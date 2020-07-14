@@ -1,0 +1,31 @@
+version: '3'
+
+services:
+  postgre:
+    container_name: rwanda_postgre
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  app:
+    container_name: rwanda_app
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgre
+  pgadmin4:
+    container_name: rwanda_pgadmin4
+    image: dpage/pgadmin4
+    depends_on:
+      - postgre
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=postgre@rwanda.com
+      - PGADMIN_DEFAULT_PASSWORD=togorwanda
+    ports:
+    - 5050:80
+
