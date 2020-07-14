@@ -1,5 +1,6 @@
 .idea
 .vscode
+.run/rwanda.run.xml
 venv
 **/__pycache__
 **/migrations/0*.py
