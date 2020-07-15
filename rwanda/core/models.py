@@ -51,14 +51,14 @@ class Service(models.Model):
         return self.title
 
 
-class ServiceMedias(models.Model):
+class ServiceMedia(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     url = models.URLField(blank=True, null=True)
     file = models.FileField(blank=True, null=True)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
 
 
-class Comments(models.Model):
+class Comment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField
     positive = models.BooleanField
@@ -66,7 +66,7 @@ class Comments(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
 
 
-class ServiceOptions(models.Model):
+class ServiceOption(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     label = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
@@ -87,13 +87,13 @@ class SellerPurchase(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
 
 
-class SellerPurchaseServiceOptions(models.Model):
+class SellerPurchaseServiceOption(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    service_options = models.ForeignKey(ServiceOptions, on_delete=models.CASCADE)
+    service_options = models.ForeignKey(ServiceOption, on_delete=models.CASCADE)
     seller_purchase = models.ForeignKey(SellerPurchase, on_delete=models.CASCADE)
 
 
-class Chats(models.Model):
+class Chat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField
     seller_purchase = models.ForeignKey(SellerPurchase, on_delete=models.CASCADE)
