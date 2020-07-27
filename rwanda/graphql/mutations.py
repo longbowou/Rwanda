@@ -188,10 +188,6 @@ class DjangoModelMutation(Mutation):
             return cls.respond(input, errors=errors, old_obj=old_obj, form=form)
 
     @classmethod
-    def extra_validations(cls, root, info, input, form):
-        pass
-
-    @classmethod
     def perform_mutate(cls, form, old_obj, input):
         cls.pre_mutate(old_obj, form, input)
 
@@ -299,6 +295,10 @@ class DjangoModelMutation(Mutation):
         kwargs = {"data": data, "initial": initial}
 
         return kwargs, old_obj
+
+    @classmethod
+    def extra_validations(cls, root, info, input, form):
+        pass
 
     @classmethod
     def pre_mutate(cls, old_obj, form, input):
