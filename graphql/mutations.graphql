@@ -1,0 +1,32 @@
+mutation{
+    createServiceCategory(input:{label: "Tech"}){
+        errors{
+            field
+            messages
+        }
+        serviceCategory{
+            id
+            label
+            description
+        }
+    }
+
+    updateServiceCategory(input:{id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9", label: "Tech One"}){
+        errors{
+            field
+            messages
+        }
+        serviceCategory{
+            id
+            label
+            description
+        }
+    }
+
+    deleteServiceCategory(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
+        errors{
+            field
+            messages
+        }
+    }
+}

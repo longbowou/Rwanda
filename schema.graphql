@@ -1,0 +1,69 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type CreateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+type DeleteServiceCategory {
+    errors: [ErrorType]
+}
+
+type ErrorType {
+    field: String!
+    messages: [String!]!
+}
+
+type Mutation {
+    createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
+    deleteServiceCategory(id: UUID!): DeleteServiceCategory
+    updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
+}
+
+type Query {
+    "ServiceCategory list"
+    serviceCategories(id: UUID): [ServiceCategoryType]
+}
+
+type ServiceCategoryType {
+    createdAt: DateTime!
+    description: String
+    id: UUID!
+    label: String!
+    updatedAt: DateTime!
+}
+
+type UpdateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+input CreateServiceCategoryInput {
+    description: String
+    label: String!
+}
+
+input UpdateServiceCategoryInput {
+    description: String
+    id: UUID!
+    label: String
+}
+
+
+"""
+Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime
