@@ -1,7 +1,7 @@
 import graphene
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceCategoryType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType
 
 
 class CreateServiceCategory(DjangoModelMutation):
@@ -18,6 +18,12 @@ class UpdateServiceCategory(DjangoModelMutation):
 class DeleteServiceCategory(DjangoModelDeleteMutation):
     class Meta:
         model_type = ServiceCategoryType
+
+
+class UpdateService(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceType
+        for_update = True
 
 
 class AdminMutations(graphene.ObjectType):
