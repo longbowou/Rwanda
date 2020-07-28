@@ -57,6 +57,8 @@ class Service(models.Model):
     delay = models.IntegerField
     service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    activated = models.BooleanField(default=False)
+    published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
