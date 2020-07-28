@@ -177,10 +177,14 @@ class DjangoModelMutation(Mutation):
         if isinstance(form, cls):
             return form
 
+        pre_form_validations = cls.pre_validations(root, info, input, form)
+        if isinstance(pre_form_validations, cls):
+            return pre_form_validations
+
         if form.is_valid():
-            post_form_validate = cls.extra_validations(root, info, input, form)
-            if isinstance(post_form_validate, cls):
-                return post_form_validate
+            post_form_validations = cls.post_validations(root, info, input, form)
+            if isinstance(post_form_validations, cls):
+                return post_form_validations
 
             return cls.perform_mutate(form, old_obj, input)
         else:
@@ -297,7 +301,11 @@ class DjangoModelMutation(Mutation):
         return kwargs, old_obj
 
     @classmethod
-    def extra_validations(cls, root, info, input, form):
+    def pre_validations(cls, root, info, input, form):
+        pass
+
+    @classmethod
+    def post_validations(cls, root, info, input, form):
         pass
 
     @classmethod
