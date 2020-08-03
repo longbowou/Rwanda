@@ -48,28 +48,27 @@ class CreateAccount(graphene.Mutation):
             username_validator(input.username)
             if User.objects.filter(username=input.username).exists():
                 return CreateAccount(
-                    errors=[ErrorType(field='username', messages=[_("This username already exists")])]
+                    errors=[ErrorType(field='username', messages=[_("An account with that username already exists.")])]
                 )
-
-        except ValidationError:
+        except ValidationError as e:
             return CreateAccount(
-                errors=[ErrorType(field='username', messages=[_("Your username does not meet the required format")])])
+                errors=[ErrorType(field='username', messages=[_(e.message)])])
 
         try:
             email_validator(input.email)
             if User.objects.filter(email=input.email).exists():
                 return CreateAccount(
-                    errors=[ErrorType(field='email', messages=[_("This email already exists")])]
+                    errors=[ErrorType(field='email', messages=[_("An account with that email already exists.")])]
                 )
 
-        except ValidationError:
+        except ValidationError as e:
             return CreateAccount(
-                errors=[ErrorType(field='email', messages=[_("Your email does not meet the required format")])])
+                errors=[ErrorType(field='email', messages=[_(e.message)])])
 
         if input.password != input.password_confirmation:
             return CreateAccount(
                 errors=[
-                    ErrorType(field='password', messages=[_("your password and its verification are not identical")])]
+                    ErrorType(field='password', messages=[_("Password does not match password confirmation.")])]
             ),
 
         user = User(

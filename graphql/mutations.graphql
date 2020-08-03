@@ -42,4 +42,24 @@ mutation{
             username
         }
     }
+
+    updateAdmin(input: {id: "1c1fc525-ba8a-43d5-8c4f-e17bd0c93968", username: "admin1", email: "admin1@admin.com", firstName: "Admin"}) {
+        errors {
+            field
+            messages
+        }
+        admin {
+            id
+            firstName
+            email
+            username
+        }
+    }
+
+    deleteAdmin(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
+        errors{
+            field
+            messages
+        }
+    }
 }

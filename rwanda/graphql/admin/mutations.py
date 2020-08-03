@@ -1,9 +1,9 @@
 import graphene
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
-from rest_framework.exceptions import ValidationError
 
 from rwanda.core.models import User, Admin
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
@@ -53,26 +53,26 @@ class CreateAdmin(graphene.Mutation):
             username_validator(input.username)
             if User.objects.filter(username=input.username).exists():
                 return CreateAdmin(
-                    errors=[ErrorType(field='username', messages=[_("This username already exists")])]
+                    errors=[ErrorType(field='username', messages=[_("An admin with that username already exists.")])]
                 )
-        except ValidationError:
+        except ValidationError as e:
             return CreateAdmin(
-                errors=[ErrorType(field='username', messages=[_("Your username does not meet the required format")])])
+                errors=[ErrorType(field='username', messages=[_(e.message)])])
 
         try:
             email_validator(input.email)
             if User.objects.filter(email=input.email).exists():
                 return CreateAdmin(
-                    errors=[ErrorType(field='email', messages=[_("This email already exists")])]
+                    errors=[ErrorType(field='email', messages=[_("An admin with that email already exists.")])]
                 )
-        except ValidationError:
+        except ValidationError as e:
             return CreateAdmin(
-                errors=[ErrorType(field='email', messages=[_("Your email does not meet the required format")])])
+                errors=[ErrorType(field='email', messages=[_(e.message)])])
 
         if input.password != input.password_confirmation:
             return CreateAdmin(
                 errors=[
-                    ErrorType(field='password', messages=[_("your password and its verification are not identical")])]
+                    ErrorType(field='password', messages=[_("Password does not match password confirmation.")])]
             ),
 
         user = User(
@@ -119,13 +119,14 @@ class UpdateAdmin(graphene.Mutation):
                 username_validator(input.username)
                 if User.objects.filter(username=input.username).exclude(pk=user.id).exists():
                     return CreateAdmin(
-                        errors=[ErrorType(field='username', messages=[_("This username already exists")])]
+                        errors=[
+                            ErrorType(field='username', messages=[_("An admin with that username already exists.")])]
                     )
                 user.username = input.username
-            except ValidationError:
+            except ValidationError as e:
                 return CreateAdmin(
                     errors=[
-                        ErrorType(field='username', messages=[_("Your username does not meet the required format")])])
+                        ErrorType(field='username', messages=[_(e.message)])])
 
         if input.email is not None:
             email_validator = EmailValidator()
@@ -133,12 +134,12 @@ class UpdateAdmin(graphene.Mutation):
                 email_validator(input.email)
                 if User.objects.filter(email=input.email).exclude(pk=user.id).exists():
                     return CreateAdmin(
-                        errors=[ErrorType(field='email', messages=[_("This email already exists")])]
+                        errors=[ErrorType(field='email', messages=[_("An admin with that email already exists.")])]
                     )
                 user.email = input.email
-            except ValidationError:
+            except ValidationError as e:
                 return CreateAdmin(
-                    errors=[ErrorType(field='email', messages=[_("Your email does not meet the required format")])])
+                    errors=[ErrorType(field='email', messages=[_(e.message)])])
 
         for field, value in input.items():
             if field in ('first_name', 'last_name', 'is_active', 'is_superuser') and value is not None:
