@@ -12,6 +12,7 @@ class ServicePurchase(models.Model):
     accepted = models.BooleanField(default=False)
     delivered = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
+    canceled = models.BooleanField(default=False)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     service_options = models.ManyToManyField(ServiceOption, through='ServicePurchaseServiceOption')

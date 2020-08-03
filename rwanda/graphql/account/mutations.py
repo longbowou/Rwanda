@@ -2,31 +2,39 @@ import graphene
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.graphql.inputs import UserInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, AccountType
+from rwanda.graphql.types import AccountType, DepositType, RefundType
 from rwanda.user.models import User, Account
 
 
-# SERVICE MUTATIONS
-class CreateService(DjangoModelMutation):
+class CreateDeposit(DjangoModelMutation):
     class Meta:
-        model_type = ServiceType
+        model_type = DepositType
+
+    @classmethod
+    def post_mutate(cls, old_obj, form, obj, input):
+        Account.objects.filter(pk=obj.pk).update(balance=F('balance') + obj.amount)
+        obj.refresh_from_db()
 
 
-class UpdateService(DjangoModelMutation):
+class CreateRefund(DjangoModelMutation):
     class Meta:
-        model_type = ServiceType
-        for_update = True
-        exclude_fields = ("activated",)
+        model_type = RefundType
 
+    @classmethod
+    def pre_validations(cls, root, info, input, form):
+        if input.amount > Account.objects.get(pk=input.account).balance:
+            form.add_error("seller_service", ValidationError(_("Insufficient amount to process the refund.")))
 
-class DeleteService(DjangoModelDeleteMutation):
-    class Meta:
-        model_type = AccountType
+    @classmethod
+    def post_mutate(cls, old_obj, form, obj, input):
+        Account.objects.filter(pk=obj.pk).update(balance=F('balance') - obj.amount)
+        obj.refresh_from_db()
 
 
 # ACCOUNT MUTATIONS
@@ -103,9 +111,8 @@ class DeleteAccount(DjangoModelDeleteMutation):
 
 
 class AccountMutations(graphene.ObjectType):
-    create_service = CreateService.Field()
-    update_service = UpdateService.Field()
-    delete_service = DeleteService.Field()
+    create_deposit = CreateDeposit.Field()
+    create_refund = CreateRefund.Field()
 
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()

@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'rwanda.user',
     'rwanda.service',
     'rwanda.administration',
+    'rwanda.account',
     'rwanda.purchase',
     'django.contrib.admin',
     'django.contrib.auth',

@@ -1,10 +1,27 @@
 from graphene_django import DjangoObjectType
 
+from rwanda.account.models import Deposit, Refund
 from rwanda.administration.models import Parameters
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
+
+
+class DepositType(DjangoObjectType):
+    class Meta:
+        model = Deposit
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class RefundType(DjangoObjectType):
+    class Meta:
+        model = Refund
+        filter_fields = {
+            "id": ("exact",),
+        }
 
 
 class ServiceCategoryType(DjangoObjectType):
