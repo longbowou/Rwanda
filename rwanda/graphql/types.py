@@ -2,6 +2,7 @@ from graphene_django import DjangoObjectType
 
 from rwanda.core.models import ServiceCategory, Service, Parameters, Admin, Account, ServiceMedia, Comment, \
     ServiceOption, SellerPurchase, SellerPurchaseServiceOption, Chat, Litigation
+from rwanda.graphql.interfaces import UserInterface
 
 
 class ServiceCategoryType(DjangoObjectType):
@@ -31,6 +32,7 @@ class ParametersType(DjangoObjectType):
 class AdminType(DjangoObjectType):
     class Meta:
         model = Admin
+        interfaces = (UserInterface,)
         filter_fields = {
             "id": ("exact",),
         }
@@ -39,6 +41,7 @@ class AdminType(DjangoObjectType):
 class AccountType(DjangoObjectType):
     class Meta:
         model = Account
+        interfaces = (UserInterface,)
         filter_fields = {
             "id": ("exact",),
         }

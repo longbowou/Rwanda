@@ -1,8 +1,14 @@
 import graphene
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.core.validators import EmailValidator
+from django.utils.translation import gettext_lazy as _
+from graphene_django.types import ErrorType
+from rest_framework.exceptions import ValidationError
 
-from rwanda.graphql.account.mutations import CreateService, DeleteService
+from rwanda.core.models import User, Admin
+from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceCategoryType, ServiceType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType
 
 
 class CreateServiceCategory(DjangoModelMutation):
@@ -28,12 +34,133 @@ class UpdateService(DjangoModelMutation):
         for_update = True
 
 
+class AdminInput(UserInput):
+    is_superuser = graphene.Boolean()
+    is_active = graphene.Boolean()
+
+
+class CreateAdmin(graphene.Mutation):
+    class Arguments:
+        input = AdminInput(required=True)
+
+    admin = graphene.Field(AdminType)
+    errors = graphene.List(ErrorType)
+
+    def mutate(self, info, input):
+        username_validator = UnicodeUsernameValidator()
+        email_validator = EmailValidator()
+        try:
+            username_validator(input.username)
+            if User.objects.filter(username=input.username).exists():
+                return CreateAdmin(
+                    errors=[ErrorType(field='username', messages=[_("This username already exists")])]
+                )
+        except ValidationError:
+            return CreateAdmin(
+                errors=[ErrorType(field='username', messages=[_("Your username does not meet the required format")])])
+
+        try:
+            email_validator(input.email)
+            if User.objects.filter(email=input.email).exists():
+                return CreateAdmin(
+                    errors=[ErrorType(field='email', messages=[_("This email already exists")])]
+                )
+        except ValidationError:
+            return CreateAdmin(
+                errors=[ErrorType(field='email', messages=[_("Your email does not meet the required format")])])
+
+        if input.password != input.password_confirmation:
+            return CreateAdmin(
+                errors=[
+                    ErrorType(field='password', messages=[_("your password and its verification are not identical")])]
+            ),
+
+        user = User(
+            username=input.username,
+            email=input.email
+        )
+
+        for field, value in input.items():
+            if field in ('first_name', 'last_name', 'is_active', 'is_superuser') and value is not None:
+                setattr(user, field, value)
+
+        user.set_password(input.password)
+        user.save()
+
+        admin = Admin(user=user)
+        admin.save()
+
+        return CreateAdmin(admin=admin, errors=[])
+
+
+class AdminUpdateInput(UserUpdateInput):
+    id = graphene.UUID(required=True)
+    is_superuser = graphene.Boolean()
+    is_active = graphene.Boolean()
+
+
+class UpdateAdmin(graphene.Mutation):
+    class Arguments:
+        input = AdminUpdateInput(required=True)
+
+    admin = graphene.Field(AdminType)
+    errors = graphene.List(ErrorType)
+
+    def mutate(self, info, input):
+        user = User.objects.filter(admin__id=input.id).first()
+        if user is None:
+            return CreateAdmin(
+                errors=[ErrorType(field='id', messages=[_("Admin instance not found for id {}".format(input.id))])]
+            )
+
+        if input.username is not None:
+            username_validator = UnicodeUsernameValidator()
+            try:
+                username_validator(input.username)
+                if User.objects.filter(username=input.username).exclude(pk=user.id).exists():
+                    return CreateAdmin(
+                        errors=[ErrorType(field='username', messages=[_("This username already exists")])]
+                    )
+                user.username = input.username
+            except ValidationError:
+                return CreateAdmin(
+                    errors=[
+                        ErrorType(field='username', messages=[_("Your username does not meet the required format")])])
+
+        if input.email is not None:
+            email_validator = EmailValidator()
+            try:
+                email_validator(input.email)
+                if User.objects.filter(email=input.email).exclude(pk=user.id).exists():
+                    return CreateAdmin(
+                        errors=[ErrorType(field='email', messages=[_("This email already exists")])]
+                    )
+                user.email = input.email
+            except ValidationError:
+                return CreateAdmin(
+                    errors=[ErrorType(field='email', messages=[_("Your email does not meet the required format")])])
+
+        for field, value in input.items():
+            if field in ('first_name', 'last_name', 'is_active', 'is_superuser') and value is not None:
+                setattr(user, field, value)
+
+        user.save()
+
+        return CreateAdmin(admin=user.admin, errors=[])
+
+
+class DeleteAdmin(DjangoModelDeleteMutation):
+    class Meta:
+        model_type = AdminType
+
+
 class AdminMutations(graphene.ObjectType):
     create_service_category = CreateServiceCategory.Field()
     update_service_category = UpdateServiceCategory.Field()
     delete_service_category = DeleteServiceCategory.Field()
-    create_service = CreateService.Field()
-    update_service = UpdateService.Field()
-    delete_service = DeleteService.Field()
 
     update_service = UpdateService.Field()
+
+    create_admin = CreateAdmin.Field()
+    update_admin = UpdateAdmin.Field()
+    delete_admin = DeleteAdmin.Field()

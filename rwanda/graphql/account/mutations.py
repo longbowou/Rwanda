@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.core.models import User, Account
+from rwanda.graphql.inputs import UserInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, AccountType
 
@@ -20,6 +21,7 @@ class UpdateService(DjangoModelMutation):
     class Meta:
         model_type = ServiceType
         for_update = True
+        exclude_fields = ("activated",)
 
 
 class DeleteService(DjangoModelDeleteMutation):
@@ -28,13 +30,8 @@ class DeleteService(DjangoModelDeleteMutation):
 
 
 # ACCOUNT MUTATIONS
-class AccountInput(graphene.InputObjectType):
-    username = graphene.String(required=True)
-    first_name = graphene.String()
-    last_name = graphene.String()
-    password = graphene.String(required=True)
-    password_confirmation = graphene.String(required=True)
-    email = graphene.String(required=True)
+class AccountInput(UserInput):
+    pass
 
 
 class CreateAccount(graphene.Mutation):
@@ -49,7 +46,6 @@ class CreateAccount(graphene.Mutation):
         email_validator = EmailValidator()
         try:
             username_validator(input.username)
-            User.objects.filter(username=input.username).exists()
             if User.objects.filter(username=input.username).exists():
                 return CreateAccount(
                     errors=[ErrorType(field='username', messages=[_("This username already exists")])]
@@ -61,7 +57,6 @@ class CreateAccount(graphene.Mutation):
 
         try:
             email_validator(input.email)
-            User.objects.filter(email=input.email).exists()
             if User.objects.filter(email=input.email).exists():
                 return CreateAccount(
                     errors=[ErrorType(field='email', messages=[_("This email already exists")])]
@@ -112,6 +107,7 @@ class AccountMutations(graphene.ObjectType):
     create_service = CreateService.Field()
     update_service = UpdateService.Field()
     delete_service = DeleteService.Field()
+
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
     delete_account = DeleteAccount.Field()

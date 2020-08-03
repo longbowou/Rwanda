@@ -2,12 +2,13 @@ version: '3'
 
 services:
   postgres:
-    container_name: rwanda_postgre
+    container_name: rwanda_postgres
     image: postgres
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+
   app:
     container_name: rwanda_app
     build: .
@@ -15,10 +16,11 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8000:8000"
+      - 8000:8000
     depends_on:
       - postgres
       - pgadmin4
+
   pgadmin4:
     container_name: rwanda_pgadmin4
     image: dpage/pgadmin4
@@ -28,5 +30,5 @@ services:
       - PGADMIN_DEFAULT_EMAIL=postgre@rwanda.com
       - PGADMIN_DEFAULT_PASSWORD=togorwanda
     ports:
-    - 5050:80
+      - 5050:80
 

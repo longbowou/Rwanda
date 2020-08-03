@@ -29,4 +29,17 @@ mutation{
             messages
         }
     }
+
+    createAdmin(input: {username: "admin", email: "admin@admin.com", password: "password", passwordConfirmation: "password"}) {
+        errors {
+            field
+            messages
+        }
+        admin {
+            id
+            fullName
+            email
+            username
+        }
+    }
 }

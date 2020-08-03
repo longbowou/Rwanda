@@ -5,9 +5,88 @@ schema {
     mutation: Mutation
 }
 
+interface UserInterface {
+    email: String!
+    firstName: String
+    fullName: String
+    lastName: String
+    username: String!
+}
+
+type AccountType implements UserInterface {
+    chatSet: [ChatType!]!
+    commentSet: [CommentType!]!
+    createdAt: DateTime!
+    email: String!
+    firstName: String
+    fullName: String
+    id: UUID!
+    lastName: String
+    litigationSet: [LitigationType!]!
+    sellerpurchaseSet: [SellerPurchaseType!]!
+    serviceSet: [ServiceType!]!
+    updatedAt: DateTime!
+    username: String!
+}
+
+type AdminType implements UserInterface {
+    createdAt: DateTime!
+    email: String!
+    firstName: String
+    fullName: String
+    id: UUID!
+    lastName: String
+    litigationSet: [LitigationType!]!
+    updatedAt: DateTime!
+    username: String!
+}
+
+type ChatType {
+    account: AccountType!
+    createdAt: DateTime!
+    id: UUID!
+    sellerPurchase: SellerPurchaseType!
+    updatedAt: DateTime!
+}
+
+type CommentType {
+    account: AccountType!
+    createdAt: DateTime!
+    id: UUID!
+    service: ServiceType!
+    updatedAt: DateTime!
+}
+
+type CreateAccount {
+    account: AccountType
+    errors: [ErrorType]
+}
+
+type CreateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
+type CreateService {
+    errors: [ErrorType]
+    service: ServiceType
+}
+
 type CreateServiceCategory {
     errors: [ErrorType]
     serviceCategory: ServiceCategoryType
+}
+
+type DeleteAccount {
+    errors: [ErrorType]
+}
+
+type DeleteAdmin {
+    errors: [ErrorType]
+}
+
+type DeleteService {
+    errors: [ErrorType]
 }
 
 type DeleteServiceCategory {
@@ -19,15 +98,59 @@ type ErrorType {
     messages: [String!]!
 }
 
+type LitigationType {
+    account: AccountType!
+    admin: AdminType!
+    createdAt: DateTime!
+    handled: Boolean!
+    id: UUID!
+    sellerPurchase: SellerPurchaseType!
+    title: String!
+    updatedAt: DateTime!
+}
+
 type Mutation {
+    createAccount(input: AccountInput!): CreateAccount
+    createAdmin(input: AdminInput!): CreateAdmin
+    createService(input: CreateServiceInput!): CreateService
     createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
+    deleteAccount(id: UUID!): DeleteAccount
+    deleteAdmin(id: UUID!): DeleteAdmin
+    deleteService(id: UUID!): DeleteService
     deleteServiceCategory(id: UUID!): DeleteServiceCategory
+    updateAccount(input: AccountInput!): UpdateAccount
+    updateAdmin(input: AdminUpdateInput!): UpdateAdmin
+    updateService(input: UpdateServiceInput!): UpdateService
     updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
 }
 
 type Query {
     "ServiceCategory list"
     serviceCategories(id: UUID): [ServiceCategoryType]
+    "Service list"
+    services(id: UUID): [ServiceType]
+}
+
+type SellerPurchaseServiceOptionType {
+    createdAt: DateTime!
+    id: UUID!
+    sellerPurchase: SellerPurchaseType!
+    serviceOptions: ServiceOptionType!
+    updatedAt: DateTime!
+}
+
+type SellerPurchaseType {
+    accepted: Boolean!
+    account: AccountType!
+    approved: Boolean!
+    chatSet: [ChatType!]!
+    createdAt: DateTime!
+    delivered: Boolean!
+    id: UUID!
+    litigationSet: [LitigationType!]!
+    sellerpurchaseserviceoptionSet: [SellerPurchaseServiceOptionType!]!
+    service: ServiceType!
+    updatedAt: DateTime!
 }
 
 type ServiceCategoryType {
@@ -35,7 +158,59 @@ type ServiceCategoryType {
     description: String
     id: UUID!
     label: String!
+    serviceSet: [ServiceType!]!
     updatedAt: DateTime!
+}
+
+type ServiceMediaType {
+    createdAt: DateTime!
+    file: String
+    id: UUID!
+    service: ServiceType!
+    updatedAt: DateTime!
+    url: String
+}
+
+type ServiceOptionType {
+    createdAt: DateTime!
+    description: String
+    id: UUID!
+    label: String!
+    sellerpurchaseserviceoptionSet: [SellerPurchaseServiceOptionType!]!
+    service: ServiceType!
+    updatedAt: DateTime!
+}
+
+type ServiceType {
+    account: AccountType!
+    activated: Boolean!
+    commentSet: [CommentType!]!
+    createdAt: DateTime!
+    id: UUID!
+    keywords: String
+    published: Boolean!
+    sellerpurchaseSet: [SellerPurchaseType!]!
+    serviceCategory: ServiceCategoryType!
+    servicemediaSet: [ServiceMediaType!]!
+    serviceoptionSet: [ServiceOptionType!]!
+    stars: Int!
+    title: String!
+    updatedAt: DateTime!
+}
+
+type UpdateAccount {
+    account: AccountType
+    errors: [ErrorType]
+}
+
+type UpdateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
+type UpdateService {
+    errors: [ErrorType]
+    service: ServiceType
 }
 
 type UpdateServiceCategory {
@@ -43,15 +218,60 @@ type UpdateServiceCategory {
     serviceCategory: ServiceCategoryType
 }
 
+input AccountInput {
+    email: String!
+    firstName: String
+    lastName: String
+    password: String!
+    passwordConfirmation: String!
+    username: String!
+}
+
+input AdminInput {
+    email: String!
+    firstName: String
+    isActive: Boolean
+    isSuperuser: Boolean
+    lastName: String
+    password: String!
+    passwordConfirmation: String!
+    username: String!
+}
+
+input AdminUpdateInput {
+    email: String
+    firstName: String
+    id: UUID!
+    isActive: Boolean
+    isSuperuser: Boolean
+    lastName: String
+    username: String
+}
+
 input CreateServiceCategoryInput {
     description: String
     label: String!
+}
+
+input CreateServiceInput {
+    account: ID!
+    activated: Boolean
+    keywords: String
+    published: Boolean
+    serviceCategory: ID!
+    stars: Int!
+    title: String!
 }
 
 input UpdateServiceCategoryInput {
     description: String
     id: UUID!
     label: String
+}
+
+input UpdateServiceInput {
+    activated: Boolean
+    id: UUID!
 }
 
 
