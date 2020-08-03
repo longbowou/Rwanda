@@ -1,8 +1,10 @@
 from graphene_django import DjangoObjectType
 
-from rwanda.core.models import ServiceCategory, Service, Parameters, Admin, Account, ServiceMedia, Comment, \
-    ServiceOption, SellerPurchase, SellerPurchaseServiceOption, Chat, Litigation
+from rwanda.administration.models import Parameters
 from rwanda.graphql.interfaces import UserInterface
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
+from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
+from rwanda.user.models import Admin, Account
 
 
 class ServiceCategoryType(DjangoObjectType):
@@ -55,9 +57,9 @@ class ServiceMediaType(DjangoObjectType):
         }
 
 
-class CommentType(DjangoObjectType):
+class ServiceCommentType(DjangoObjectType):
     class Meta:
-        model = Comment
+        model = ServiceComment
         filter_fields = {
             "id": ("exact",),
         }
@@ -71,17 +73,17 @@ class ServiceOptionType(DjangoObjectType):
         }
 
 
-class SellerPurchaseType(DjangoObjectType):
+class ServicePurchaseType(DjangoObjectType):
     class Meta:
-        model = SellerPurchase
+        model = ServicePurchase
         filter_fields = {
             "id": ("exact",),
         }
 
 
-class SellerPurchaseServiceOptionType(DjangoObjectType):
+class ServicePurchaseServiceOptionType(DjangoObjectType):
     class Meta:
-        model = SellerPurchaseServiceOption
+        model = ServicePurchaseServiceOption
         filter_fields = {
             "id": ("exact",),
         }

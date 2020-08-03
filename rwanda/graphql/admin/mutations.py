@@ -5,10 +5,10 @@ from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.core.models import User, Admin
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType
+from rwanda.user.models import User, Admin
 
 
 class CreateServiceCategory(DjangoModelMutation):
