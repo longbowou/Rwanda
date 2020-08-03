@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  postgre:
+  postgres:
     container_name: rwanda_postgre
     image: postgres
     environment:
@@ -17,12 +17,13 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgre
+      - postgres
+      - pgadmin4
   pgadmin4:
     container_name: rwanda_pgadmin4
     image: dpage/pgadmin4
     depends_on:
-      - postgre
+      - postgres
     environment:
       - PGADMIN_DEFAULT_EMAIL=postgre@rwanda.com
       - PGADMIN_DEFAULT_PASSWORD=togorwanda
