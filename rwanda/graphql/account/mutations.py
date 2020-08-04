@@ -6,6 +6,7 @@ from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
+from rwanda.accounting.models import Operation, Fund
 from rwanda.graphql.inputs import UserInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import AccountType, DepositType, RefundType
@@ -18,7 +19,10 @@ class CreateDeposit(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Account.objects.filter(pk=obj.pk).update(balance=F('balance') + obj.amount)
+        Operation(type=Operation.CREDIT, account=obj.account, amount=obj.amount,
+                  fund=Fund.objects.get(label=Fund.ACCOUNTS))
+        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.amount)
+        Account.objects.filter(pk=input.account).update(balance=F('balance') + obj.amount)
         obj.refresh_from_db()
 
 
@@ -33,7 +37,10 @@ class CreateRefund(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Account.objects.filter(pk=obj.pk).update(balance=F('balance') - obj.amount)
+        Operation(type=Operation.DEBIT, account=obj.account, amount=obj.amount,
+                  fund=Fund.objects.get(label=Fund.ACCOUNTS))
+        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.amount)
+        Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.amount)
         obj.refresh_from_db()
 
 

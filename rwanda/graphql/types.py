@@ -1,7 +1,7 @@
 from graphene_django import DjangoObjectType
 
 from rwanda.account.models import Deposit, Refund
-from rwanda.administration.models import Parameters
+from rwanda.administration.models import Parameter
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
@@ -40,9 +40,9 @@ class ServiceType(DjangoObjectType):
         }
 
 
-class ParametersType(DjangoObjectType):
+class ParameterType(DjangoObjectType):
     class Meta:
-        model = Parameters
+        model = Parameter
         filter_fields = {
             "id": ("exact",),
         }

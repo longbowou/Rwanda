@@ -193,14 +193,18 @@ class DjangoModelMutation(Mutation):
 
     @classmethod
     def perform_mutate(cls, form, old_obj, input):
-        cls.pre_mutate(old_obj, form, input)
+        pre_mutate = cls.pre_mutate(old_obj, form, input)
+        if isinstance(pre_mutate, cls):
+            return pre_mutate
 
         if cls._meta.multiple:
             obj = [form_form.save() for form_form in form.forms]
         else:
             obj = form.save()
 
-        cls.post_mutate(old_obj, form, obj, input)
+        post_mutate = cls.post_mutate(old_obj, form, obj, input)
+        if isinstance(post_mutate, cls):
+            return post_mutate
 
         kwargs = {cls._meta.return_field_name: obj}
         return cls.respond(input, errors=[], kwargs=kwargs, old_obj=old_obj, form=form, obj=obj)
@@ -242,7 +246,7 @@ class DjangoModelMutation(Mutation):
 
     @classmethod
     def get_form_kwargs(cls, root, info, input):
-        kwargs = {"data": input, "files": info.context.FILES}
+        kwargs = {"data": input, "files": info.context.FILES, "instance": cls._meta.model()}
 
         old_obj = None
         pk = input.pop("id", None)

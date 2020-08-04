@@ -9,13 +9,16 @@ from rwanda.user.models import Account, Admin
 class ServicePurchase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     delay = models.IntegerField()
+    price = models.IntegerField()
+    commission = models.IntegerField()
     accepted = models.BooleanField(default=False)
     delivered = models.BooleanField(default=False)
     approved = models.BooleanField(default=False)
     canceled = models.BooleanField(default=False)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    service_options = models.ManyToManyField(ServiceOption, through='ServicePurchaseServiceOption')
+    service_options = models.ManyToManyField(ServiceOption, null=True, blank=True,
+                                             through='ServicePurchaseServiceOption')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
