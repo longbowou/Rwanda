@@ -38,6 +38,7 @@ class ServiceMedia(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     url = models.URLField(blank=True, null=True)
     file = models.FileField(blank=True, null=True, upload_to="service-medias/")
+    is_main = models.BooleanField(default=False)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

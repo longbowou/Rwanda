@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, AccountType
+from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType
 from rwanda.service.models import ServiceOption, ServiceMedia
 
 
@@ -73,7 +73,38 @@ class DeleteService(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
+class CreateServiceMedia(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceMediaType
+
+    @classmethod
+    def post_mutate(cls, info, old_obj, form, obj, input):
+        if input.is_main is not None and obj.is_main:
+            ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
+
+
+class UpdateServiceMedia(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceMediaType
+        for_update = True
+        exclude_fields = ('service',)
+
+    @classmethod
+    def post_mutate(cls, info, old_obj, form, obj, input):
+        if input.is_main is not None and obj.is_main:
+            ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
+
+
+class DeleteServiceMedia(DjangoModelDeleteMutation):
+    class Meta:
+        model_type = ServiceMediaType
+
+
 class ServiceMutations(graphene.ObjectType):
     create_service = CreateService.Field()
     update_service = UpdateService.Field()
     delete_service = DeleteService.Field()
+
+    create_service_media = CreateServiceMedia.Field()
+    update_service_media = UpdateServiceMedia.Field()
+    delete_service_media = DeleteServiceMedia.Field()
