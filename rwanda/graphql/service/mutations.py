@@ -2,12 +2,27 @@ import graphene
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, AccountType
+from rwanda.service.models import ServiceOption
+
+
+class ServiceOptionInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String()
+    delay = graphene.Int(required=True)
+    price = graphene.Int(required=True)
 
 
 class CreateService(DjangoModelMutation):
     class Meta:
         model_type = ServiceType
         exclude_fields = ("activated",)
+        extra_input_fields = {"service_options": graphene.List(ServiceOptionInput)}
+
+    @classmethod
+    def post_mutate(cls, old_obj, form, obj, input):
+        if input.service_options is not None:
+            for item in input.service_options:
+                ServiceOption(service=obj, **item).save()
 
 
 class UpdateService(DjangoModelMutation):
