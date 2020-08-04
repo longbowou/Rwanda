@@ -17,7 +17,7 @@ class ServicePurchase(models.Model):
     canceled = models.BooleanField(default=False)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
-    service_options = models.ManyToManyField(ServiceOption, null=True, blank=True,
+    service_options = models.ManyToManyField(ServiceOption, blank=True,
                                              through='ServicePurchaseServiceOption')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -34,7 +34,7 @@ class ServicePurchaseServiceOption(models.Model):
 class Chat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
-    service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
+    service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
