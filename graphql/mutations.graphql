@@ -76,4 +76,77 @@ mutation{
             }
         }
     }
+
+    cancelServicePurchase(input: {id: "0ad71219-b549-4dce-b16f-96df30ae79af"}){
+        errors{
+            field
+            messages
+        }
+        servicePurchase{
+            id
+            price
+            commission
+            account{
+                id
+                username
+                balance
+            }
+            service{
+                id
+                title
+            }
+            serviceOptions{
+                id
+                label
+            }
+        }
+    }
+
+    acceptServicePurchase(input: {id: "44cf45dc-bc8d-4642-8692-b40549532c4b"}){
+        errors{
+            field
+            messages
+        }
+        servicePurchase{
+            id
+            price
+            commission
+            account{
+                id
+                username
+            }
+            service{
+                id
+                title
+            }
+            serviceOptions{
+                id
+                label
+            }
+        }
+    }
+
+    deliverServicePurchase(input: {id: "44cf45dc-bc8d-4642-8692-b40549532c4b"}){
+        errors{
+            field
+            messages
+        }
+        servicePurchase{
+            id
+            price
+            commission
+            account{
+                id
+                username
+            }
+            service{
+                id
+                title
+            }
+            serviceOptions{
+                id
+                label
+            }
+        }
+    }
 }

@@ -50,6 +50,16 @@ type AdminType implements UserInterface {
     username: String!
 }
 
+type ApproveServicePurchase {
+    errors: [ErrorType]
+    servicePurchase: ServicePurchaseType
+}
+
+type CancelServicePurchase {
+    errors: [ErrorType]
+    servicePurchase: ServicePurchaseType
+}
+
 type ChatType {
     account: AccountType!
     content: String!
@@ -85,6 +95,11 @@ type DeleteAccount {
 
 type DeleteService {
     errors: [ErrorType]
+}
+
+type DeliverServicePurchase {
+    errors: [ErrorType]
+    servicePurchase: ServicePurchaseType
 }
 
 type DepositType {
@@ -128,14 +143,17 @@ type LitigationType {
 
 type Mutation {
     acceptServicePurchase(input: AcceptServicePurchaseInput!): AcceptServicePurchase
+    approveServicePurchase(input: ApproveServicePurchaseInput!): ApproveServicePurchase
+    cancelServicePurchase(input: CancelServicePurchaseInput!): CancelServicePurchase
     createAccount(input: AccountInput!): CreateAccount
     createDeposit(input: CreateDepositInput!): CreateDeposit
     createRefund(input: CreateRefundInput!): CreateRefund
     createService(input: CreateServiceInput!): CreateService
     deleteAccount(id: UUID!): DeleteAccount
     deleteService(id: UUID!): DeleteService
+    deliverServicePurchase(input: DeliverServicePurchaseInput!): DeliverServicePurchase
     initServicePurchase(input: InitServicePurchaseInput!): InitServicePurchase
-    updateAccount(input: AccountInput!): UpdateAccount
+    updateAccount(input: AccountUpdateInput!): UpdateAccount
     updateService(input: UpdateServiceInput!): UpdateService
 }
 
@@ -215,16 +233,21 @@ type ServicePurchaseServiceOptionType {
 
 type ServicePurchaseType {
     accepted: Boolean!
+    acceptedAt: DateTime
     account: AccountType!
     approved: Boolean!
+    approvedAt: DateTime
     canceled: Boolean!
+    canceledAt: DateTime
     chatSet: [ChatType!]!
     commission: Int!
     createdAt: DateTime!
     delay: Int!
     delivered: Boolean!
+    deliveredAt: DateTime
     id: UUID!
     litigation: LitigationType
+    mustBeDeliveredAt: DateTime
     operationSet: [OperationType!]!
     price: Int!
     service: ServiceType!
@@ -275,6 +298,24 @@ input AccountInput {
     username: String!
 }
 
+input AccountUpdateInput {
+    email: String!
+    firstName: String
+    id: UUID!
+    lastName: String
+    password: String!
+    passwordConfirmation: String!
+    username: String!
+}
+
+input ApproveServicePurchaseInput {
+    id: UUID!
+}
+
+input CancelServicePurchaseInput {
+    id: UUID!
+}
+
 input CreateDepositInput {
     account: ID!
     amount: Int!
@@ -294,6 +335,10 @@ input CreateServiceInput {
     serviceCategory: ID!
     serviceOptions: [ServiceOptionInput]
     title: String!
+}
+
+input DeliverServicePurchaseInput {
+    id: UUID!
 }
 
 input InitServicePurchaseInput {
