@@ -32,7 +32,7 @@ class InitServicePurchase(DjangoModelMutation):
                 delay += service_option.delay
 
         if Account.objects.get(pk=input.account).balance < price:
-            return InitServicePurchase(
+            return cls(
                 errors=[ErrorType(field="account", messages=[_("Insufficient amount to purchase service.")])])
 
         form.instance.price = price
@@ -62,7 +62,7 @@ class InitServicePurchase(DjangoModelMutation):
 class AcceptServicePurchase(DjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
-        only_fields = ("accepted",)
+        only_fields = ("",)
         for_update = True
 
     @classmethod
@@ -70,55 +70,58 @@ class AcceptServicePurchase(DjangoModelMutation):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.accepted or service_purchase.approved or service_purchase.delivered \
                 or service_purchase.canceled:
-            return AcceptServicePurchase(
+            return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
 
+        service_purchase.accepted = True
         service_purchase.accepted_at = datetime.today()
 
 
 class ApproveServicePurchase(DjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
-        only_fields = ("approved",)
+        only_fields = ("",)
         for_update = True
 
     @classmethod
     def pre_mutate(cls, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.approved or service_purchase.delivered or service_purchase.canceled:
-            return AcceptServicePurchase(
+            return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
 
+        service_purchase.approved = True
         service_purchase.approved_at = datetime.today()
 
 
 class DeliverServicePurchase(DjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
-        only_fields = ("delivered",)
+        only_fields = ("",)
         for_update = True
 
     @classmethod
     def pre_mutate(cls, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.delivered or service_purchase.approved or service_purchase.canceled:
-            return AcceptServicePurchase(
+            return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
 
+        service_purchase.delivered = True
         service_purchase.delivered_at = datetime.today()
 
 
 class CancelServicePurchase(DjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
-        only_fields = ("canceled",)
+        only_fields = ("",)
         for_update = True
 
     @classmethod
     def pre_mutate(cls, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.canceled or service_purchase.delivered or service_purchase.approved:
-            return AcceptServicePurchase(
+            return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
 
         today = datetime.today()
@@ -126,9 +129,10 @@ class CancelServicePurchase(DjangoModelMutation):
             timedelta = today - service_purchase.must_be_delivered_at
 
             if int(Parameter.objects.get(label=Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL).value) < timedelta.days:
-                return AcceptServicePurchase(
+                return cls(
                     errors=[ErrorType(field="service_purchase", messages=[_("You can not cancel purchase for now.")])])
 
+        service_purchase.canceled = True
         service_purchase.canceled_at = today
 
     @classmethod
@@ -146,7 +150,7 @@ class CancelServicePurchase(DjangoModelMutation):
         Operation(type=Operation.CREDIT, account=obj.account, amount=obj.price,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.price)
-        Account.objects.filter(pk=input.account).update(balance=F('balance') + obj.price)
+        Account.objects.filter(pk=obj.account.id).update(balance=F('balance') + obj.price)
 
 
 class PurchaseMutations(graphene.ObjectType):
