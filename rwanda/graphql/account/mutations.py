@@ -18,7 +18,7 @@ class CreateDeposit(DjangoModelMutation):
         model_type = DepositType
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         Operation(type=Operation.TYPE_CREDIT, account=obj.account, amount=obj.amount,
                   description=Operation.DESC_CREDIT_FOR_DEPOSIT,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
@@ -32,12 +32,12 @@ class CreateRefund(DjangoModelMutation):
         model_type = RefundType
 
     @classmethod
-    def pre_validations(cls, root, info, input, form):
+    def pre_validations(cls, info, input, form):
         if input.amount > Account.objects.get(pk=input.account).balance:
             form.add_error("seller_service", ValidationError(_("Insufficient amount to process the refund.")))
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.amount,
                   description=Operation.DESC_DEBIT_FOR_REFUND,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()

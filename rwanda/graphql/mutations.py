@@ -173,27 +173,27 @@ class DjangoModelMutation(Mutation):
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, input):
-        form, old_obj = cls.get_form(root, info, input)
+        form, old_obj = cls.get_form(info, input)
         if isinstance(form, cls):
             return form
 
-        pre_form_validations = cls.pre_validations(root, info, input, form)
+        pre_form_validations = cls.pre_validations(info, input, form)
         if isinstance(pre_form_validations, cls):
             return pre_form_validations
 
         if form.is_valid():
-            post_form_validations = cls.post_validations(root, info, input, form)
+            post_form_validations = cls.post_validations(info, input, form)
             if isinstance(post_form_validations, cls):
                 return post_form_validations
 
-            return cls.perform_mutate(form, old_obj, input)
+            return cls.perform_mutate(info, form, old_obj, input)
         else:
             errors = from_multiple_errors(form.errors) if cls._meta.multiple else ErrorType.from_errors(form.errors)
             return cls.respond(input, errors=errors, old_obj=old_obj, form=form)
 
     @classmethod
-    def perform_mutate(cls, form, old_obj, input):
-        pre_mutate = cls.pre_mutate(old_obj, form, input)
+    def perform_mutate(cls, info, form, old_obj, input):
+        pre_mutate = cls.pre_mutate(info, old_obj, form, input)
         if isinstance(pre_mutate, cls):
             return pre_mutate
 
@@ -202,7 +202,7 @@ class DjangoModelMutation(Mutation):
         else:
             obj = form.save()
 
-        post_mutate = cls.post_mutate(old_obj, form, obj, input)
+        post_mutate = cls.post_mutate(info, old_obj, form, obj, input)
         if isinstance(post_mutate, cls):
             return post_mutate
 
@@ -210,9 +210,9 @@ class DjangoModelMutation(Mutation):
         return cls.respond(input, errors=[], kwargs=kwargs, old_obj=old_obj, form=form, obj=obj)
 
     @classmethod
-    def get_form(cls, root, info, input):
-        form_kwargs, old_obj = cls.get_form_multiple_kwargs(root, info, input) \
-            if cls._meta.multiple else cls.get_form_kwargs(root, info, input)
+    def get_form(cls, info, input):
+        form_kwargs, old_obj = cls.get_form_multiple_kwargs(info, input) \
+            if cls._meta.multiple else cls.get_form_kwargs(info, input)
         if isinstance(form_kwargs, cls):
             return form_kwargs, None
 
@@ -245,7 +245,7 @@ class DjangoModelMutation(Mutation):
         return formset_factory(Form)(**form_kwargs)
 
     @classmethod
-    def get_form_kwargs(cls, root, info, input):
+    def get_form_kwargs(cls, info, input):
         kwargs = {"data": input, "files": info.context.FILES, "instance": cls._meta.model()}
 
         old_obj = None
@@ -270,7 +270,7 @@ class DjangoModelMutation(Mutation):
         return kwargs, old_obj
 
     @classmethod
-    def get_form_multiple_kwargs(cls, root, info, input):
+    def get_form_multiple_kwargs(cls, info, input):
         initial = []
         errors = []
         if cls._meta.for_update:
@@ -305,19 +305,19 @@ class DjangoModelMutation(Mutation):
         return kwargs, old_obj
 
     @classmethod
-    def pre_validations(cls, root, info, input, form):
+    def pre_validations(cls, info, input, form):
         pass
 
     @classmethod
-    def post_validations(cls, root, info, input, form):
+    def post_validations(cls, info, input, form):
         pass
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         pass
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         pass
 
     @classmethod

@@ -1,3 +1,4 @@
+import graphene
 from graphene_django import DjangoObjectType
 
 from rwanda.account.models import Deposit, Refund
@@ -51,11 +52,18 @@ class AccountType(DjangoObjectType):
 
 
 class ServiceMediaType(DjangoObjectType):
+    file_url = graphene.String()
+
     class Meta:
         model = ServiceMedia
+        exclude = ('file',)
         filter_fields = {
             "id": ("exact",),
         }
+
+    @staticmethod
+    def resolve_file_url(cls, info):
+        return info.context.scheme + "://" + info.context.META['HTTP_HOST'] + cls.file_url if cls.file_url else None
 
 
 class ServiceCommentType(DjangoObjectType):
