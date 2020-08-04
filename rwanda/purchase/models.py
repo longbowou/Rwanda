@@ -19,6 +19,11 @@ class ServicePurchase(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     service_options = models.ManyToManyField(ServiceOption, blank=True,
                                              through='ServicePurchaseServiceOption')
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    canceled_at = models.DateTimeField(null=True, blank=True)
+    must_be_delivered_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

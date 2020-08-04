@@ -14,7 +14,8 @@ class Command(BaseCommand):
         for item in [
             {"label": Parameter.BASE_PRICE, "value": 1000},
             {"label": Parameter.CURRENCY, "value": "XOF"},
-            {"label": Parameter.COMMISSION, "value": 200}
+            {"label": Parameter.COMMISSION, "value": 200},
+            {"label": Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL, "value": 5},
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():
                 Parameter(**item).save()
