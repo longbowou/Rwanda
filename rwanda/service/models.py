@@ -45,10 +45,12 @@ class ServiceMedia(models.Model):
 
 class ServiceComment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    content = models.TextField
-    positive = models.BooleanField
+    content = models.TextField()
+    reply_content = models.TextField(blank=True, null=True)
+    positive = models.BooleanField()
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    reply_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

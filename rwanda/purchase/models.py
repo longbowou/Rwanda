@@ -27,6 +27,10 @@ class ServicePurchase(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def fees(self):
+        return self.price - self.commission
+
 
 class ServicePurchaseServiceOption(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

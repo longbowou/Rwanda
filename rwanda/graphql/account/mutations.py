@@ -19,7 +19,8 @@ class CreateDeposit(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Operation(type=Operation.CREDIT, account=obj.account, amount=obj.amount,
+        Operation(type=Operation.TYPE_CREDIT, account=obj.account, amount=obj.amount,
+                  description=Operation.DESC_CREDIT_FOR_DEPOSIT,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.amount)
         Account.objects.filter(pk=input.account).update(balance=F('balance') + obj.amount)
@@ -37,7 +38,8 @@ class CreateRefund(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Operation(type=Operation.DEBIT, account=obj.account, amount=obj.amount,
+        Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.amount,
+                  description=Operation.DESC_DEBIT_FOR_REFUND,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.amount)
         Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.amount)
