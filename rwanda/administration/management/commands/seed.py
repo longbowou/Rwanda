@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 
 from rwanda.accounting.models import Fund
 from rwanda.administration.models import Parameter
+from rwanda.service.models import ServiceCategory
 
 
 class Command(BaseCommand):
@@ -23,5 +24,9 @@ class Command(BaseCommand):
         for item in [Fund.MAIN, Fund.COMMISSIONS, Fund.ACCOUNTS]:
             if not Fund.objects.filter(label=item).exists():
                 Fund(label=item).save()
+
+        for item in ["TECH", ]:
+            if not ServiceCategory.objects.filter(label=item).exists():
+                ServiceCategory(label=item).save()
 
         self.stdout.write(self.style.SUCCESS('Seed complete'))

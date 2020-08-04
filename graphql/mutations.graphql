@@ -1,5 +1,5 @@
 mutation{
-    createAccount(input: {username: "account", email: "account@account.com", password:"password", passwordConfirmation: "password"}){
+    createAccount(input: {username: "buyer", email: "buyer@account.com", password:"password", passwordConfirmation: "password"}){
         errors{
             field
             messages
