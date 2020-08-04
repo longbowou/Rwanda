@@ -15,6 +15,10 @@ $ docker-compose build
 ```
 $ docker-compose run --rm app python manage.py migrate
 ```
+- Seed data
+```
+$ docker-compose run --rm app python manage.py seed
+```
 - Run the application
 ```
 $ docker-compose up
