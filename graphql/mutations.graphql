@@ -1,65 +1,55 @@
 mutation{
-    createServiceCategory(input:{label: "Tech"}){
+    createAccount(input: {username: "account", email: "account@account.com", password:"password", passwordConfirmation: "password"}){
         errors{
             field
             messages
         }
-        serviceCategory{
-            id
-            label
-            description
-        }
-    }
-
-    updateServiceCategory(input:{id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9", label: "Tech One"}){
-        errors{
-            field
-            messages
-        }
-        serviceCategory{
-            id
-            label
-            description
-        }
-    }
-
-    deleteServiceCategory(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
-        errors{
-            field
-            messages
-        }
-    }
-
-    createAdmin(input: {username: "admin", email: "admin@admin.com", password: "password", passwordConfirmation: "password"}) {
-        errors {
-            field
-            messages
-        }
-        admin {
+        account{
             id
             fullName
-            email
-            username
+            balance
         }
     }
 
-    updateAdmin(input: {id: "1c1fc525-ba8a-43d5-8c4f-e17bd0c93968", username: "admin1", email: "admin1@admin.com", firstName: "Admin"}) {
+    createDeposit(input:{account: "9827239c-7acf-4a80-9509-f0e564124790", amount: 5000}){
+        errors{
+            field
+            messages
+        }
+        deposit{
+            id
+            amount
+            account{
+                id
+                balance
+            }
+        }
+    }
+
+    createService(input: {title: "Je vais booster votre SEO avec des Backlinks à fort DA (PR9) pour 5 €", content: "Les Backlinks sont le plus grand facteur de classement depuis la création de Google, ce pourquoi nos services SEO sont principalement axées sur le NETLINKING et renforcement des liens de qualité.", delay: 7, serviceCategory: "b7ee9070-83ca-467f-bbe8-3f8d17845db0", account: "7b595e35-f481-4cda-8e7d-e5a9f6eb1ba1", serviceOptions: [{label: "Pack de Base (x2) : Je vais vous créer 15+ Backlinks HQ avec PR9/5 - Option Réservée Pour un Deuxième Site (Domaine)", price: 5, delay: 1}, {label: "Pack PLUS : Je vais vous créer 60+ Backlinks HQ avec PR9/5 Safe SEO 2020", price: 20, delay: 3}]}) {
         errors {
             field
             messages
         }
-        admin {
+        service {
             id
-            firstName
-            email
-            username
-        }
-    }
-
-    deleteAdmin(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
-        errors{
-            field
-            messages
+            title
+            content
+            delay
+            serviceCategory {
+                id
+                label
+            }
+            account {
+                id
+                fullName
+            }
+            serviceoptionSet {
+                id
+                label
+                delay
+                price
+            }
         }
     }
 }

@@ -1,0 +1,33 @@
+{
+    serviceCategories {
+        id
+        label
+        description
+    }
+
+    funds {
+        id
+        label
+        balance
+    }
+
+    services {
+        id
+        title
+        content
+        serviceCategory {
+            id
+            label
+        }
+        account {
+            id
+            username
+        }
+        serviceoptionSet{
+            id
+            label
+            price
+            delay
+        }
+    }
+}

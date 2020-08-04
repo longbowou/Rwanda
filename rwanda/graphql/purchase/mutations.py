@@ -40,18 +40,18 @@ class InitServicePurchase(DjangoModelMutation):
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
         Operation(type=Operation.DEBIT, account=obj.account, amount=obj.price,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS))
+                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.price)
         Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.price)
 
         fees = obj.price - obj.commission
 
         Operation(type=Operation.CREDIT, service_purchase=obj, amount=fees,
-                  fund=Fund.objects.get(label=Fund.MAIN))
+                  fund=Fund.objects.get(label=Fund.MAIN)).save()
         Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') + fees)
 
         Operation(type=Operation.CREDIT, service_purchase=obj, amount=obj.commission,
-                  fund=Fund.objects.get(label=Fund.COMMISSIONS))
+                  fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
         Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') + obj.commission)
         obj.refresh_from_db()
 
@@ -59,7 +59,7 @@ class InitServicePurchase(DjangoModelMutation):
 class AcceptServicePurchase(DjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
-        only_fields = ("accept",)
+        only_fields = ("accepted",)
         for_update = True
 
     @classmethod

@@ -1,0 +1,65 @@
+mutation{
+    createServiceCategory(input:{label: "Tech"}){
+        errors{
+            field
+            messages
+        }
+        serviceCategory{
+            id
+            label
+            description
+        }
+    }
+
+    updateServiceCategory(input:{id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9", label: "Tech One"}){
+        errors{
+            field
+            messages
+        }
+        serviceCategory{
+            id
+            label
+            description
+        }
+    }
+
+    deleteServiceCategory(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
+        errors{
+            field
+            messages
+        }
+    }
+
+    createAdmin(input: {username: "admin", email: "admin@admin.com", password: "password", passwordConfirmation: "password"}) {
+        errors {
+            field
+            messages
+        }
+        admin {
+            id
+            fullName
+            email
+            username
+        }
+    }
+
+    updateAdmin(input: {id: "1c1fc525-ba8a-43d5-8c4f-e17bd0c93968", username: "admin1", email: "admin1@admin.com", firstName: "Admin"}) {
+        errors {
+            field
+            messages
+        }
+        admin {
+            id
+            firstName
+            email
+            username
+        }
+    }
+
+    deleteAdmin(id: "b2cccf27-ccab-485a-a5c6-6bb05f4244f9"){
+        errors{
+            field
+            messages
+        }
+    }
+}

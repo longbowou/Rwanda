@@ -7,7 +7,7 @@ from rwanda.user.models import Account
 
 class ServiceCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    label = models.CharField(max_length=100, unique=True)
+    label = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -18,7 +18,7 @@ class ServiceCategory(models.Model):
 
 class Service(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
     content = models.TextField()
     keywords = models.TextField(blank=True, null=True)
     stars = models.IntegerField(default=0)
@@ -55,7 +55,7 @@ class ServiceComment(models.Model):
 
 class ServiceOption(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    label = models.CharField(max_length=100)
+    label = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     delay = models.IntegerField()
     price = models.IntegerField()

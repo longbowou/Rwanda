@@ -13,18 +13,27 @@ interface UserInterface {
     username: String!
 }
 
+type AcceptServicePurchase {
+    errors: [ErrorType]
+    servicePurchase: ServicePurchaseType
+}
+
 type AccountType implements UserInterface {
+    balance: Int!
     chatSet: [ChatType!]!
-    commentSet: [CommentType!]!
     createdAt: DateTime!
+    depositSet: [DepositType!]!
     email: String!
     firstName: String
     fullName: String
     id: UUID!
     lastName: String
     litigationSet: [LitigationType!]!
-    sellerpurchaseSet: [SellerPurchaseType!]!
+    operationSet: [OperationType!]!
+    refundSet: [RefundType!]!
     serviceSet: [ServiceType!]!
+    servicecommentSet: [ServiceCommentType!]!
+    servicepurchaseSet: [ServicePurchaseType!]!
     updatedAt: DateTime!
     username: String!
 }
@@ -43,17 +52,10 @@ type AdminType implements UserInterface {
 
 type ChatType {
     account: AccountType!
+    content: String!
     createdAt: DateTime!
     id: UUID!
-    sellerPurchase: SellerPurchaseType!
-    updatedAt: DateTime!
-}
-
-type CommentType {
-    account: AccountType!
-    createdAt: DateTime!
-    id: UUID!
-    service: ServiceType!
+    servicePurchase: ServicePurchaseType!
     updatedAt: DateTime!
 }
 
@@ -62,9 +64,14 @@ type CreateAccount {
     errors: [ErrorType]
 }
 
-type CreateAdmin {
-    admin: AdminType
+type CreateDeposit {
+    deposit: DepositType
     errors: [ErrorType]
+}
+
+type CreateRefund {
+    errors: [ErrorType]
+    refund: RefundType
 }
 
 type CreateService {
@@ -72,16 +79,7 @@ type CreateService {
     service: ServiceType
 }
 
-type CreateServiceCategory {
-    errors: [ErrorType]
-    serviceCategory: ServiceCategoryType
-}
-
 type DeleteAccount {
-    errors: [ErrorType]
-}
-
-type DeleteAdmin {
     errors: [ErrorType]
 }
 
@@ -89,8 +87,12 @@ type DeleteService {
     errors: [ErrorType]
 }
 
-type DeleteServiceCategory {
-    errors: [ErrorType]
+type DepositType {
+    account: AccountType!
+    amount: Int!
+    createdAt: DateTime!
+    id: UUID!
+    updatedAt: DateTime!
 }
 
 type ErrorType {
@@ -98,30 +100,55 @@ type ErrorType {
     messages: [String!]!
 }
 
+type FundType {
+    balance: Int!
+    createdAt: DateTime!
+    id: UUID!
+    label: String!
+    operationSet: [OperationType!]!
+    updatedAt: DateTime!
+}
+
+type InitServicePurchase {
+    errors: [ErrorType]
+    servicePurchase: ServicePurchaseType
+}
+
 type LitigationType {
     account: AccountType!
     admin: AdminType!
     createdAt: DateTime!
+    description: String!
     handled: Boolean!
     id: UUID!
-    sellerPurchase: SellerPurchaseType!
+    servicePurchase: ServicePurchaseType!
     title: String!
     updatedAt: DateTime!
 }
 
 type Mutation {
+    acceptServicePurchase(input: AcceptServicePurchaseInput!): AcceptServicePurchase
     createAccount(input: AccountInput!): CreateAccount
-    createAdmin(input: AdminInput!): CreateAdmin
+    createDeposit(input: CreateDepositInput!): CreateDeposit
+    createRefund(input: CreateRefundInput!): CreateRefund
     createService(input: CreateServiceInput!): CreateService
-    createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
     deleteAccount(id: UUID!): DeleteAccount
-    deleteAdmin(id: UUID!): DeleteAdmin
     deleteService(id: UUID!): DeleteService
-    deleteServiceCategory(id: UUID!): DeleteServiceCategory
+    initServicePurchase(input: InitServicePurchaseInput!): InitServicePurchase
     updateAccount(input: AccountInput!): UpdateAccount
-    updateAdmin(input: AdminUpdateInput!): UpdateAdmin
     updateService(input: UpdateServiceInput!): UpdateService
-    updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
+}
+
+type OperationType {
+    account: AccountType
+    amount: Int!
+    createdAt: DateTime!
+    description: String
+    fund: FundType!
+    id: UUID!
+    servicePurchase: ServicePurchaseType
+    type: String!
+    updatedAt: DateTime!
 }
 
 type Query {
@@ -131,25 +158,11 @@ type Query {
     services(id: UUID): [ServiceType]
 }
 
-type SellerPurchaseServiceOptionType {
-    createdAt: DateTime!
-    id: UUID!
-    sellerPurchase: SellerPurchaseType!
-    serviceOptions: ServiceOptionType!
-    updatedAt: DateTime!
-}
-
-type SellerPurchaseType {
-    accepted: Boolean!
+type RefundType {
     account: AccountType!
-    approved: Boolean!
-    chatSet: [ChatType!]!
+    amount: Int!
     createdAt: DateTime!
-    delivered: Boolean!
     id: UUID!
-    litigationSet: [LitigationType!]!
-    sellerpurchaseserviceoptionSet: [SellerPurchaseServiceOptionType!]!
-    service: ServiceType!
     updatedAt: DateTime!
 }
 
@@ -159,6 +172,14 @@ type ServiceCategoryType {
     id: UUID!
     label: String!
     serviceSet: [ServiceType!]!
+    updatedAt: DateTime!
+}
+
+type ServiceCommentType {
+    account: AccountType!
+    createdAt: DateTime!
+    id: UUID!
+    service: ServiceType!
     updatedAt: DateTime!
 }
 
@@ -173,26 +194,59 @@ type ServiceMediaType {
 
 type ServiceOptionType {
     createdAt: DateTime!
+    delay: Int!
     description: String
     id: UUID!
     label: String!
-    sellerpurchaseserviceoptionSet: [SellerPurchaseServiceOptionType!]!
+    price: Int!
     service: ServiceType!
+    servicepurchaseSet: [ServicePurchaseType!]!
+    servicepurchaseserviceoptionSet: [ServicePurchaseServiceOptionType!]!
+    updatedAt: DateTime!
+}
+
+type ServicePurchaseServiceOptionType {
+    createdAt: DateTime!
+    id: UUID!
+    serviceOption: ServiceOptionType!
+    servicePurchase: ServicePurchaseType!
+    updatedAt: DateTime!
+}
+
+type ServicePurchaseType {
+    accepted: Boolean!
+    account: AccountType!
+    approved: Boolean!
+    canceled: Boolean!
+    chatSet: [ChatType!]!
+    commission: Int!
+    createdAt: DateTime!
+    delay: Int!
+    delivered: Boolean!
+    id: UUID!
+    litigation: LitigationType
+    operationSet: [OperationType!]!
+    price: Int!
+    service: ServiceType!
+    serviceOptions: [ServiceOptionType!]!
+    servicepurchaseserviceoptionSet: [ServicePurchaseServiceOptionType!]!
     updatedAt: DateTime!
 }
 
 type ServiceType {
     account: AccountType!
     activated: Boolean!
-    commentSet: [CommentType!]!
+    content: String!
     createdAt: DateTime!
+    delay: Int!
     id: UUID!
     keywords: String
     published: Boolean!
-    sellerpurchaseSet: [SellerPurchaseType!]!
     serviceCategory: ServiceCategoryType!
+    servicecommentSet: [ServiceCommentType!]!
     servicemediaSet: [ServiceMediaType!]!
     serviceoptionSet: [ServiceOptionType!]!
+    servicepurchaseSet: [ServicePurchaseType!]!
     stars: Int!
     title: String!
     updatedAt: DateTime!
@@ -203,19 +257,13 @@ type UpdateAccount {
     errors: [ErrorType]
 }
 
-type UpdateAdmin {
-    admin: AdminType
-    errors: [ErrorType]
-}
-
 type UpdateService {
     errors: [ErrorType]
     service: ServiceType
 }
 
-type UpdateServiceCategory {
-    errors: [ErrorType]
-    serviceCategory: ServiceCategoryType
+input AcceptServicePurchaseInput {
+    id: UUID!
 }
 
 input AccountInput {
@@ -227,51 +275,49 @@ input AccountInput {
     username: String!
 }
 
-input AdminInput {
-    email: String!
-    firstName: String
-    isActive: Boolean
-    isSuperuser: Boolean
-    lastName: String
-    password: String!
-    passwordConfirmation: String!
-    username: String!
+input CreateDepositInput {
+    account: ID!
+    amount: Int!
 }
 
-input AdminUpdateInput {
-    email: String
-    firstName: String
-    id: UUID!
-    isActive: Boolean
-    isSuperuser: Boolean
-    lastName: String
-    username: String
-}
-
-input CreateServiceCategoryInput {
-    description: String
-    label: String!
+input CreateRefundInput {
+    account: ID!
+    amount: Int!
 }
 
 input CreateServiceInput {
     account: ID!
-    activated: Boolean
+    content: String!
+    delay: Int!
     keywords: String
     published: Boolean
     serviceCategory: ID!
-    stars: Int!
+    serviceOptions: [ServiceOptionInput]
     title: String!
 }
 
-input UpdateServiceCategoryInput {
+input InitServicePurchaseInput {
+    account: ID!
+    service: ID!
+    serviceOptions: [ID]
+}
+
+input ServiceOptionInput {
+    delay: Int!
     description: String
-    id: UUID!
-    label: String
+    label: String!
+    price: Int!
 }
 
 input UpdateServiceInput {
-    activated: Boolean
+    content: String
+    delay: Int
     id: UUID!
+    keywords: String
+    published: Boolean
+    serviceCategory: ID
+    stars: Int
+    title: String
 }
 
 

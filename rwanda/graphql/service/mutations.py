@@ -6,7 +6,7 @@ from rwanda.service.models import ServiceOption
 
 
 class ServiceOptionInput(graphene.InputObjectType):
-    title = graphene.String(required=True)
+    label = graphene.String(required=True)
     description = graphene.String()
     delay = graphene.Int(required=True)
     price = graphene.Int(required=True)
@@ -15,7 +15,7 @@ class ServiceOptionInput(graphene.InputObjectType):
 class CreateService(DjangoModelMutation):
     class Meta:
         model_type = ServiceType
-        exclude_fields = ("activated",)
+        exclude_fields = ("activated", "stars")
         extra_input_fields = {"service_options": graphene.List(ServiceOptionInput)}
 
     @classmethod

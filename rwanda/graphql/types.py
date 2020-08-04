@@ -1,6 +1,7 @@
 from graphene_django import DjangoObjectType
 
 from rwanda.account.models import Deposit, Refund
+from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
@@ -35,23 +36,6 @@ class ServiceCategoryType(DjangoObjectType):
 class ServiceType(DjangoObjectType):
     class Meta:
         model = Service
-        filter_fields = {
-            "id": ("exact",),
-        }
-
-
-class ParameterType(DjangoObjectType):
-    class Meta:
-        model = Parameter
-        filter_fields = {
-            "id": ("exact",),
-        }
-
-
-class AdminType(DjangoObjectType):
-    class Meta:
-        model = Admin
-        interfaces = (UserInterface,)
         filter_fields = {
             "id": ("exact",),
         }
@@ -117,6 +101,39 @@ class ChatType(DjangoObjectType):
 class LitigationType(DjangoObjectType):
     class Meta:
         model = Litigation
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class ParameterType(DjangoObjectType):
+    class Meta:
+        model = Parameter
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class AdminType(DjangoObjectType):
+    class Meta:
+        model = Admin
+        interfaces = (UserInterface,)
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class FundType(DjangoObjectType):
+    class Meta:
+        model = Fund
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class OperationType(DjangoObjectType):
+    class Meta:
+        model = Operation
         filter_fields = {
             "id": ("exact",),
         }

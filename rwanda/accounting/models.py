@@ -8,7 +8,7 @@ from rwanda.user.models import Account
 
 class Fund(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    label = models.CharField(max_length=100, unique=True)
+    label = models.CharField(max_length=255, unique=True)
     balance = models.BigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -23,7 +23,7 @@ class Fund(models.Model):
 
 class Operation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    type = models.CharField(max_length=100)
+    type = models.CharField(max_length=255)
     amount = models.BigIntegerField()
     description = models.TextField(null=True, blank=True)
     fund = models.ForeignKey(Fund, on_delete=models.CASCADE)

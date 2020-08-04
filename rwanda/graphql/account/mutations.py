@@ -20,7 +20,7 @@ class CreateDeposit(DjangoModelMutation):
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
         Operation(type=Operation.CREDIT, account=obj.account, amount=obj.amount,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS))
+                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.amount)
         Account.objects.filter(pk=input.account).update(balance=F('balance') + obj.amount)
         obj.refresh_from_db()
@@ -38,7 +38,7 @@ class CreateRefund(DjangoModelMutation):
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
         Operation(type=Operation.DEBIT, account=obj.account, amount=obj.amount,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS))
+                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.amount)
         Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.amount)
         obj.refresh_from_db()
@@ -88,10 +88,13 @@ class CreateAccount(graphene.Mutation):
 
         user = User(
             username=input.username,
-            first_name=input.first_name,
-            last_name=input.last_name,
             email=input.email,
         )
+
+        for field, value in input.items():
+            if field in ('first_name', 'last_name') and value is not None:
+                setattr(user, field, value)
+
         user.set_password(input.password)
         user.save()
         account = Account(
