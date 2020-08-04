@@ -1,0 +1,10 @@
+{
+    accounts{
+        id
+        username
+        firstName
+      	lastName
+      	email
+      	createdAt
+    }
+}

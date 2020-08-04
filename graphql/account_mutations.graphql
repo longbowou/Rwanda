@@ -1,0 +1,39 @@
+mutation {
+  createAccount(input: {username: "AGBASKO", firstName: "Komi", lastName: "AGBASKO", email: "agbaskokomi@gmail.com", password: "kkk1234", passwordConfirmation: "kkk1234"}) {
+    errors {
+      field
+      messages
+    }
+    account {
+      id
+      updatedAt
+      createdAt
+    }
+  }
+}
+
+
+mutation{
+    updateAccount(input: {id:"39d28499-37b6-414f-b9ed-a957564d2f13", username: "AGBEKO"}){
+           errors {
+              field
+              messages
+            }
+          	account {
+              id
+              updatedAt
+              createdAt
+            }
+    	}
+  }
+
+
+mutation{
+    deleteAccount(id: "39d28499-37b6-414f-b9ed-a957564d2f13"){
+        errors{
+            field
+            messages
+        }
+
+    }
+  }
