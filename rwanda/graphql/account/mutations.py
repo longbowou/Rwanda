@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.accounting.models import Operation, Fund
-from rwanda.graphql.inputs import UserInput
+from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import AccountType, DepositType, RefundType
 from rwanda.user.models import User, Account
@@ -84,7 +84,7 @@ class CreateAccount(graphene.Mutation):
             return CreateAccount(
                 errors=[
                     ErrorType(field='password', messages=[_("Password does not match password confirmation.")])]
-            ),
+            )
 
         user = User(
             username=input.username,
@@ -104,14 +104,9 @@ class CreateAccount(graphene.Mutation):
         return CreateAccount(account=account, errors=[])
 
 
-class AccountUpdateInput(graphene.InputObjectType):
+class AccountUpdateInput(UserUpdateInput):
     id = graphene.UUID(required=True)
-    username = graphene.String(required=True)
-    first_name = graphene.String()
-    last_name = graphene.String()
-    password = graphene.String(required=True)
-    password_confirmation = graphene.String(required=True)
-    email = graphene.String(required=True)
+    is_active = graphene.Boolean()
 
 
 class UpdateAccount(graphene.Mutation):
@@ -156,22 +151,13 @@ class UpdateAccount(graphene.Mutation):
                 return CreateAccount(
                     errors=[ErrorType(field='email', messages=[_(e.message)])])
 
-        if input.password != input.password_confirmation:
-            return CreateAccount(
-                errors=[
-                    ErrorType(field='password', messages=[_("your password and its verification are not identical")])]
-            ),
-
         for field, value in input.items():
             if field in ('first_name', 'last_name') and value is not None:
                 setattr(user, field, value)
 
         user.save()
-        account = Account(
-            user=user
-        )
-        account.save()
-        return CreateAccount(account=account, errors=[])
+
+        return CreateAccount(account=user.account, errors=[])
 
 
 class DeleteAccount(DjangoModelDeleteMutation):
