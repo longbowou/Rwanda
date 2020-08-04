@@ -42,16 +42,19 @@ class InitServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Operation(type=Operation.DEBIT, account=obj.account, amount=obj.price,
+        Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.price,
+                  description=Operation.DESC_DEBIT_FOR_PURCHASE_INIT,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.price)
         Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.price)
 
-        Operation(type=Operation.CREDIT, service_purchase=obj, amount=obj.fees,
+        Operation(type=Operation.TYPE_CREDIT, service_purchase=obj, amount=obj.fees,
+                  description=Operation.DESC_CREDIT_FOR_PURCHASE_INIT,
                   fund=Fund.objects.get(label=Fund.MAIN)).save()
         Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') + obj.fees)
 
-        Operation(type=Operation.CREDIT, service_purchase=obj, amount=obj.commission,
+        Operation(type=Operation.TYPE_CREDIT, service_purchase=obj, amount=obj.commission,
+                  description=Operation.DESC_CREDIT_FOR_PURCHASE_INIT,
                   fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
         Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') + obj.commission)
         obj.refresh_from_db()
@@ -125,11 +128,13 @@ class ApproveServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Operation(type=Operation.DEBIT, service_purchase=obj, amount=obj.fees,
+        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
+                  description=Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED,
                   fund=Fund.objects.get(label=Fund.MAIN)).save()
         Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') - obj.fees)
 
-        Operation(type=Operation.CREDIT, account=obj.service.account, amount=obj.fees,
+        Operation(type=Operation.TYPE_CREDIT, account=obj.service.account, amount=obj.fees,
+                  description=Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.fees)
         Account.objects.filter(pk=obj.service.account.id).update(balance=F('balance') + obj.fees)
@@ -163,15 +168,18 @@ class CancelServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, old_obj, form, obj, input):
-        Operation(type=Operation.DEBIT, service_purchase=obj, amount=obj.fees,
+        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
+                  description=Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED,
                   fund=Fund.objects.get(label=Fund.MAIN)).save()
         Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') - obj.fees)
 
-        Operation(type=Operation.DEBIT, service_purchase=obj, amount=obj.commission,
+        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.commission,
+                  description=Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED,
                   fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
         Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') - obj.commission)
 
-        Operation(type=Operation.CREDIT, account=obj.account, amount=obj.price,
+        Operation(type=Operation.TYPE_CREDIT, account=obj.account, amount=obj.price,
+                  description=Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
         Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.price)
         Account.objects.filter(pk=obj.account.id).update(balance=F('balance') + obj.price)
