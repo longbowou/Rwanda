@@ -1,12 +1,13 @@
 import os
 import uuid
+from datetime import datetime
 
 import graphene
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType
+from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType
 from rwanda.service.models import ServiceOption, ServiceMedia
 
 
@@ -100,6 +101,35 @@ class DeleteServiceMedia(DjangoModelDeleteMutation):
         model_type = ServiceMediaType
 
 
+class CreateServiceComment(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceCommentType
+        only_fields = ("content", "account", "service", "positive")
+
+
+class UpdateServiceComment(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceCommentType
+        for_update = True
+        only_fields = ("content", "positive")
+
+
+class DeleteServiceComment(DjangoModelDeleteMutation):
+    class Meta:
+        model_type = ServiceCommentType
+
+
+class ReplyServiceComment(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceCommentType
+        for_update = True
+        only_fields = ("reply_content",)
+
+    @classmethod
+    def pre_mutate(cls, info, old_obj, form, input):
+        form.instance.reply_at = datetime.today()
+
+
 class ServiceMutations(graphene.ObjectType):
     create_service = CreateService.Field()
     update_service = UpdateService.Field()
@@ -108,3 +138,8 @@ class ServiceMutations(graphene.ObjectType):
     create_service_media = CreateServiceMedia.Field()
     update_service_media = UpdateServiceMedia.Field()
     delete_service_media = DeleteServiceMedia.Field()
+
+    create_service_comment = CreateServiceComment.Field()
+    update_service_comment = UpdateServiceComment.Field()
+    delete_service_comment = DeleteServiceComment.Field()
+    reply_service_comment = ReplyServiceComment.Field()
