@@ -25,6 +25,6 @@ $ docker-compose up
 ```
 
 ## Where is the application running?
-- Web App - [http://0.0.0.0:8000](http://0.0.0.0:8000/)
-- GraphQl - [http://0.0.0.0:8000/graphql/](http://0.0.0.0:8000/graphql/)
-- PgAdmin4 - [http://0.0.0.0:5050](http://0.0.0.0:5050)
+- GraphQl - [http://localhost:8000/graphql/](http://localhost:8000/graphql/)
+- GraphQl Admin - [http://localhost:8000/graphql-admin/](http://localhost:8000/graphql-admin/)
+- PgAdmin4 - [http://localhost:5050](http://localhost:5050)

@@ -1,7 +1,0 @@
-{
-    serviceCategories {
-        id
-        label
-        description
-    }
-}

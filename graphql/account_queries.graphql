@@ -1,0 +1,16 @@
+{
+    accounts{
+        id
+        username
+        firstName
+        lastName
+        email
+        createdAt
+    }
+
+    serviceCategories {
+        id
+        label
+        description
+    }
+}

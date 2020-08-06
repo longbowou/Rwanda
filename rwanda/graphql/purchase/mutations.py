@@ -20,7 +20,7 @@ class InitServicePurchase(DjangoModelMutation):
         only_fields = ("account", 'service', 'service_options')
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         price = int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)
         service = Service.objects.get(pk=input.service)
         delay = service.delay
@@ -41,7 +41,7 @@ class InitServicePurchase(DjangoModelMutation):
         form.instance.must_be_delivered_at = datetime.today() + timedelta(days=delay)
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.price,
                   description=Operation.DESC_DEBIT_FOR_PURCHASE_INIT,
                   fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
@@ -67,7 +67,7 @@ class AcceptServicePurchase(DjangoModelMutation):
         for_update = True
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.accepted or service_purchase.approved or service_purchase.delivered \
                 or service_purchase.canceled:
@@ -85,7 +85,7 @@ class DeliverServicePurchase(DjangoModelMutation):
         for_update = True
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.delivered or service_purchase.approved or service_purchase.canceled:
             return cls(
@@ -107,7 +107,7 @@ class ApproveServicePurchase(DjangoModelMutation):
         for_update = True
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.approved or service_purchase.canceled:
             return cls(
@@ -127,7 +127,7 @@ class ApproveServicePurchase(DjangoModelMutation):
         service_purchase.approved_at = datetime.today()
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
                   description=Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED,
                   fund=Fund.objects.get(label=Fund.MAIN)).save()
@@ -148,7 +148,7 @@ class CancelServicePurchase(DjangoModelMutation):
         for_update = True
 
     @classmethod
-    def pre_mutate(cls, old_obj, form, input):
+    def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
         if service_purchase.canceled or service_purchase.delivered or service_purchase.approved:
             return cls(
@@ -167,7 +167,7 @@ class CancelServicePurchase(DjangoModelMutation):
         service_purchase.canceled_at = today
 
     @classmethod
-    def post_mutate(cls, old_obj, form, obj, input):
+    def post_mutate(cls, info, old_obj, form, obj, input):
         Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
                   description=Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED,
                   fund=Fund.objects.get(label=Fund.MAIN)).save()
