@@ -1,7 +1,7 @@
 import graphene
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, AccountType
+from rwanda.graphql.types import ServiceType
 from rwanda.service.models import ServiceOption
 
 
@@ -34,7 +34,7 @@ class UpdateService(DjangoModelMutation):
 
 class DeleteService(DjangoModelDeleteMutation):
     class Meta:
-        model_type = AccountType
+        model_type = ServiceType
 
 
 class ServiceMutations(graphene.ObjectType):
