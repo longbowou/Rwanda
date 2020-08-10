@@ -9,10 +9,12 @@ from graphene_django.types import ErrorType
 from rwanda.accounting.models import Operation, Fund
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import AccountType, DepositType, RefundType
+from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
+from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.user.models import User, Account
 
 
+# MUTATION DEPOSIT
 class CreateDeposit(DjangoModelMutation):
     class Meta:
         model_type = DepositType
@@ -27,6 +29,7 @@ class CreateDeposit(DjangoModelMutation):
         obj.refresh_from_db()
 
 
+#MUTATION REFUND
 class CreateRefund(DjangoModelMutation):
     class Meta:
         model_type = RefundType
@@ -167,6 +170,36 @@ class DeleteAccount(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
+# INPUT LITIGATION
+class LitigationInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String(required=True)
+
+
+# MUTATION LITIGATION
+class CreateLitigation(graphene.Mutation):
+    class Meta:
+        model_type = LitigationType
+        only_fields = ("account", 'admin', 'service_purchase', 'title', 'description')
+
+
+class UpdateLitigation(graphene.Mutation):
+    class Meta:
+        model_type = LitigationType
+        for_update = True
+        exclude_fields = ('service_purchase', 'account', 'title', 'description')
+
+    @classmethod
+    def post_mutate(cls, info, old_obj, form, obj, input):
+        if input.is_main is not None and obj.is_main:
+            Litigation.objects.exclude(pk=input.id).update(handle=True)
+
+
+class DeleteLitigation(graphene.Mutation):
+    class Meta:
+        model_type = LitigationType
+
+
 class AccountMutations(graphene.ObjectType):
     create_deposit = CreateDeposit.Field()
     create_refund = CreateRefund.Field()
@@ -174,3 +207,7 @@ class AccountMutations(graphene.ObjectType):
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
     delete_account = DeleteAccount.Field()
+
+    create_litigation = CreateLitigation.Field()
+    update_litigation = UpdateLitigation.Field()
+    delete_litigation = DeleteLitigation.Field()
