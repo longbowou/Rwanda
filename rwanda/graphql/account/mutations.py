@@ -10,9 +10,11 @@ from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType
+from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
 from rwanda.user.models import User, Account
 
 
+# MUTATION DEPOSIT
 class CreateDeposit(DjangoModelMutation):
     class Meta:
         model_type = DepositType
@@ -23,6 +25,7 @@ class CreateDeposit(DjangoModelMutation):
         obj.refresh_from_db()
 
 
+#MUTATION REFUND
 class CreateRefund(DjangoModelMutation):
     class Meta:
         model_type = RefundType
@@ -160,6 +163,30 @@ class DeleteAccount(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
+# INPUT LITIGATION
+class LitigationInput(graphene.InputObjectType):
+    title = graphene.String(required=True)
+    description = graphene.String(required=True)
+
+
+# MUTATION LITIGATION
+class CreateLitigation(DjangoModelMutation):
+    class Meta:
+        model_type = LitigationType
+        only_fields = ("account", 'service_purchase', 'title', 'description')
+
+    @classmethod
+    def pre_mutate(cls, info, old_obj, form, input):
+        if not obj.service_purchase.delivered:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+        if obj.service_purchase.approved:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already approved.")])])
+
+
+
+
 class AccountMutations(graphene.ObjectType):
     create_deposit = CreateDeposit.Field()
     create_refund = CreateRefund.Field()
@@ -167,3 +194,5 @@ class AccountMutations(graphene.ObjectType):
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
     delete_account = DeleteAccount.Field()
+
+    create_litigation = CreateLitigation.Field()

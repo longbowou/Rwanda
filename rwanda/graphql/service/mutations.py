@@ -7,10 +7,11 @@ from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
 
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType
+from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType, ServiceOptionType
 from rwanda.service.models import ServiceOption, ServiceMedia
 
 
+# INPUTS
 class ServiceOptionInput(graphene.InputObjectType):
     label = graphene.String(required=True)
     description = graphene.String()
@@ -23,6 +24,7 @@ class ServiceMediaInput(graphene.InputObjectType):
     url = graphene.String()
 
 
+# SERVICE MUTATIONS
 class CreateService(DjangoModelMutation):
     class Meta:
         model_type = ServiceType
@@ -74,6 +76,7 @@ class DeleteService(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
+# SERVICE MEDIA MUTATIONS
 class CreateServiceMedia(DjangoModelMutation):
     class Meta:
         model_type = ServiceMediaType
@@ -101,6 +104,7 @@ class DeleteServiceMedia(DjangoModelDeleteMutation):
         model_type = ServiceMediaType
 
 
+# SERVICE COMMENT MUTATIONS
 class CreateServiceComment(DjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
@@ -130,6 +134,32 @@ class ReplyServiceComment(DjangoModelMutation):
         form.instance.reply_at = datetime.today()
 
 
+# SERVICE OPTIONS MUTATION
+class CreateServiceOption(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceOptionType
+
+    @classmethod
+    def post_mutate(cls, info, old_obj, form, obj, input):
+        pass
+
+
+class UpdateServiceOption(DjangoModelMutation):
+    class Meta:
+        model_type = ServiceOptionType
+        for_update = True
+        exclude_fields = ('service',)
+
+    @classmethod
+    def post_mutate(cls, info, old_obj, form, obj, input):
+        pass
+
+
+class DeleteServiceOption(DjangoModelDeleteMutation):
+    class Meta:
+        model_type = ServiceOptionType
+
+
 class ServiceMutations(graphene.ObjectType):
     create_service = CreateService.Field()
     update_service = UpdateService.Field()
@@ -143,3 +173,7 @@ class ServiceMutations(graphene.ObjectType):
     update_service_comment = UpdateServiceComment.Field()
     delete_service_comment = DeleteServiceComment.Field()
     reply_service_comment = ReplyServiceComment.Field()
+
+    create_service_option = CreateServiceOption.Field()
+    update_service_option = UpdateServiceOption.Field()
+    delete_service_option = DeleteServiceOption.Field()
