@@ -5,12 +5,12 @@ from django.core.validators import EmailValidator
 from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
+from graphql.pyutils.contain_subset import obj
 
 from rwanda.accounting.models import Operation, Fund
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
-from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.user.models import User, Account
 
 
@@ -177,27 +177,21 @@ class LitigationInput(graphene.InputObjectType):
 
 
 # MUTATION LITIGATION
-class CreateLitigation(graphene.Mutation):
+class CreateLitigation(DjangoModelMutation):
     class Meta:
         model_type = LitigationType
-        only_fields = ("account", 'admin', 'service_purchase', 'title', 'description')
-
-
-class UpdateLitigation(graphene.Mutation):
-    class Meta:
-        model_type = LitigationType
-        for_update = True
-        exclude_fields = ('service_purchase', 'account', 'title', 'description')
+        only_fields = ("account", 'service_purchase', 'title', 'description')
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
-        if input.is_main is not None and obj.is_main:
-            Litigation.objects.exclude(pk=input.id).update(handle=True)
+    def pre_mutate(cls, info, old_obj, form, input):
+        if not obj.service_purchase.delivered:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+        if obj.service_purchase.approved:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already approved.")])])
 
 
-class DeleteLitigation(graphene.Mutation):
-    class Meta:
-        model_type = LitigationType
 
 
 class AccountMutations(graphene.ObjectType):
@@ -209,5 +203,3 @@ class AccountMutations(graphene.ObjectType):
     delete_account = DeleteAccount.Field()
 
     create_litigation = CreateLitigation.Field()
-    update_litigation = UpdateLitigation.Field()
-    delete_litigation = DeleteLitigation.Field()

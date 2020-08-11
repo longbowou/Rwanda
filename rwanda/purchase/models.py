@@ -54,7 +54,7 @@ class Litigation(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     handled = models.BooleanField(default=False)
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE)
+    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

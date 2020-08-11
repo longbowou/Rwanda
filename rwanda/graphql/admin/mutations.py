@@ -7,7 +7,7 @@ from graphene_django.types import ErrorType
 
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType
 from rwanda.user.models import User, Admin
 
 
@@ -155,13 +155,26 @@ class DeleteAdmin(DjangoModelDeleteMutation):
         model_type = AdminType
 
 
+class UpdateLitigation(DjangoModelMutation):
+    class Meta:
+        model_type = LitigationType
+        for_update = True
+        only_fields = ('handled', 'admin')
+
+    @classmethod
+    def pre_mutate(cls, info, form, obj, input):
+        if obj.handled:
+            return cls(errors=[ErrorType(field="id", messages=[_("Litigation already handled.")])])
+
+
 class AdminMutations(graphene.ObjectType):
+    create_admin = CreateAdmin.Field()
+    update_admin = UpdateAdmin.Field()
+    delete_admin = DeleteAdmin.Field()
+
     create_service_category = CreateServiceCategory.Field()
     update_service_category = UpdateServiceCategory.Field()
     delete_service_category = DeleteServiceCategory.Field()
 
     update_service = UpdateService.Field()
-
-    create_admin = CreateAdmin.Field()
-    update_admin = UpdateAdmin.Field()
-    delete_admin = DeleteAdmin.Field()
+    update_litigation = UpdateLitigation.Field()
