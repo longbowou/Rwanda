@@ -28,9 +28,10 @@ class CreateRefund(DjangoModelMutation):
         model_type = RefundType
 
     @classmethod
-    def pre_validations(cls, info, input, form):
+    def pre_mutate(cls, info, old_obj, form, input):
         if input.amount > Account.objects.get(pk=input.account).balance:
-            form.add_error("seller_service", ValidationError(_("Insufficient amount to process the refund.")))
+            return cls(
+                errors=[ErrorType(field='seller_service', messages=[_("Insufficient amount to process the refund.")])])
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
