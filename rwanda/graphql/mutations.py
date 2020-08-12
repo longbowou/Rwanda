@@ -28,7 +28,13 @@ class Mutation(GrapheneMutation):
 
     @classmethod
     def __init_subclass_with_meta__(
-            cls, output=None, input_fields=None, arguments=None, name=None, **options
+            cls,
+            output=None,
+            input_fields=None,
+            arguments=None,
+            name=None,
+            multiple=False,
+            **options
     ):
         input_class = getattr(cls, "Input", None)
         base_name = re.sub("Payload$", "", name or cls.__name__)
@@ -52,7 +58,6 @@ class Mutation(GrapheneMutation):
             ),
         )
 
-        multiple = options["multiple"] if options.__contains__("multiple") else False
         arguments = OrderedDict(
             input=graphene.List(graphene.NonNull(cls.Input), required=True) if multiple else cls.Input(required=True)
             # 'client_mutation_id': String(name='clientMutationId')
@@ -103,11 +108,15 @@ class DjangoModelMutation(Mutation):
             exclude_fields=(),
             extra_input_fields=None,
             for_update=False,
-            post_mutate=None,
+            multiple=False,
+            custom_input_fields=None,
             **options
     ):
         if extra_input_fields is None:
             extra_input_fields = {}
+
+        if custom_input_fields is None:
+            custom_input_fields = {}
 
         if not isinstance(extra_input_fields, dict):
             raise Exception("extra fields must be a dictionary")
@@ -118,7 +127,7 @@ class DjangoModelMutation(Mutation):
         model = model_type._meta.model
 
         form = cls.form_class(model, fields, {})
-        input_fields = fields_for_form(form, only_fields, exclude_fields, for_update)
+        input_fields = fields_for_form(form, only_fields, exclude_fields, custom_input_fields, for_update)
 
         if for_update:
             input_fields["id"] = graphene.UUID(required=True)
@@ -133,15 +142,13 @@ class DjangoModelMutation(Mutation):
 
         for k, v in extra_input_fields.items():
             if not isinstance(v, (BaseType, OrderedType)):
-                raise Exception(f"{k} extra field must be a graphene type.")
+                raise Exception(f"{k} extra field must be a graphql type.")
 
             input_fields[k] = v
 
         registry = get_global_registry()
         if not registry.get_type_for_model(model):
             registry.register(model_type)
-
-        multiple = options["multiple"] if options.__contains__("multiple") else False
 
         if not return_field_name:
             model_name = model.__name__
@@ -168,7 +175,11 @@ class DjangoModelMutation(Mutation):
 
         input_fields = yank_fields_from_attrs(input_fields, _as=InputField)
         super(DjangoModelMutation, cls).__init_subclass_with_meta__(
-            _meta=_meta, input_fields=input_fields, name=cls.__name__, **options
+            _meta=_meta,
+            input_fields=input_fields,
+            name=cls.__name__,
+            multiple=multiple,
+            **options
         )
 
     @classmethod
@@ -353,8 +364,6 @@ class DjangoModelDeleteMutation(GrapheneMutation):
 
     errors = graphene.List(ErrorType)
 
-    # client_mutation_id = Field(String, name="clientMutationId")
-
     @classmethod
     def __init_subclass_with_meta__(
             cls,
@@ -424,17 +433,20 @@ def not_found_error(model_name, id):
     return ErrorType.from_errors({"id": ["{} instance not found for id {}".format(model_name, id)]})
 
 
-def fields_for_form(form, only_fields, exclude_fields, for_update=False):
+def fields_for_form(form, only_fields, exclude_fields, custom_input_fields, for_update):
     fields = OrderedDict()
     for name, field in form.fields.items():
         is_not_in_only = only_fields and name not in only_fields
-        is_excluded = (
-                name
-                in exclude_fields  # or
-            # name in already_created_fields
-        )
+        is_excluded = (name in exclude_fields)
 
         if is_not_in_only or is_excluded:
+            continue
+
+        if name in custom_input_fields:
+            if not isinstance(custom_input_fields[name], (BaseType, OrderedType)):
+                raise Exception(f"{name} custom input field must be a graphql type.")
+
+            fields[name] = custom_input_fields[name]
             continue
 
         fields[name] = convert_form_field(field, for_update=for_update)

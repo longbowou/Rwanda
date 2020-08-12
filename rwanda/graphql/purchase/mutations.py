@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 
 import graphene
-from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.accounting.models import Operation, Fund
+from rwanda.accounting.models import Operation
 from rwanda.administration.models import Parameter
 from rwanda.graphql.mutations import DjangoModelMutation
+from rwanda.graphql.purchase.operations import debit_account, credit_account, credit_main, credit_commission, \
+    debit_main, debit_commission
 from rwanda.graphql.types import ServicePurchaseType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.service.models import Service, ServiceOption
@@ -42,21 +43,11 @@ class InitServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.price,
-                  description=Operation.DESC_DEBIT_FOR_PURCHASE_INIT,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
-        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.price)
-        Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.price)
+        debit_account(obj.account, obj.price, Operation.DESC_DEBIT_FOR_PURCHASE_INIT)
 
-        Operation(type=Operation.TYPE_CREDIT, service_purchase=obj, amount=obj.fees,
-                  description=Operation.DESC_CREDIT_FOR_PURCHASE_INIT,
-                  fund=Fund.objects.get(label=Fund.MAIN)).save()
-        Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') + obj.fees)
+        credit_main(obj, obj.fees, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
 
-        Operation(type=Operation.TYPE_CREDIT, service_purchase=obj, amount=obj.commission,
-                  description=Operation.DESC_CREDIT_FOR_PURCHASE_INIT,
-                  fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
-        Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') + obj.commission)
+        credit_commission(obj, obj.commission, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
         obj.refresh_from_db()
 
 
@@ -128,16 +119,9 @@ class ApproveServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
-                  description=Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED,
-                  fund=Fund.objects.get(label=Fund.MAIN)).save()
-        Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') - obj.fees)
+        debit_main(obj, obj.fees, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
 
-        Operation(type=Operation.TYPE_CREDIT, account=obj.service.account, amount=obj.fees,
-                  description=Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
-        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.fees)
-        Account.objects.filter(pk=obj.service.account.id).update(balance=F('balance') + obj.fees)
+        credit_account(obj.service.account, obj.fees, Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
         obj.refresh_from_db()
 
 
@@ -168,21 +152,11 @@ class CancelServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.fees,
-                  description=Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED,
-                  fund=Fund.objects.get(label=Fund.MAIN)).save()
-        Fund.objects.filter(label=Fund.MAIN).update(balance=F('balance') - obj.fees)
+        debit_main(obj, obj.fees, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
 
-        Operation(type=Operation.TYPE_DEBIT, service_purchase=obj, amount=obj.commission,
-                  description=Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED,
-                  fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
-        Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') - obj.commission)
+        debit_commission(obj, obj.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
 
-        Operation(type=Operation.TYPE_CREDIT, account=obj.account, amount=obj.price,
-                  description=Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
-        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.price)
-        Account.objects.filter(pk=obj.account.id).update(balance=F('balance') + obj.price)
+        credit_account(obj.account, obj.price, Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
         obj.refresh_from_db()
 
 

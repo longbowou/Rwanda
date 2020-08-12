@@ -2,15 +2,15 @@ import graphene
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
-from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
-from graphql.pyutils.contain_subset import obj
 
-from rwanda.accounting.models import Operation, Fund
+from rwanda.accounting.models import Operation
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
-from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
+from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation, not_found_error
+from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
+from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
 
@@ -21,31 +21,24 @@ class CreateDeposit(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        Operation(type=Operation.TYPE_CREDIT, account=obj.account, amount=obj.amount,
-                  description=Operation.DESC_CREDIT_FOR_DEPOSIT,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
-        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') + obj.amount)
-        Account.objects.filter(pk=input.account).update(balance=F('balance') + obj.amount)
+        credit_account(obj.account, obj.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
         obj.refresh_from_db()
 
 
-#MUTATION REFUND
+# MUTATION REFUND
 class CreateRefund(DjangoModelMutation):
     class Meta:
         model_type = RefundType
 
     @classmethod
-    def pre_validations(cls, info, input, form):
+    def pre_mutate(cls, info, old_obj, form, input):
         if input.amount > Account.objects.get(pk=input.account).balance:
-            form.add_error("seller_service", ValidationError(_("Insufficient amount to process the refund.")))
+            return cls(
+                errors=[ErrorType(field='seller_service', messages=[_("Insufficient amount to process the refund.")])])
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        Operation(type=Operation.TYPE_DEBIT, account=obj.account, amount=obj.amount,
-                  description=Operation.DESC_DEBIT_FOR_REFUND,
-                  fund=Fund.objects.get(label=Fund.ACCOUNTS)).save()
-        Fund.objects.filter(label=Fund.ACCOUNTS).update(balance=F('balance') - obj.amount)
-        Account.objects.filter(pk=input.account).update(balance=F('balance') - obj.amount)
+        debit_account(obj.account, obj.amount, Operation.DESC_DEBIT_FOR_REFUND)
         obj.refresh_from_db()
 
 
@@ -170,12 +163,6 @@ class DeleteAccount(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
-# INPUT LITIGATION
-class LitigationInput(graphene.InputObjectType):
-    title = graphene.String(required=True)
-    description = graphene.String(required=True)
-
-
 # MUTATION LITIGATION
 class CreateLitigation(DjangoModelMutation):
     class Meta:
@@ -184,14 +171,17 @@ class CreateLitigation(DjangoModelMutation):
 
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
-        if not obj.service_purchase.delivered:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
-        if obj.service_purchase.approved:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already approved.")])])
+        service_purchase = ServicePurchase.objects.get(pk=input.service_purchase)
+        if service_purchase is None:
+            return cls(errors=[not_found_error(ServicePurchase._meta.model_name, input.service_purchase)])
 
+        if not service_purchase.delivered:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase must be delivered first.")])])
 
+        if service_purchase.approved:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase already approved.")])])
 
 
 class AccountMutations(graphene.ObjectType):
