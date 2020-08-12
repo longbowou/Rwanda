@@ -1,6 +1,7 @@
 from django.db.models import F
 
 from rwanda.accounting.models import Operation, Fund
+from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import Account
 
 
@@ -46,3 +47,25 @@ def debit_commission(service_purchase, amount, desc):
               description=desc,
               fund=Fund.objects.get(label=Fund.COMMISSIONS)).save()
     Fund.objects.filter(label=Fund.COMMISSIONS).update(balance=F('balance') - amount)
+
+
+def init_service_purchase(service_purchase: ServicePurchase):
+    debit_account(service_purchase.account, service_purchase.price, Operation.DESC_DEBIT_FOR_PURCHASE_INIT)
+
+    credit_main(service_purchase, service_purchase.fees, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
+
+    credit_commission(service_purchase, service_purchase.commission, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
+
+
+def approve_service_purchase(service_purchase: ServicePurchase):
+    debit_main(service_purchase, service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
+
+    credit_account(service_purchase.service.account, service_purchase.fees, Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
+
+
+def cancel_service_purchase(service_purchase: ServicePurchase):
+    debit_main(service_purchase, service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
+
+    debit_commission(service_purchase, service_purchase.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
+
+    credit_account(service_purchase.account, service_purchase.price, Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
