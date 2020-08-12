@@ -160,10 +160,11 @@ class UpdateLitigation(DjangoModelMutation):
         model_type = LitigationType
         for_update = True
         only_fields = ('handled', 'admin')
+        custom_input_fields = {"admin": graphene.UUID(required=True)}
 
     @classmethod
-    def pre_mutate(cls, info, form, obj, input):
-        if obj.handled:
+    def pre_mutate(cls, info, old_obj, form, input):
+        if form.instance.handled:
             return cls(errors=[ErrorType(field="id", messages=[_("Litigation already handled.")])])
 
 

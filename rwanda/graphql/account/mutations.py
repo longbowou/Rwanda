@@ -7,10 +7,10 @@ from graphene_django.types import ErrorType
 
 from rwanda.accounting.models import Operation
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
-from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
+from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation, not_found_error
 from rwanda.graphql.purchase.operations import credit_account, debit_account
-from rwanda.graphql.types import AccountType, DepositType, RefundType
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
+from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
 
@@ -25,7 +25,7 @@ class CreateDeposit(DjangoModelMutation):
         obj.refresh_from_db()
 
 
-#MUTATION REFUND
+# MUTATION REFUND
 class CreateRefund(DjangoModelMutation):
     class Meta:
         model_type = RefundType
@@ -163,12 +163,6 @@ class DeleteAccount(DjangoModelDeleteMutation):
         model_type = AccountType
 
 
-# INPUT LITIGATION
-class LitigationInput(graphene.InputObjectType):
-    title = graphene.String(required=True)
-    description = graphene.String(required=True)
-
-
 # MUTATION LITIGATION
 class CreateLitigation(DjangoModelMutation):
     class Meta:
@@ -177,14 +171,17 @@ class CreateLitigation(DjangoModelMutation):
 
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
-        if not obj.service_purchase.delivered:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
-        if obj.service_purchase.approved:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already approved.")])])
+        service_purchase = ServicePurchase.objects.get(pk=input.service_purchase)
+        if service_purchase is None:
+            return cls(errors=[not_found_error(ServicePurchase._meta.model_name, input.service_purchase)])
 
+        if not service_purchase.delivered:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase must be delivered first.")])])
 
+        if service_purchase.approved:
+            return cls(
+                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase already approved.")])])
 
 
 class AccountMutations(graphene.ObjectType):
