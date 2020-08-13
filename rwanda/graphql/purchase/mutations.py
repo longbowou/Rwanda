@@ -4,11 +4,9 @@ import graphene
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.accounting.models import Operation
 from rwanda.administration.models import Parameter
 from rwanda.graphql.mutations import DjangoModelMutation
-from rwanda.graphql.purchase.operations import debit_account, credit_account, credit_main, credit_commission, \
-    debit_main, debit_commission
+from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.types import ServicePurchaseType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.service.models import Service, ServiceOption
@@ -43,11 +41,7 @@ class InitServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        debit_account(obj.account, obj.price, Operation.DESC_DEBIT_FOR_PURCHASE_INIT)
-
-        credit_main(obj, obj.fees, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
-
-        credit_commission(obj, obj.commission, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
+        init_service_purchase(obj)
         obj.refresh_from_db()
 
 
@@ -119,9 +113,7 @@ class ApproveServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        debit_main(obj, obj.fees, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
-
-        credit_account(obj.service.account, obj.fees, Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
+        approve_service_purchase(obj)
         obj.refresh_from_db()
 
 
@@ -152,11 +144,7 @@ class CancelServicePurchase(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        debit_main(obj, obj.fees, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
-
-        debit_commission(obj, obj.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
-
-        credit_account(obj.account, obj.price, Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
+        cancel_service_purchase(obj)
         obj.refresh_from_db()
 
 
