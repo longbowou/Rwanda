@@ -5,10 +5,11 @@ from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
+from rwanda.accounting.models import Operation
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
+from rwanda.graphql.purchase.operations import credit_account, debit_main, debit_commission
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType
-from rwanda.purchase.models import Litigation
 from rwanda.user.models import User, Admin
 
 
@@ -160,7 +161,7 @@ class HandleLitigation(DjangoModelMutation):
     class Meta:
         model_type = LitigationType
         for_update = True
-        only_fields = ('handled', 'admin')
+        only_fields = ('handled', 'admin', 'decision')
         custom_input_fields = {"admin": graphene.UUID(required=True)}
 
     @classmethod
@@ -170,12 +171,18 @@ class HandleLitigation(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        if not form.instance.handled:
-            if form.instance.decision == 'approved':
-                Litigation.objects.exclude(pk=input.id).update(decision='approved')
-            else:
-                if form.instance.decision == 'canceled':
-                    Litigation.objects.exclude(pk=input.id).update(decision='canceled')
+        if form.instance.decision == 'approved':
+            debit_main(obj, obj.service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
+            credit_account(obj.service_purchase.service.account, obj.service_purchase.fees,
+                           Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
+            obj.refresh_from_db()
+
+        if form.instance.decision == 'canceled':
+            debit_main(obj, obj.service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
+            debit_commission(obj, obj.service_purchase.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
+            credit_account(obj.service_purchase.account, obj.service_purchase.price,
+                           Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
+            obj.refresh_from_db()
 
 
 class AdminMutations(graphene.ObjectType):
