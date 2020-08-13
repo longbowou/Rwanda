@@ -49,29 +49,21 @@ class Chat(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Constants(object):
-    pass
-
-
-class ConstantChoiceCharField(object):
-    pass
-
-
 class Litigation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
     handled = models.BooleanField(default=False)
-    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
-    APPROVED = 'approved'
-    CANCELED = 'canceled'
+    APPROVED = 'APPROVED'
+    CANCELED = 'CANCELED'
     decisions = (
         (APPROVED, APPROVED),
         (CANCELED, CANCELED),
     )
     decision = models.CharField(choices=decisions, blank=True, null=True)
+    admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

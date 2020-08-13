@@ -5,11 +5,12 @@ from django.core.validators import EmailValidator
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.accounting.models import Operation
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
-from rwanda.graphql.purchase.operations import credit_account, debit_main, debit_commission
+from rwanda.graphql.purchase.operations import cancel_service_purchase, \
+    approve_service_purchase
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType
+from rwanda.purchase.models import Litigation
 from rwanda.user.models import User, Admin
 
 
@@ -161,7 +162,7 @@ class HandleLitigation(DjangoModelMutation):
     class Meta:
         model_type = LitigationType
         for_update = True
-        only_fields = ('handled', 'admin', 'decision')
+        only_fields = ('admin', 'decision')
         custom_input_fields = {"admin": graphene.UUID(required=True)}
 
     @classmethod
@@ -171,18 +172,15 @@ class HandleLitigation(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        if form.instance.decision == 'approved':
-            debit_main(obj, obj.service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
-            credit_account(obj.service_purchase.service.account, obj.service_purchase.fees,
-                           Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
-            obj.refresh_from_db()
+        if form.instance.decision == Litigation.APPROVED:
+            approve_service_purchase(obj.service_purchase)
 
-        if form.instance.decision == 'canceled':
-            debit_main(obj, obj.service_purchase.fees, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
-            debit_commission(obj, obj.service_purchase.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
-            credit_account(obj.service_purchase.account, obj.service_purchase.price,
-                           Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
-            obj.refresh_from_db()
+        if form.instance.decision == Litigation.CANCELED:
+            cancel_service_purchase(obj.service_purchase)
+
+        obj.handled = True
+        obj.save()
+        obj.refresh_from_db()
 
 
 class AdminMutations(graphene.ObjectType):
@@ -195,4 +193,5 @@ class AdminMutations(graphene.ObjectType):
     delete_service_category = DeleteServiceCategory.Field()
 
     update_service = UpdateService.Field()
+
     handle_litigation = HandleLitigation.Field()
