@@ -1,7 +1,9 @@
 import uuid
+from datetime import datetime
 
 from django.db import models
 
+from rwanda.administration.models import Parameter
 from rwanda.service.models import Service, ServiceOption
 from rwanda.user.models import Account, Admin
 
@@ -11,10 +13,12 @@ class ServicePurchase(models.Model):
     delay = models.IntegerField()
     price = models.IntegerField()
     commission = models.IntegerField()
-    accepted = models.BooleanField(default=False)
-    delivered = models.BooleanField(default=False)
-    approved = models.BooleanField(default=False)
-    canceled = models.BooleanField(default=False)
+    STATUS_INITIALIZED = 'INITIALIZED'
+    STATUS_ACCEPTED = 'ACCEPTED'
+    STATUS_APPROVED = 'APPROVED'
+    STATUS_DELIVERED = 'DELIVERED'
+    STATUS_CANCELED = 'CANCELED'
+    status = models.CharField(default=STATUS_INITIALIZED)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     service_options = models.ManyToManyField(ServiceOption, blank=True,
@@ -30,6 +34,92 @@ class ServicePurchase(models.Model):
     @property
     def fees(self):
         return self.price - self.commission
+
+    @property
+    def initialized(self):
+        return self.status == self.STATUS_INITIALIZED
+
+    @property
+    def accepted(self):
+        return self.status == self.STATUS_ACCEPTED
+
+    @property
+    def delivered(self):
+        return self.status == self.STATUS_DELIVERED
+
+    @property
+    def approved(self):
+        return self.status == self.STATUS_APPROVED
+
+    @property
+    def canceled(self):
+        return self.status == self.STATUS_CANCELED
+
+    @property
+    def can_be_accepted(self):
+        return self.initialized
+
+    @property
+    def cannot_be_accepted(self):
+        return not self.can_be_accepted
+
+    @property
+    def can_be_delivered(self):
+        return self.accepted
+
+    @property
+    def cannot_be_delivered(self):
+        return not self.can_be_delivered
+
+    @property
+    def can_be_approved(self):
+        return self.delivered
+
+    @property
+    def cannot_be_approved(self):
+        return not self.can_be_approved
+
+    @property
+    def can_be_canceled(self):
+        return self.initialized or self.can_be_canceled_for_delay
+
+    @property
+    def cannot_be_canceled(self):
+        return not self.can_be_canceled
+
+    @property
+    def can_create_a_litigation(self):
+        return self.delivered
+
+    @property
+    def cannot_create_a_litigation(self):
+        return not self.can_create_a_litigation
+
+    @property
+    def can_be_canceled_for_delay(self):
+        timedelta = datetime.today() - self.must_be_delivered_at
+        delay_for_cancel = int(Parameter.objects.get(label=Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL).value)
+        return self.status == self.STATUS_ACCEPTED and delay_for_cancel > timedelta.days
+
+    @property
+    def canceled_for_delay(self):
+        return self.accepted and self.canceled and self.canceled_at > self.must_be_delivered_at
+
+    def set_as_accepted(self):
+        self.status = self.STATUS_ACCEPTED
+        self.accepted_at = datetime.today()
+
+    def set_as_delivered(self):
+        self.status = self.STATUS_DELIVERED
+        self.delivered_at = datetime.today()
+
+    def set_as_approved(self):
+        self.status = self.STATUS_APPROVED
+        self.approved_at = datetime.today()
+
+    def set_as_canceled(self):
+        self.status = self.STATUS_CANCELED
+        self.canceled_at = datetime.today()
 
 
 class ServicePurchaseServiceOption(models.Model):
@@ -53,14 +143,14 @@ class Litigation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    handled = models.BooleanField(default=False)
-    APPROVED = 'APPROVED'
-    CANCELED = 'CANCELED'
+    DECISION_APPROVED = 'APPROVED'
+    DECISION_CANCELED = 'CANCELED'
     decisions = (
-        (APPROVED, APPROVED),
-        (CANCELED, CANCELED),
+        (DECISION_APPROVED, DECISION_APPROVED),
+        (DECISION_CANCELED, DECISION_CANCELED),
     )
     decision = models.CharField(choices=decisions, blank=True, null=True)
+    handled = models.BooleanField(default=False)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
@@ -69,3 +159,11 @@ class Litigation(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def approved(self):
+        return self.decision == self.DECISION_APPROVED
+
+    @property
+    def canceled(self):
+        return self.decision == self.DECISION_CANCELED

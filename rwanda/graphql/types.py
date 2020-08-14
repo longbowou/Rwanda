@@ -83,6 +83,11 @@ class ServiceOptionType(DjangoObjectType):
 
 
 class ServicePurchaseType(DjangoObjectType):
+    can_be_accepted = graphene.Boolean(source='can_be_accepted')
+    can_be_delivered = graphene.Boolean(source='can_be_delivered')
+    can_be_canceled = graphene.Boolean(source='can_be_canceled')
+    can_create_a_litigation = graphene.Boolean(source='can_create_a_litigation')
+
     class Meta:
         model = ServicePurchase
         filter_fields = {

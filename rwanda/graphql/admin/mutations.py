@@ -10,7 +10,7 @@ from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutat
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType
-from rwanda.purchase.models import Litigation
+from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Admin
 
 
@@ -172,11 +172,17 @@ class HandleLitigation(DjangoModelMutation):
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
-        if form.instance.decision == Litigation.APPROVED:
-            approve_service_purchase(obj.service_purchase)
+        service_purchase: ServicePurchase = obj.service_purchase
 
-        if form.instance.decision == Litigation.CANCELED:
-            cancel_service_purchase(obj.service_purchase)
+        if obj.approved:
+            approve_service_purchase(service_purchase)
+            service_purchase.set_as_approved()
+
+        if obj.canceled:
+            cancel_service_purchase(service_purchase)
+            service_purchase.set_as_canceled()
+
+        service_purchase.save()
 
         obj.handled = True
         obj.save()
