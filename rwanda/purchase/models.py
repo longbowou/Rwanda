@@ -1,7 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import timedelta
 
 from django.db import models
+from django.utils import timezone
 
 from rwanda.administration.models import Parameter
 from rwanda.service.models import Service, ServiceOption
@@ -18,7 +19,7 @@ class ServicePurchase(models.Model):
     STATUS_APPROVED = 'APPROVED'
     STATUS_DELIVERED = 'DELIVERED'
     STATUS_CANCELED = 'CANCELED'
-    status = models.CharField(default=STATUS_INITIALIZED)
+    status = models.CharField(max_length=255, default=STATUS_INITIALIZED)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     service_options = models.ManyToManyField(ServiceOption, blank=True,
@@ -88,18 +89,18 @@ class ServicePurchase(models.Model):
         return not self.can_be_canceled
 
     @property
-    def can_create_a_litigation(self):
+    def can_create_litigation(self):
         return self.delivered
 
     @property
-    def cannot_create_a_litigation(self):
-        return not self.can_create_a_litigation
+    def cannot_create_litigation(self):
+        return not self.can_create_litigation
 
     @property
     def can_be_canceled_for_delay(self):
-        timedelta = datetime.today() - self.must_be_delivered_at
-        delay_for_cancel = int(Parameter.objects.get(label=Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL).value)
-        return self.status == self.STATUS_ACCEPTED and delay_for_cancel > timedelta.days
+        in_between_days = (timezone.now() - self.must_be_delivered_at).days
+        cancellation_delay_days = int(Parameter.objects.get(label=Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY).value)
+        return not self.approved and in_between_days > cancellation_delay_days
 
     @property
     def canceled_for_delay(self):
@@ -107,19 +108,21 @@ class ServicePurchase(models.Model):
 
     def set_as_accepted(self):
         self.status = self.STATUS_ACCEPTED
-        self.accepted_at = datetime.today()
+        today = timezone.now()
+        self.accepted_at = today
+        self.must_be_delivered_at = today + timedelta(days=self.delay)
 
     def set_as_delivered(self):
         self.status = self.STATUS_DELIVERED
-        self.delivered_at = datetime.today()
+        self.delivered_at = timezone.now()
 
     def set_as_approved(self):
         self.status = self.STATUS_APPROVED
-        self.approved_at = datetime.today()
+        self.approved_at = timezone.now()
 
     def set_as_canceled(self):
         self.status = self.STATUS_CANCELED
-        self.canceled_at = datetime.today()
+        self.canceled_at = timezone.now()
 
 
 class ServicePurchaseServiceOption(models.Model):
@@ -149,7 +152,7 @@ class Litigation(models.Model):
         (DECISION_APPROVED, DECISION_APPROVED),
         (DECISION_CANCELED, DECISION_CANCELED),
     )
-    decision = models.CharField(choices=decisions, blank=True, null=True)
+    decision = models.CharField(max_length=255, choices=decisions, blank=True, null=True)
     handled = models.BooleanField(default=False)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)

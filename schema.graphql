@@ -74,9 +74,19 @@ type CreateAccount {
     errors: [ErrorType]
 }
 
+type CreateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
 type CreateDeposit {
     deposit: DepositType
     errors: [ErrorType]
+}
+
+type CreateLitigation {
+    errors: [ErrorType]
+    litigation: LitigationType
 }
 
 type CreateRefund {
@@ -89,11 +99,51 @@ type CreateService {
     service: ServiceType
 }
 
+type CreateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+type CreateServiceComment {
+    errors: [ErrorType]
+    serviceComment: ServiceCommentType
+}
+
+type CreateServiceMedia {
+    errors: [ErrorType]
+    serviceMedia: ServiceMediaType
+}
+
+type CreateServiceOption {
+    errors: [ErrorType]
+    serviceOption: ServiceOptionType
+}
+
 type DeleteAccount {
     errors: [ErrorType]
 }
 
+type DeleteAdmin {
+    errors: [ErrorType]
+}
+
 type DeleteService {
+    errors: [ErrorType]
+}
+
+type DeleteServiceCategory {
+    errors: [ErrorType]
+}
+
+type DeleteServiceComment {
+    errors: [ErrorType]
+}
+
+type DeleteServiceMedia {
+    errors: [ErrorType]
+}
+
+type DeleteServiceOption {
     errors: [ErrorType]
 }
 
@@ -124,6 +174,11 @@ type FundType {
     updatedAt: DateTime!
 }
 
+type HandleLitigation {
+    errors: [ErrorType]
+    litigation: LitigationType
+}
+
 type InitServicePurchase {
     errors: [ErrorType]
     servicePurchase: ServicePurchaseType
@@ -131,8 +186,9 @@ type InitServicePurchase {
 
 type LitigationType {
     account: AccountType!
-    admin: AdminType!
+    admin: AdminType
     createdAt: DateTime!
+    decision: LitigationDecision
     description: String!
     handled: Boolean!
     id: UUID!
@@ -146,15 +202,33 @@ type Mutation {
     approveServicePurchase(input: ApproveServicePurchaseInput!): ApproveServicePurchase
     cancelServicePurchase(input: CancelServicePurchaseInput!): CancelServicePurchase
     createAccount(input: AccountInput!): CreateAccount
+    createAdmin(input: AdminInput!): CreateAdmin
     createDeposit(input: CreateDepositInput!): CreateDeposit
+    createLitigation(input: CreateLitigationInput!): CreateLitigation
     createRefund(input: CreateRefundInput!): CreateRefund
     createService(input: CreateServiceInput!): CreateService
+    createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
+    createServiceComment(input: CreateServiceCommentInput!): CreateServiceComment
+    createServiceMedia(input: CreateServiceMediaInput!): CreateServiceMedia
+    createServiceOption(input: CreateServiceOptionInput!): CreateServiceOption
     deleteAccount(id: UUID!): DeleteAccount
+    deleteAdmin(id: UUID!): DeleteAdmin
     deleteService(id: UUID!): DeleteService
+    deleteServiceCategory(id: UUID!): DeleteServiceCategory
+    deleteServiceComment(id: UUID!): DeleteServiceComment
+    deleteServiceMedia(id: UUID!): DeleteServiceMedia
+    deleteServiceOption(id: UUID!): DeleteServiceOption
     deliverServicePurchase(input: DeliverServicePurchaseInput!): DeliverServicePurchase
+    handleLitigation(input: HandleLitigationInput!): HandleLitigation
     initServicePurchase(input: InitServicePurchaseInput!): InitServicePurchase
+    replyServiceComment(input: ReplyServiceCommentInput!): ReplyServiceComment
     updateAccount(input: AccountUpdateInput!): UpdateAccount
+    updateAdmin(input: AdminUpdateInput!): UpdateAdmin
     updateService(input: UpdateServiceInput!): UpdateService
+    updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
+    updateServiceComment(input: UpdateServiceCommentInput!): UpdateServiceComment
+    updateServiceMedia(input: UpdateServiceMediaInput!): UpdateServiceMedia
+    updateServiceOption(input: UpdateServiceOptionInput!): UpdateServiceOption
 }
 
 type OperationType {
@@ -170,8 +244,16 @@ type OperationType {
 }
 
 type Query {
+    "Account list"
+    accounts(id: UUID): [AccountType]
+    "Admin list"
+    admins(id: UUID): [AdminType]
+    "Litigation list"
+    litigations(id: UUID): [LitigationType]
     "ServiceCategory list"
     serviceCategories(id: UUID): [ServiceCategoryType]
+    "ServicePurchase list"
+    servicePurchases(id: UUID): [ServicePurchaseType]
     "Service list"
     services(id: UUID): [ServiceType]
 }
@@ -182,6 +264,11 @@ type RefundType {
     createdAt: DateTime!
     id: UUID!
     updatedAt: DateTime!
+}
+
+type ReplyServiceComment {
+    errors: [ErrorType]
+    serviceComment: ServiceCommentType
 }
 
 type ServiceCategoryType {
@@ -195,16 +282,21 @@ type ServiceCategoryType {
 
 type ServiceCommentType {
     account: AccountType!
+    content: String!
     createdAt: DateTime!
     id: UUID!
+    positive: Boolean!
+    replyAt: DateTime
+    replyContent: String
     service: ServiceType!
     updatedAt: DateTime!
 }
 
 type ServiceMediaType {
     createdAt: DateTime!
-    file: String
+    fileUrl: String
     id: UUID!
+    isMain: Boolean!
     service: ServiceType!
     updatedAt: DateTime!
     url: String
@@ -232,18 +324,19 @@ type ServicePurchaseServiceOptionType {
 }
 
 type ServicePurchaseType {
-    accepted: Boolean!
     acceptedAt: DateTime
     account: AccountType!
-    approved: Boolean!
     approvedAt: DateTime
-    canceled: Boolean!
+    canBeAccepted: Boolean!
+    canBeApproved: Boolean!
+    canBeCanceled: Boolean!
+    canBeDelivered: Boolean!
+    canCreateLitigation: Boolean!
     canceledAt: DateTime
     chatSet: [ChatType!]!
     commission: Int!
     createdAt: DateTime!
     delay: Int!
-    delivered: Boolean!
     deliveredAt: DateTime
     id: UUID!
     litigation: LitigationType
@@ -253,6 +346,7 @@ type ServicePurchaseType {
     service: ServiceType!
     serviceOptions: [ServiceOptionType!]!
     servicepurchaseserviceoptionSet: [ServicePurchaseServiceOptionType!]!
+    status: String!
     updatedAt: DateTime!
 }
 
@@ -280,9 +374,42 @@ type UpdateAccount {
     errors: [ErrorType]
 }
 
+type UpdateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
 type UpdateService {
     errors: [ErrorType]
     service: ServiceType
+}
+
+type UpdateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+type UpdateServiceComment {
+    errors: [ErrorType]
+    serviceComment: ServiceCommentType
+}
+
+type UpdateServiceMedia {
+    errors: [ErrorType]
+    serviceMedia: ServiceMediaType
+}
+
+type UpdateServiceOption {
+    errors: [ErrorType]
+    serviceOption: ServiceOptionType
+}
+
+"An enumeration."
+enum LitigationDecision {
+    "APPROVED"
+    APPROVED
+    "CANCELED"
+    CANCELED
 }
 
 input AcceptServicePurchaseInput {
@@ -299,13 +426,33 @@ input AccountInput {
 }
 
 input AccountUpdateInput {
-    email: String!
+    email: String
     firstName: String
     id: UUID!
+    isActive: Boolean
+    lastName: String
+    username: String
+}
+
+input AdminInput {
+    email: String!
+    firstName: String
+    isActive: Boolean
+    isSuperuser: Boolean
     lastName: String
     password: String!
     passwordConfirmation: String!
     username: String!
+}
+
+input AdminUpdateInput {
+    email: String
+    firstName: String
+    id: UUID!
+    isActive: Boolean
+    isSuperuser: Boolean
+    lastName: String
+    username: String
 }
 
 input ApproveServicePurchaseInput {
@@ -321,9 +468,28 @@ input CreateDepositInput {
     amount: Int!
 }
 
+input CreateLitigationInput {
+    account: ID!
+    description: String!
+    servicePurchase: ID!
+    title: String!
+}
+
 input CreateRefundInput {
     account: ID!
     amount: Int!
+}
+
+input CreateServiceCategoryInput {
+    description: String
+    label: String!
+}
+
+input CreateServiceCommentInput {
+    account: ID!
+    content: String!
+    positive: Boolean
+    service: ID!
 }
 
 input CreateServiceInput {
@@ -333,11 +499,33 @@ input CreateServiceInput {
     keywords: String
     published: Boolean
     serviceCategory: ID!
+    serviceMedias: [ServiceMediaInput]
     serviceOptions: [ServiceOptionInput]
     title: String!
 }
 
+input CreateServiceMediaInput {
+    file: String
+    isMain: Boolean
+    service: ID!
+    url: String
+}
+
+input CreateServiceOptionInput {
+    delay: Int!
+    description: String
+    label: String!
+    price: Int!
+    service: ID!
+}
+
 input DeliverServicePurchaseInput {
+    id: UUID!
+}
+
+input HandleLitigationInput {
+    admin: UUID!
+    decision: String
     id: UUID!
 }
 
@@ -347,6 +535,16 @@ input InitServicePurchaseInput {
     serviceOptions: [ID]
 }
 
+input ReplyServiceCommentInput {
+    id: UUID!
+    replyContent: String
+}
+
+input ServiceMediaInput {
+    file: String
+    url: String
+}
+
 input ServiceOptionInput {
     delay: Int!
     description: String
@@ -354,15 +552,36 @@ input ServiceOptionInput {
     price: Int!
 }
 
-input UpdateServiceInput {
-    content: String
-    delay: Int
+input UpdateServiceCategoryInput {
+    description: String
     id: UUID!
-    keywords: String
-    published: Boolean
-    serviceCategory: ID
-    stars: Int
-    title: String
+    label: String
+}
+
+input UpdateServiceCommentInput {
+    content: String
+    id: UUID!
+    positive: Boolean
+}
+
+input UpdateServiceInput {
+    activated: Boolean
+    id: UUID!
+}
+
+input UpdateServiceMediaInput {
+    file: String
+    id: UUID!
+    isMain: Boolean
+    url: String
+}
+
+input UpdateServiceOptionInput {
+    delay: Int
+    description: String
+    id: UUID!
+    label: String
+    price: Int
 }
 
 
