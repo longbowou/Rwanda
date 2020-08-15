@@ -13,7 +13,7 @@ import sys
 import time
 import traceback
 
-from django.core.wsgi import get_wsgi_application
+from django.core.wsgi import WSGIHandler
 
 sys.path.append('/var/www/clients/client1/web16/web/backend')
 
@@ -22,7 +22,7 @@ sys.path.append('/var/www/clients/client1/web16/web/venv/lib/python3.8/site-pack
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rwanda.settings')
 
 try:
-    application = get_wsgi_application()
+    application = WSGIHandler()
 except Exception:
     # Error loading applications
     if 'mod_wsgi' in sys.modules:
