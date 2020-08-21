@@ -16,7 +16,7 @@ class Command(BaseCommand):
             {"label": Parameter.BASE_PRICE, "value": 1000},
             {"label": Parameter.CURRENCY, "value": "XOF"},
             {"label": Parameter.COMMISSION, "value": 200},
-            {"label": Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL, "value": 5},
+            {"label": Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY, "value": 5},
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():
                 Parameter(**item).save()

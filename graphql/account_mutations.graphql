@@ -77,19 +77,25 @@ mutation {
             field
             messages
         }
-        servicePurchase{
+        servicePurchase {
             id
+            status
             price
             commission
-            account{
+            canBeAccepted
+            canBeApproved
+            canBeDelivered
+            canBeCanceled
+            account {
                 id
                 username
+                balance
             }
-            service{
+            service {
                 id
                 title
             }
-            serviceOptions{
+            serviceOptions {
                 id
                 label
             }

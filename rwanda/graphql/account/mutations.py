@@ -7,7 +7,7 @@ from graphene_django.types import ErrorType
 
 from rwanda.accounting.models import Operation
 from rwanda.graphql.inputs import UserInput, UserUpdateInput
-from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation, not_found_error
+from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
 from rwanda.purchase.models import ServicePurchase
@@ -172,16 +172,9 @@ class CreateLitigation(DjangoModelMutation):
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
         service_purchase = ServicePurchase.objects.get(pk=input.service_purchase)
-        if service_purchase is None:
-            return cls(errors=[not_found_error(ServicePurchase._meta.model_name, input.service_purchase)])
-
-        if not service_purchase.delivered:
+        if service_purchase.cannot_create_a_litigation:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase must be delivered first.")])])
-
-        if service_purchase.approved:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Service purchase already approved.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot create a litigation yet.")])])
 
 
 class AccountMutations(graphene.ObjectType):

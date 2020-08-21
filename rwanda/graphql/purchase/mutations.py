@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 import graphene
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
@@ -37,7 +35,6 @@ class InitServicePurchase(DjangoModelMutation):
         form.instance.price = price
         form.instance.delay = delay
         form.instance.commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
-        form.instance.must_be_delivered_at = datetime.today() + timedelta(days=delay)
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
@@ -54,13 +51,12 @@ class AcceptServicePurchase(DjangoModelMutation):
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
-        if service_purchase.accepted or service_purchase.approved or service_purchase.delivered \
-                or service_purchase.canceled:
+        if service_purchase.cannot_be_accepted:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                servicePurchase=service_purchase)
 
-        service_purchase.accepted = True
-        service_purchase.accepted_at = datetime.today()
+        service_purchase.set_as_accepted()
 
 
 class DeliverServicePurchase(DjangoModelMutation):
@@ -72,17 +68,12 @@ class DeliverServicePurchase(DjangoModelMutation):
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
-        if service_purchase.delivered or service_purchase.approved or service_purchase.canceled:
+        if service_purchase.cannot_be_delivered:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                servicePurchase=service_purchase)
 
-        if not service_purchase.accepted:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[
-                    _("You cannot deliver the service for now. You must first accept the purchase.")])])
-
-        service_purchase.delivered = True
-        service_purchase.delivered_at = datetime.today()
+        service_purchase.set_as_delivered()
 
 
 class ApproveServicePurchase(DjangoModelMutation):
@@ -94,22 +85,12 @@ class ApproveServicePurchase(DjangoModelMutation):
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
-        if service_purchase.approved or service_purchase.canceled:
+        if service_purchase.cannot_be_approved:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                servicePurchase=service_purchase)
 
-        if not service_purchase.accepted:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[
-                    _("You cannot approved the purchase for now. The purchase must be accepted first.")])])
-
-        if not service_purchase.delivered:
-            return cls(
-                errors=[ErrorType(field="service_purchase", messages=[
-                    _("You cannot approved the purchase for now. The purchase must be delivered first.")])])
-
-        service_purchase.approved = True
-        service_purchase.approved_at = datetime.today()
+        service_purchase.set_as_approved()
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
@@ -126,21 +107,12 @@ class CancelServicePurchase(DjangoModelMutation):
     @classmethod
     def pre_mutate(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
-        if service_purchase.canceled or service_purchase.delivered or service_purchase.approved:
+        if service_purchase.cannot_be_canceled:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot canceled the purchase yet.")])],
+                servicePurchase=service_purchase)
 
-        today = datetime.today()
-        if service_purchase.accepted:
-            timedelta = today - service_purchase.must_be_delivered_at
-
-            if int(Parameter.objects.get(label=Parameter.DELAY_FOR_SERVICE_PURCHASE_CANCEL).value) < timedelta.days:
-                return cls(
-                    errors=[ErrorType(field="service_purchase", messages=[
-                        _("You can not cancel purchase for now. But you can make a cancel request.")])])
-
-        service_purchase.canceled = True
-        service_purchase.canceled_at = today
+        service_purchase.set_as_canceled()
 
     @classmethod
     def post_mutate(cls, info, old_obj, form, obj, input):
