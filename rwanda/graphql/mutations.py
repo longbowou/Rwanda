@@ -110,6 +110,7 @@ class DjangoModelMutation(Mutation):
             for_update=False,
             multiple=False,
             custom_input_fields=None,
+            custom_form_instance=False,
             **options
     ):
         if extra_input_fields is None:
@@ -130,7 +131,8 @@ class DjangoModelMutation(Mutation):
         input_fields = fields_for_form(form, only_fields, exclude_fields, custom_input_fields, for_update)
 
         if for_update:
-            input_fields["id"] = graphene.UUID(required=True)
+            if not custom_form_instance:
+                input_fields["id"] = graphene.UUID(required=True)
         else:
             if "id" in input_fields:
                 input_fields.pop("id")
@@ -171,6 +173,7 @@ class DjangoModelMutation(Mutation):
         _meta.form_fields = form_fields
         _meta.multiple = multiple
         _meta.for_update = for_update
+        _meta.custom_form_instance = custom_form_instance
         _meta.fields = yank_fields_from_attrs(output_fields, _as=Field)
 
         input_fields = yank_fields_from_attrs(input_fields, _as=InputField)
@@ -260,13 +263,17 @@ class DjangoModelMutation(Mutation):
         kwargs = {"data": input, "files": info.context.FILES, "instance": cls._meta.model()}
 
         old_obj = None
-        pk = input.pop("id", None)
-        if pk:
-            try:
-                instance = cls._meta.model._default_manager.get(pk=pk)
-                old_obj = deepcopy(instance)
-            except Exception:
-                return cls.respond(input, errors=not_found_error(cls._meta.model.__name__, pk)), None
+        if cls._meta.for_update:
+            if cls._meta.custom_form_instance:
+                instance = cls.custom_form_instance(info, input)
+            else:
+                pk = input.id
+                try:
+                    instance = cls._meta.model._default_manager.get(pk=input)
+                except Exception:
+                    return cls.respond(input, errors=not_found_error(cls._meta.model.__name__, pk)), None
+
+            old_obj = deepcopy(instance)
 
             class Serializer(serializers.ModelSerializer):
                 class Meta:
@@ -343,6 +350,10 @@ class DjangoModelMutation(Mutation):
             kwargs['total_error_count'] = form.total_error_count()
 
         return cls(errors=errors, **kwargs)
+
+    @classmethod
+    def custom_form_instance(cls, info, input):
+        pass
 
 
 def from_multiple_errors(errors):
