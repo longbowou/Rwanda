@@ -10,9 +10,9 @@ from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
 from rwanda.accounting.models import Operation
+from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, AuthInput
-from rwanda.graphql.mutations import DjangoModelMutation
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
 from rwanda.purchase.models import ServicePurchase
@@ -54,15 +54,10 @@ class AuthAccountMutation(graphene.Mutation):
 
 
 # MUTATION DEPOSIT
-class CreateDeposit(DjangoModelMutation):
+class CreateDeposit(AccountDjangoModelMutation):
     class Meta:
         model_type = DepositType
         only_fields = ('amount',)
-
-    @classmethod
-    @account_required
-    def mutate(cls, root, info, input):
-        return super().mutate(root, info, input)
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
@@ -75,14 +70,9 @@ class CreateDeposit(DjangoModelMutation):
 
 
 # MUTATION REFUND
-class CreateRefund(DjangoModelMutation):
+class CreateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
-
-    @classmethod
-    @account_required
-    def mutate(cls, root, info, input):
-        return super().mutate(root, info, input)
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
@@ -111,6 +101,7 @@ class CreateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
+    @classmethod
     @anonymous_account
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
@@ -171,6 +162,7 @@ class UpdateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
+    @classmethod
     @account_required
     def mutate(self, info, input):
         user = info.context.user
@@ -213,15 +205,10 @@ class UpdateAccount(graphene.Mutation):
 
 
 # MUTATION LITIGATION
-class CreateLitigation(DjangoModelMutation):
+class CreateLitigation(AccountDjangoModelMutation):
     class Meta:
         model_type = LitigationType
         only_fields = ('service_purchase', 'title', 'description')
-
-    @classmethod
-    @account_required
-    def mutate(cls, root, info, input):
-        return super().mutate(root, info, input)
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
@@ -230,12 +217,12 @@ class CreateLitigation(DjangoModelMutation):
         if form.cleaned_data.service_purchase.account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
-        form.instance.account = account
-
         service_purchase: ServicePurchase = form.cleaned_data.service_purchase
         if service_purchase.cannot_create_litigation:
             return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])])
+
+        form.instance.account = account
 
 
 class AccountMutations(graphene.ObjectType):

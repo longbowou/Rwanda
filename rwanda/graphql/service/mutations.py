@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.graphql.auth.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
+from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType, ServiceOptionType
 from rwanda.service.models import ServiceOption, ServiceMedia
 

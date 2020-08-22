@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.administration.models import Parameter
-from rwanda.graphql.auth.account import AccountDjangoModelMutation
+from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.types import ServicePurchaseType
 from rwanda.purchase.models import ServicePurchase
@@ -53,7 +53,7 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_accepted:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_accepted()
@@ -74,7 +74,7 @@ class DeliverServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_delivered:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_delivered()
@@ -121,7 +121,7 @@ class CancelServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_canceled:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("You cannot canceled the purchase yet.")])],
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_canceled()
