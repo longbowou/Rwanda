@@ -1,4 +1,17 @@
 mutation{
+    auth(input: {login: "admin", password: "password"}){
+        errors{
+            field
+            messages
+        }
+        admin{
+            id
+            fullName
+        }
+        token
+        tokenExpiresIn
+    }
+
     createServiceCategory(input:{label: "Tech"}){
         errors{
             field

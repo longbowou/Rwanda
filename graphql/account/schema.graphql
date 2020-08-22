@@ -55,6 +55,14 @@ type ApproveServicePurchase {
     servicePurchase: ServicePurchaseType
 }
 
+type AuthAccountMutation {
+    account: AccountType
+    errors: [ErrorType]
+    refreshToken: String!
+    token: String!
+    tokenExpiresIn: Int!
+}
+
 type CancelServicePurchase {
     errors: [ErrorType]
     servicePurchase: ServicePurchaseType
@@ -117,10 +125,6 @@ type CreateServiceMedia {
 type CreateServiceOption {
     errors: [ErrorType]
     serviceOption: ServiceOptionType
-}
-
-type DeleteAccount {
-    errors: [ErrorType]
 }
 
 type DeleteAdmin {
@@ -200,6 +204,7 @@ type LitigationType {
 type Mutation {
     acceptServicePurchase(input: AcceptServicePurchaseInput!): AcceptServicePurchase
     approveServicePurchase(input: ApproveServicePurchaseInput!): ApproveServicePurchase
+    auth(input: AuthInput!): AuthAccountMutation
     cancelServicePurchase(input: CancelServicePurchaseInput!): CancelServicePurchase
     createAccount(input: AccountInput!): CreateAccount
     createAdmin(input: AdminInput!): CreateAdmin
@@ -211,7 +216,6 @@ type Mutation {
     createServiceComment(input: CreateServiceCommentInput!): CreateServiceComment
     createServiceMedia(input: CreateServiceMediaInput!): CreateServiceMedia
     createServiceOption(input: CreateServiceOptionInput!): CreateServiceOption
-    deleteAccount(id: UUID!): DeleteAccount
     deleteAdmin(id: UUID!): DeleteAdmin
     deleteService(id: UUID!): DeleteService
     deleteServiceCategory(id: UUID!): DeleteServiceCategory
@@ -221,7 +225,9 @@ type Mutation {
     deliverServicePurchase(input: DeliverServicePurchaseInput!): DeliverServicePurchase
     handleLitigation(input: HandleLitigationInput!): HandleLitigation
     initServicePurchase(input: InitServicePurchaseInput!): InitServicePurchase
+    refreshToken(refreshToken: String): Refresh
     replyServiceComment(input: ReplyServiceCommentInput!): ReplyServiceComment
+    revokeToken(refreshToken: String): Revoke
     updateAccount(input: AccountUpdateInput!): UpdateAccount
     updateAdmin(input: AdminUpdateInput!): UpdateAdmin
     updateService(input: UpdateServiceInput!): UpdateService
@@ -229,6 +235,7 @@ type Mutation {
     updateServiceComment(input: UpdateServiceCommentInput!): UpdateServiceComment
     updateServiceMedia(input: UpdateServiceMediaInput!): UpdateServiceMedia
     updateServiceOption(input: UpdateServiceOptionInput!): UpdateServiceOption
+    verifyToken(token: String): Verify
 }
 
 type OperationType {
@@ -249,13 +256,20 @@ type Query {
     "Admin list"
     admins(id: UUID): [AdminType]
     "Litigation list"
-    litigations(id: UUID): [LitigationType]
+    litigation(id: UUID): [LitigationType]
     "ServiceCategory list"
     serviceCategories(id: UUID): [ServiceCategoryType]
     "ServicePurchase list"
     servicePurchases(id: UUID): [ServicePurchaseType]
     "Service list"
     services(id: UUID): [ServiceType]
+}
+
+type Refresh {
+    payload: GenericScalar!
+    refreshExpiresIn: Int!
+    refreshToken: String!
+    token: String!
 }
 
 type RefundType {
@@ -269,6 +283,10 @@ type RefundType {
 type ReplyServiceComment {
     errors: [ErrorType]
     serviceComment: ServiceCommentType
+}
+
+type Revoke {
+    revoked: Int!
 }
 
 type ServiceCategoryType {
@@ -404,6 +422,10 @@ type UpdateServiceOption {
     serviceOption: ServiceOptionType
 }
 
+type Verify {
+    payload: GenericScalar!
+}
+
 "An enumeration."
 enum LitigationDecision {
     "APPROVED"
@@ -428,8 +450,6 @@ input AccountInput {
 input AccountUpdateInput {
     email: String
     firstName: String
-    id: UUID!
-    isActive: Boolean
     lastName: String
     username: String
 }
@@ -459,17 +479,20 @@ input ApproveServicePurchaseInput {
     id: UUID!
 }
 
+input AuthInput {
+    login: String!
+    password: String!
+}
+
 input CancelServicePurchaseInput {
     id: UUID!
 }
 
 input CreateDepositInput {
-    account: ID!
     amount: Int!
 }
 
 input CreateLitigationInput {
-    account: ID!
     description: String!
     servicePurchase: ID!
     title: String!
@@ -486,14 +509,12 @@ input CreateServiceCategoryInput {
 }
 
 input CreateServiceCommentInput {
-    account: ID!
     content: String!
     positive: Boolean
     service: ID!
 }
 
 input CreateServiceInput {
-    account: ID!
     content: String!
     delay: Int!
     keywords: String
@@ -530,7 +551,6 @@ input HandleLitigationInput {
 }
 
 input InitServicePurchaseInput {
-    account: ID!
     service: ID!
     serviceOptions: [ID]
 }
@@ -597,3 +617,10 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
+
+"""
+The `GenericScalar` scalar type represents a generic
+GraphQL scalar value that could be:
+String, Boolean, Int, Float, List or Object.
+"""
+scalar GenericScalar

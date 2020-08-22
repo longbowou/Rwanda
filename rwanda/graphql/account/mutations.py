@@ -1,26 +1,75 @@
 import graphene
+from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
+from graphql_jwt.refresh_token.shortcuts import create_refresh_token
+from graphql_jwt.settings import jwt_settings
 
 from rwanda.accounting.models import Operation
-from rwanda.graphql.inputs import UserInput, UserUpdateInput
-from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
+from rwanda.graphql.decorators import anonymous_account, account_required
+from rwanda.graphql.inputs import UserInput, UserUpdateInput, AuthInput
+from rwanda.graphql.mutations import DjangoModelMutation
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
 
+class AuthAccountMutation(graphene.Mutation):
+    class Arguments:
+        input = AuthInput(required=True)
+
+    account = graphene.Field(AccountType)
+    errors = graphene.List(ErrorType)
+
+    token = graphene.String()
+    refresh_token = graphene.String()
+    token_expires_in = graphene.Int()
+
+    @anonymous_account
+    def mutate(self, info, input):
+        user: User = User.objects.filter(Q(username=input.login) & Q(account__isnull=False) |
+                                         Q(email=input.login) & Q(account__isnull=False)).first()
+        if user is None:
+            return AuthAccountMutation(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
+
+        user = authenticate(username=user.username, password=input.password)
+        if user is None:
+            return AuthAccountMutation(errors=[ErrorType(field="password", messages=[_("Incorrect password")])])
+
+        if not user.is_active:
+            return AuthAccountMutation(
+                errors=[ErrorType(field="login", messages=[_("Your account has been disabled")])])
+
+        payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
+        token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
+        refresh_token = create_refresh_token(user).get_token()
+
+        return AuthAccountMutation(account=user.account, token=token, refresh_token=refresh_token,
+                                   token_expires_in=payload['exp'], errors=[])
+
+
 # MUTATION DEPOSIT
 class CreateDeposit(DjangoModelMutation):
     class Meta:
         model_type = DepositType
+        only_fields = ('amount',)
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    @account_required
+    def mutate(cls, root, info, input):
+        return super().mutate(root, info, input)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        form.instance.account = info.context.user.account
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
         credit_account(obj.account, obj.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
         obj.refresh_from_db()
 
@@ -31,13 +80,21 @@ class CreateRefund(DjangoModelMutation):
         model_type = RefundType
 
     @classmethod
-    def pre_mutate(cls, info, old_obj, form, input):
-        if input.amount > Account.objects.get(pk=input.account).balance:
+    @account_required
+    def mutate(cls, root, info, input):
+        return super().mutate(root, info, input)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        account = info.context.user.account
+        form.instance.account = account
+
+        if input.amount > account.balance:
             return cls(
                 errors=[ErrorType(field='seller_service', messages=[_("Insufficient amount to process the refund.")])])
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def post_save(cls, info, old_obj, form, obj, input):
         debit_account(obj.account, obj.amount, Operation.DESC_DEBIT_FOR_REFUND)
         obj.refresh_from_db()
 
@@ -54,6 +111,7 @@ class CreateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
+    @anonymous_account
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
         email_validator = EmailValidator()
@@ -103,8 +161,7 @@ class CreateAccount(graphene.Mutation):
 
 
 class AccountUpdateInput(UserUpdateInput):
-    id = graphene.UUID(required=True)
-    is_active = graphene.Boolean()
+    pass
 
 
 class UpdateAccount(graphene.Mutation):
@@ -114,12 +171,9 @@ class UpdateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
+    @account_required
     def mutate(self, info, input):
-        user = User.objects.filter(account__id=input.id).first()
-        if user is None:
-            return CreateAccount(
-                errors=[ErrorType(field='id', messages=[_("Account instance not found ")])]
-            )
+        user = info.context.user
 
         if input.username is not None:
             username_validator = UnicodeUsernameValidator()
@@ -158,31 +212,39 @@ class UpdateAccount(graphene.Mutation):
         return CreateAccount(account=user.account, errors=[])
 
 
-class DeleteAccount(DjangoModelDeleteMutation):
-    class Meta:
-        model_type = AccountType
-
-
 # MUTATION LITIGATION
 class CreateLitigation(DjangoModelMutation):
     class Meta:
         model_type = LitigationType
-        only_fields = ("account", 'service_purchase', 'title', 'description')
+        only_fields = ('service_purchase', 'title', 'description')
 
     @classmethod
-    def pre_mutate(cls, info, old_obj, form, input):
-        service_purchase = ServicePurchase.objects.get(pk=input.service_purchase)
-        if service_purchase.cannot_create_a_litigation:
+    @account_required
+    def mutate(cls, root, info, input):
+        return super().mutate(root, info, input)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        account = info.context.user.account
+
+        if form.cleaned_data.service_purchase.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        form.instance.account = account
+
+        service_purchase: ServicePurchase = form.cleaned_data.service_purchase
+        if service_purchase.cannot_create_litigation:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("You cannot create a litigation yet.")])])
+                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])])
 
 
 class AccountMutations(graphene.ObjectType):
+    auth = AuthAccountMutation.Field()
+
     create_deposit = CreateDeposit.Field()
     create_refund = CreateRefund.Field()
 
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
-    delete_account = DeleteAccount.Field()
 
     create_litigation = CreateLitigation.Field()

@@ -1,4 +1,5 @@
 import graphene
+import graphql_jwt
 from graphene_django_extras import DjangoFilterListField
 
 from rwanda.graphql.admin.mutations import AdminMutations
@@ -14,7 +15,9 @@ class AdminQuery(AdminQueries):
 
 
 class AdminMutation(AdminMutations):
-    pass
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
+    revoke_token = graphql_jwt.Revoke.Field()
 
 
 admin_schema = graphene.Schema(query=AdminQuery, mutation=AdminMutation)

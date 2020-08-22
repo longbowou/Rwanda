@@ -6,7 +6,7 @@
       "Admin GraphQL Endpoint": {
         "url": "http://localhost:8000/graphql-admin/",
         "headers": {
-          "user-agent": "JS GraphQL"
+          "Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNTk4MDYxMzUyLCJvcmlnSWF0IjoxNTk4MDYwNjMyfQ.CIGdLLGEZ25RTdLKHda93e6u16itLhnr1nbQlWTJc7Q"
         },
         "introspect": false
       }

@@ -207,7 +207,7 @@ class DjangoModelMutation(Mutation):
 
     @classmethod
     def perform_mutate(cls, info, form, old_obj, input):
-        pre_mutate = cls.pre_mutate(info, old_obj, form, input)
+        pre_mutate = cls.pre_save(info, old_obj, form, input)
         if isinstance(pre_mutate, cls):
             return pre_mutate
 
@@ -216,7 +216,7 @@ class DjangoModelMutation(Mutation):
         else:
             obj = form.save()
 
-        post_mutate = cls.post_mutate(info, old_obj, form, obj, input)
+        post_mutate = cls.post_save(info, old_obj, form, obj, input)
         if isinstance(post_mutate, cls):
             return post_mutate
 
@@ -331,11 +331,11 @@ class DjangoModelMutation(Mutation):
         pass
 
     @classmethod
-    def pre_mutate(cls, info, old_obj, form, input):
+    def pre_save(cls, info, old_obj, form, input):
         pass
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def post_save(cls, info, old_obj, form, obj, input):
         pass
 
     @classmethod
@@ -413,27 +413,47 @@ class DjangoModelDeleteMutation(GrapheneMutation):
         if cls._meta.multiple:
             old_obj = []
             for _id in id:
-                multiple_errors, multiple_old_obj = cls.perform_delete(_id)
+                multiple_errors, multiple_old_obj = cls.perform_delete(info, _id)
                 old_obj.append(multiple_old_obj)
                 if multiple_errors.__len__() > 0:
                     errors += multiple_errors
         else:
-            errors, old_obj = cls.perform_delete(id)
+            errors, old_obj = cls.perform_delete(info, id)
+            if isinstance(errors, cls):
+                return errors, None
 
         return cls.respond(old_obj, errors=errors)
 
     @classmethod
-    def perform_delete(cls, id):
+    def perform_delete(cls, info, id):
+        instance = None
         old_obj = None
         errors = []
         try:
             instance = cls._meta.model._default_manager.get(pk=id)
             old_obj = deepcopy(instance)
-            instance.delete()
         except Exception:
             errors += not_found_error(cls._meta.model.__name__, id)
 
+        pre_delete = cls.pre_delete(info, instance)
+        if isinstance(pre_delete, cls):
+            return pre_delete
+
+        instance.delete()
+
+        post_delete = cls.post_delete(info, old_obj)
+        if isinstance(post_delete, cls):
+            return post_delete, None
+
         return errors, old_obj
+
+    @classmethod
+    def pre_delete(cls, info, obj):
+        pass
+
+    @classmethod
+    def post_delete(cls, info, old_obj):
+        pass
 
     @classmethod
     def respond(cls, old_obj, errors=None):

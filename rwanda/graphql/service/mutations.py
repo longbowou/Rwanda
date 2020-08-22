@@ -5,8 +5,10 @@ from datetime import datetime
 import graphene
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile
+from django.utils.translation import gettext_lazy as _
+from graphene_django.types import ErrorType
 
-from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
+from rwanda.graphql.auth.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType, ServiceOptionType
 from rwanda.service.models import ServiceOption, ServiceMedia
 
@@ -25,17 +27,21 @@ class ServiceMediaInput(graphene.InputObjectType):
 
 
 # SERVICE MUTATIONS
-class CreateService(DjangoModelMutation):
+class CreateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
-        exclude_fields = ("activated", "stars")
+        exclude_fields = ("activated", "stars", "account")
         extra_input_fields = {
             "service_options": graphene.List(ServiceOptionInput),
             "service_medias": graphene.List(ServiceMediaInput)
         }
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def pre_save(cls, info, old_obj, form, input):
+        form.instance.account = info.context.user.account
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
         if input.service_options is not None:
             for item in input.service_options:
                 ServiceOption(service=obj, **item).save()
@@ -64,100 +70,152 @@ class CreateService(DjangoModelMutation):
                     continue
 
 
-class UpdateService(DjangoModelMutation):
+class UpdateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
         for_update = True
         exclude_fields = ("activated", 'account')
 
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
-class DeleteService(DjangoModelDeleteMutation):
+
+class DeleteService(AccountDjangoModelDeleteMutation):
     class Meta:
         model_type = AccountType
 
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
 
 # SERVICE MEDIA MUTATIONS
-class CreateServiceMedia(DjangoModelMutation):
+class CreateServiceMedia(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceMediaType
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def pre_save(cls, info, old_obj, form, input):
+        if form.cleaned_data.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
         if input.is_main is not None and obj.is_main:
             ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
 
 
-class UpdateServiceMedia(DjangoModelMutation):
+class UpdateServiceMedia(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceMediaType
         for_update = True
         exclude_fields = ('service',)
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
         if input.is_main is not None and obj.is_main:
             ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
 
 
-class DeleteServiceMedia(DjangoModelDeleteMutation):
+class DeleteServiceMedia(AccountDjangoModelDeleteMutation):
     class Meta:
         model_type = ServiceMediaType
 
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
+# SERVICE OPTIONS MUTATION
+class CreateServiceOption(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServiceOptionType
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.cleaned_data.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
+class UpdateServiceOption(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServiceOptionType
+        for_update = True
+        exclude_fields = ('service',)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
+class DeleteServiceOption(AccountDjangoModelDeleteMutation):
+    class Meta:
+        model_type = ServiceOptionType
+
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
 
 # SERVICE COMMENT MUTATIONS
-class CreateServiceComment(DjangoModelMutation):
+class CreateServiceComment(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
-        only_fields = ("content", "account", "service", "positive")
+        only_fields = ("content", "service", "positive")
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.cleaned_data.service.account_id == info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        form.instance.account = info.context.user.account
 
 
-class UpdateServiceComment(DjangoModelMutation):
+class UpdateServiceComment(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
         for_update = True
         only_fields = ("content", "positive")
 
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
-class DeleteServiceComment(DjangoModelDeleteMutation):
+
+class DeleteServiceComment(AccountDjangoModelDeleteMutation):
     class Meta:
         model_type = ServiceCommentType
 
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
-class ReplyServiceComment(DjangoModelMutation):
+
+class ReplyServiceComment(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
         for_update = True
         only_fields = ("reply_content",)
 
     @classmethod
-    def pre_mutate(cls, info, old_obj, form, input):
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.service.account_id != info.context.user.account.id:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
         form.instance.reply_at = datetime.today()
-
-
-# SERVICE OPTIONS MUTATION
-class CreateServiceOption(DjangoModelMutation):
-    class Meta:
-        model_type = ServiceOptionType
-
-    @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
-        pass
-
-
-class UpdateServiceOption(DjangoModelMutation):
-    class Meta:
-        model_type = ServiceOptionType
-        for_update = True
-        exclude_fields = ('service',)
-
-    @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
-        pass
-
-
-class DeleteServiceOption(DjangoModelDeleteMutation):
-    class Meta:
-        model_type = ServiceOptionType
 
 
 class ServiceMutations(graphene.ObjectType):

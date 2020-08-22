@@ -9,6 +9,17 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def is_account(self):
+        try:
+            return self.account is not None
+        except Exception:
+            return False
+
+    @property
+    def is_not_account(self):
+        return not self.is_account
+
 
 class Admin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -11,26 +11,19 @@ from rwanda.graphql.types import ServiceCategoryType, ServiceType, AccountType, 
     ServicePurchaseType
 
 
-class Mutation(graphene.ObjectType):
-    token_auth = graphql_jwt.ObtainJSONWebToken.Field()
-    verify_token = graphql_jwt.Verify.Field()
-    refresh_token = graphql_jwt.Refresh.Field()
-
-
-schema = graphene.Schema(mutation=Mutation)
-
-
 class Query(AccountQueries):
     service_categories = DjangoFilterListField(ServiceCategoryType)
     admins = DjangoFilterListField(AdminType)
     service_purchases = DjangoFilterListField(ServicePurchaseType)
     accounts = DjangoFilterListField(AccountType)
     services = DjangoFilterListField(ServiceType)
-    litigations = DjangoFilterListField(LitigationType)
+    litigation = DjangoFilterListField(LitigationType)
 
 
 class Mutation(AccountMutations, AdminMutations, ServiceMutations, PurchaseMutations):
-    pass
+    verify_token = graphql_jwt.Verify.Field()
+    refresh_token = graphql_jwt.Refresh.Field()
+    revoke_token = graphql_jwt.Revoke.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

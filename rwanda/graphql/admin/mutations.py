@@ -166,12 +166,12 @@ class HandleLitigation(DjangoModelMutation):
         custom_input_fields = {"admin": graphene.UUID(required=True)}
 
     @classmethod
-    def pre_mutate(cls, info, old_obj, form, input):
+    def pre_save(cls, info, old_obj, form, input):
         if form.instance.handled:
             return cls(errors=[ErrorType(field="id", messages=[_("Litigation already handled.")])])
 
     @classmethod
-    def post_mutate(cls, info, old_obj, form, obj, input):
+    def post_save(cls, info, old_obj, form, obj, input):
         service_purchase: ServicePurchase = obj.service_purchase
 
         if obj.approved:
