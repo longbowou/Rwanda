@@ -17,6 +17,6 @@ class UserUpdateInput(graphene.InputObjectType):
     email = graphene.String()
 
 
-class AuthInput(graphene.InputObjectType):
+class LoginInput(graphene.InputObjectType):
     login = graphene.String(required=True)
     password = graphene.String(required=True)

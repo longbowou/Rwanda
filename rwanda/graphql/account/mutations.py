@@ -12,16 +12,16 @@ from graphql_jwt.settings import jwt_settings
 from rwanda.accounting.models import Operation
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account, account_required
-from rwanda.graphql.inputs import UserInput, UserUpdateInput, AuthInput
+from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
 
-class AuthAccountMutation(graphene.Mutation):
+class LoginAccount(graphene.Mutation):
     class Arguments:
-        input = AuthInput(required=True)
+        input = LoginInput(required=True)
 
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
@@ -35,22 +35,22 @@ class AuthAccountMutation(graphene.Mutation):
         user: User = User.objects.filter(Q(username=input.login) & Q(account__isnull=False) |
                                          Q(email=input.login) & Q(account__isnull=False)).first()
         if user is None:
-            return AuthAccountMutation(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
+            return LoginAccount(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
 
         user = authenticate(username=user.username, password=input.password)
         if user is None:
-            return AuthAccountMutation(errors=[ErrorType(field="password", messages=[_("Incorrect password")])])
+            return LoginAccount(errors=[ErrorType(field="password", messages=[_("Incorrect password")])])
 
         if not user.is_active:
-            return AuthAccountMutation(
+            return LoginAccount(
                 errors=[ErrorType(field="login", messages=[_("Your account has been disabled")])])
 
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
         refresh_token = create_refresh_token(user).get_token()
 
-        return AuthAccountMutation(account=user.account, token=token, refresh_token=refresh_token,
-                                   token_expires_in=payload['exp'], errors=[])
+        return LoginAccount(account=user.account, token=token, refresh_token=refresh_token,
+                            token_expires_in=payload['exp'], errors=[])
 
 
 # MUTATION DEPOSIT
@@ -73,6 +73,7 @@ class CreateDeposit(AccountDjangoModelMutation):
 class CreateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
+        only_fields = ('amount',)
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
@@ -101,7 +102,6 @@ class CreateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
-    @classmethod
     @anonymous_account
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
@@ -162,7 +162,6 @@ class UpdateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
-    @classmethod
     @account_required
     def mutate(self, info, input):
         user = info.context.user
@@ -226,7 +225,7 @@ class CreateLitigation(AccountDjangoModelMutation):
 
 
 class AccountMutations(graphene.ObjectType):
-    auth = AuthAccountMutation.Field()
+    login = LoginAccount.Field()
 
     create_deposit = CreateDeposit.Field()
     create_refund = CreateRefund.Field()

@@ -34,18 +34,14 @@ type AccountType implements UserInterface {
 }
 
 type AdminMutation {
-    auth(input: AuthInput!): AuthAdminMutation
     createAdmin(input: AdminInput!): CreateAdmin
     createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
     deleteAdmin(id: UUID!): DeleteAdmin
     deleteServiceCategory(id: UUID!): DeleteServiceCategory
     handleLitigation(input: HandleLitigationInput!): HandleLitigation
-    refreshToken(refreshToken: String): Refresh
-    revokeToken(refreshToken: String): Revoke
     updateAdmin(input: AdminUpdateInput!): UpdateAdmin
     updateService(input: UpdateServiceInput!): UpdateService
     updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
-    verifyToken(token: String): Verify
 }
 
 type AdminQuery {
@@ -69,14 +65,6 @@ type AdminType implements UserInterface {
     litigationSet: [LitigationType!]!
     updatedAt: DateTime!
     username: String!
-}
-
-type AuthAdminMutation {
-    admin: AdminType
-    errors: [ErrorType]
-    refreshToken: String!
-    token: String!
-    tokenExpiresIn: Int!
 }
 
 type ChatType {
@@ -166,23 +154,12 @@ type ParameterType {
     value: String!
 }
 
-type Refresh {
-    payload: GenericScalar!
-    refreshExpiresIn: Int!
-    refreshToken: String!
-    token: String!
-}
-
 type RefundType {
     account: AccountType!
     amount: Int!
     createdAt: DateTime!
     id: UUID!
     updatedAt: DateTime!
-}
-
-type Revoke {
-    revoked: Int!
 }
 
 type ServiceCategoryType {
@@ -298,10 +275,6 @@ type UpdateServiceCategory {
     serviceCategory: ServiceCategoryType
 }
 
-type Verify {
-    payload: GenericScalar!
-}
-
 "An enumeration."
 enum LitigationDecision {
     "APPROVED"
@@ -329,11 +302,6 @@ input AdminUpdateInput {
     isSuperuser: Boolean
     lastName: String
     username: String
-}
-
-input AuthInput {
-    login: String!
-    password: String!
 }
 
 input CreateServiceCategoryInput {
@@ -371,10 +339,3 @@ value as specified by
 [iso8601](https://en.wikipedia.org/wiki/ISO_8601).
 """
 scalar DateTime
-
-"""
-The `GenericScalar` scalar type represents a generic
-GraphQL scalar value that could be:
-String, Boolean, Int, Float, List or Object.
-"""
-scalar GenericScalar

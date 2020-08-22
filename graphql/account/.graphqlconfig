@@ -6,7 +6,7 @@
       "Account GraphQL Endpoint": {
         "url": "http://localhost:8000/graphql/",
         "headers": {
-          "Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkFHQkFTS08iLCJleHAiOjE1OTgxMTUxOTUsIm9yaWdJYXQiOjE1OTgxMDc5OTV9.yQhmxYhM7VUfDlF_irusmFoYh97V97HeGx3XY1Hy_3Y"
+//          "Authorization": "JWT eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VybmFtZSI6IkFHQkFTS08iLCJleHAiOjE1OTgxMTUxOTUsIm9yaWdJYXQiOjE1OTgxMDc5OTV9.yQhmxYhM7VUfDlF_irusmFoYh97V97HeGx3XY1Hy_3Y"
         },
         "introspect": false
       }
