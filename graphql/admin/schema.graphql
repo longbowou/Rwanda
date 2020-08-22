@@ -1,0 +1,341 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: AdminQuery
+    mutation: AdminMutation
+}
+
+interface UserInterface {
+    email: String!
+    firstName: String
+    fullName: String
+    lastName: String
+    username: String!
+}
+
+type AccountType implements UserInterface {
+    balance: Int!
+    chatSet: [ChatType!]!
+    createdAt: DateTime!
+    depositSet: [DepositType!]!
+    email: String!
+    firstName: String
+    fullName: String
+    id: UUID!
+    lastName: String
+    litigationSet: [LitigationType!]!
+    operationSet: [OperationType!]!
+    refundSet: [RefundType!]!
+    serviceSet: [ServiceType!]!
+    servicecommentSet: [ServiceCommentType!]!
+    servicepurchaseSet: [ServicePurchaseType!]!
+    updatedAt: DateTime!
+    username: String!
+}
+
+type AdminMutation {
+    createAdmin(input: AdminInput!): CreateAdmin
+    createServiceCategory(input: CreateServiceCategoryInput!): CreateServiceCategory
+    deleteAdmin(id: UUID!): DeleteAdmin
+    deleteServiceCategory(id: UUID!): DeleteServiceCategory
+    handleLitigation(input: HandleLitigationInput!): HandleLitigation
+    updateAdmin(input: AdminUpdateInput!): UpdateAdmin
+    updateService(input: UpdateServiceInput!): UpdateService
+    updateServiceCategory(input: UpdateServiceCategoryInput!): UpdateServiceCategory
+}
+
+type AdminQuery {
+    "Fund list"
+    funds(id: UUID): [FundType]
+    "Parameter list"
+    parameters(id: UUID): [ParameterType]
+    "ServiceCategory list"
+    serviceCategories(id: UUID): [ServiceCategoryType]
+    "Service list"
+    services(id: UUID): [ServiceType]
+}
+
+type AdminType implements UserInterface {
+    createdAt: DateTime!
+    email: String!
+    firstName: String
+    fullName: String
+    id: UUID!
+    lastName: String
+    litigationSet: [LitigationType!]!
+    updatedAt: DateTime!
+    username: String!
+}
+
+type ChatType {
+    account: AccountType!
+    content: String!
+    createdAt: DateTime!
+    id: UUID!
+    servicePurchase: ServicePurchaseType!
+    updatedAt: DateTime!
+}
+
+type CreateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
+type CreateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+type DeleteAdmin {
+    errors: [ErrorType]
+}
+
+type DeleteServiceCategory {
+    errors: [ErrorType]
+}
+
+type DepositType {
+    account: AccountType!
+    amount: Int!
+    createdAt: DateTime!
+    id: UUID!
+    updatedAt: DateTime!
+}
+
+type ErrorType {
+    field: String!
+    messages: [String!]!
+}
+
+type FundType {
+    balance: Int!
+    createdAt: DateTime!
+    id: UUID!
+    label: String!
+    operationSet: [OperationType!]!
+    updatedAt: DateTime!
+}
+
+type HandleLitigation {
+    errors: [ErrorType]
+    litigation: LitigationType
+}
+
+type LitigationType {
+    account: AccountType!
+    admin: AdminType
+    createdAt: DateTime!
+    decision: LitigationDecision
+    description: String!
+    handled: Boolean!
+    id: UUID!
+    servicePurchase: ServicePurchaseType!
+    title: String!
+    updatedAt: DateTime!
+}
+
+type OperationType {
+    account: AccountType
+    amount: Int!
+    createdAt: DateTime!
+    description: String
+    fund: FundType!
+    id: UUID!
+    servicePurchase: ServicePurchaseType
+    type: String!
+    updatedAt: DateTime!
+}
+
+type ParameterType {
+    createdAt: DateTime!
+    id: UUID!
+    label: String!
+    updatedAt: DateTime!
+    value: String!
+}
+
+type RefundType {
+    account: AccountType!
+    amount: Int!
+    createdAt: DateTime!
+    id: UUID!
+    updatedAt: DateTime!
+}
+
+type ServiceCategoryType {
+    createdAt: DateTime!
+    description: String
+    id: UUID!
+    label: String!
+    serviceSet: [ServiceType!]!
+    updatedAt: DateTime!
+}
+
+type ServiceCommentType {
+    account: AccountType!
+    content: String!
+    createdAt: DateTime!
+    id: UUID!
+    positive: Boolean!
+    replyAt: DateTime
+    replyContent: String
+    service: ServiceType!
+    updatedAt: DateTime!
+}
+
+type ServiceMediaType {
+    createdAt: DateTime!
+    fileUrl: String
+    id: UUID!
+    isMain: Boolean!
+    service: ServiceType!
+    updatedAt: DateTime!
+    url: String
+}
+
+type ServiceOptionType {
+    createdAt: DateTime!
+    delay: Int!
+    description: String
+    id: UUID!
+    label: String!
+    price: Int!
+    service: ServiceType!
+    servicepurchaseSet: [ServicePurchaseType!]!
+    servicepurchaseserviceoptionSet: [ServicePurchaseServiceOptionType!]!
+    updatedAt: DateTime!
+}
+
+type ServicePurchaseServiceOptionType {
+    createdAt: DateTime!
+    id: UUID!
+    serviceOption: ServiceOptionType!
+    servicePurchase: ServicePurchaseType!
+    updatedAt: DateTime!
+}
+
+type ServicePurchaseType {
+    acceptedAt: DateTime
+    account: AccountType!
+    approvedAt: DateTime
+    canBeAccepted: Boolean!
+    canBeApproved: Boolean!
+    canBeCanceled: Boolean!
+    canBeDelivered: Boolean!
+    canCreateLitigation: Boolean!
+    canceledAt: DateTime
+    chatSet: [ChatType!]!
+    commission: Int!
+    createdAt: DateTime!
+    delay: Int!
+    deliveredAt: DateTime
+    id: UUID!
+    litigation: LitigationType
+    mustBeDeliveredAt: DateTime
+    operationSet: [OperationType!]!
+    price: Int!
+    service: ServiceType!
+    serviceOptions: [ServiceOptionType!]!
+    servicepurchaseserviceoptionSet: [ServicePurchaseServiceOptionType!]!
+    status: String!
+    updatedAt: DateTime!
+}
+
+type ServiceType {
+    account: AccountType!
+    activated: Boolean!
+    content: String!
+    createdAt: DateTime!
+    delay: Int!
+    id: UUID!
+    keywords: String
+    published: Boolean!
+    serviceCategory: ServiceCategoryType!
+    servicecommentSet: [ServiceCommentType!]!
+    servicemediaSet: [ServiceMediaType!]!
+    serviceoptionSet: [ServiceOptionType!]!
+    servicepurchaseSet: [ServicePurchaseType!]!
+    stars: Int!
+    title: String!
+    updatedAt: DateTime!
+}
+
+type UpdateAdmin {
+    admin: AdminType
+    errors: [ErrorType]
+}
+
+type UpdateService {
+    errors: [ErrorType]
+    service: ServiceType
+}
+
+type UpdateServiceCategory {
+    errors: [ErrorType]
+    serviceCategory: ServiceCategoryType
+}
+
+"An enumeration."
+enum LitigationDecision {
+    "APPROVED"
+    APPROVED
+    "CANCELED"
+    CANCELED
+}
+
+input AdminInput {
+    email: String!
+    firstName: String
+    isActive: Boolean
+    isSuperuser: Boolean
+    lastName: String
+    password: String!
+    passwordConfirmation: String!
+    username: String!
+}
+
+input AdminUpdateInput {
+    email: String
+    firstName: String
+    id: UUID!
+    isActive: Boolean
+    isSuperuser: Boolean
+    lastName: String
+    username: String
+}
+
+input CreateServiceCategoryInput {
+    description: String
+    label: String!
+}
+
+input HandleLitigationInput {
+    admin: UUID!
+    decision: String
+    id: UUID!
+}
+
+input UpdateServiceCategoryInput {
+    description: String
+    id: UUID!
+    label: String
+}
+
+input UpdateServiceInput {
+    activated: Boolean
+    id: UUID!
+}
+
+
+"""
+Leverages the internal Python implmeentation of UUID (uuid.UUID) to provide native UUID objects
+in fields, resolvers and input.
+"""
+scalar UUID
+
+"""
+The `DateTime` scalar type represents a DateTime
+value as specified by
+[iso8601](https://en.wikipedia.org/wiki/ISO_8601).
+"""
+scalar DateTime

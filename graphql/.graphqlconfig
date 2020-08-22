@@ -1,0 +1,15 @@
+{
+  "name": "Root GraphQL Config",
+  "projects": {
+    "account": {
+      "includes": [
+        "account/**"
+      ]
+    },
+    "admin": {
+      "includes": [
+        "admin/**"
+      ]
+    }
+  }
+}
