@@ -34,7 +34,7 @@ class Admin(models.Model):
 class Account(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, related_name="account", on_delete=models.CASCADE)
-    balance = models.BigIntegerField(default=0)
+    balance = models.PositiveBigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

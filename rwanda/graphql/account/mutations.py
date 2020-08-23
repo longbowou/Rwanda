@@ -3,6 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.db import transaction
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
@@ -60,13 +61,16 @@ class CreateDeposit(AccountDjangoModelMutation):
         only_fields = ('amount',)
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
-        form.instance.account = info.context.user.account
+        instance = form.instance
+        account = info.context.user.account
+        credit_account(account, instance.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
+        instance.account = account
+        form.save()
+        instance.refresh_from_db()
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        credit_account(obj.account, obj.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
-        obj.refresh_from_db()
+        return cls(deposit=instance, errors=[])
 
 
 # MUTATION REFUND
@@ -76,18 +80,22 @@ class CreateRefund(AccountDjangoModelMutation):
         only_fields = ('amount',)
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
-        account = info.context.user.account
-        form.instance.account = account
+        account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
+        instance = form.instance
 
         if input.amount > account.balance:
             return cls(
                 errors=[ErrorType(field='seller_service', messages=[_("Insufficient amount to process the refund.")])])
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        debit_account(obj.account, obj.amount, Operation.DESC_DEBIT_FOR_REFUND)
-        obj.refresh_from_db()
+        debit_account(account, instance.amount, Operation.DESC_DEBIT_FOR_REFUND)
+
+        instance.account = account
+        form.save()
+        instance.refresh_from_db()
+
+        return cls(refund=instance, errors=[])
 
 
 # ACCOUNT MUTATIONS

@@ -11,9 +11,9 @@ from rwanda.user.models import Account, Admin
 
 class ServicePurchase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    delay = models.IntegerField()
-    price = models.IntegerField()
-    commission = models.IntegerField()
+    delay = models.PositiveBigIntegerField()
+    price = models.PositiveBigIntegerField()
+    commission = models.PositiveBigIntegerField()
     STATUS_INITIALIZED = 'INITIALIZED'
     STATUS_ACCEPTED = 'ACCEPTED'
     STATUS_APPROVED = 'APPROVED'
