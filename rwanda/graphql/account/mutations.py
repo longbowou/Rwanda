@@ -213,10 +213,10 @@ class CreateLitigation(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         account = info.context.user.account
 
-        if form.cleaned_data.service_purchase.account_id != info.context.user.account.id:
+        if form.cleaned_data["service_purchase"].account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
-        service_purchase: ServicePurchase = form.cleaned_data.service_purchase
+        service_purchase: ServicePurchase = form.cleaned_data["service_purchase"]
         if service_purchase.cannot_create_litigation:
             return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])])

@@ -99,7 +99,7 @@ class CreateServiceMedia(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.cleaned_data.service.account_id != info.context.user.account.id:
+        if form.cleaned_data["service"].account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
     @classmethod
@@ -142,7 +142,7 @@ class CreateServiceOption(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.cleaned_data.service.account_id != info.context.user.account.id:
+        if form.cleaned_data["service"].account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
@@ -176,7 +176,7 @@ class CreateServiceComment(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.cleaned_data.service.account_id == info.context.user.account.id:
+        if form.cleaned_data["service"].account_id == info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         form.instance.account = info.context.user.account
