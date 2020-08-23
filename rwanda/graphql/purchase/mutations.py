@@ -1,4 +1,5 @@
 import graphene
+from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
@@ -7,6 +8,7 @@ from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutatio
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.types import ServicePurchaseType
 from rwanda.purchase.models import ServicePurchase
+from rwanda.user.models import Account
 
 
 class InitServicePurchase(AccountDjangoModelMutation):
@@ -15,7 +17,10 @@ class InitServicePurchase(AccountDjangoModelMutation):
         only_fields = ('service', 'service_options')
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
+        account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
+
         price = int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)
         service = form.cleaned_data["service"]
         delay = service.delay
@@ -24,19 +29,21 @@ class InitServicePurchase(AccountDjangoModelMutation):
             price += service_option.price
             delay += service_option.delay
 
-        if info.context.user.account.balance < price:
+        if account.balance < price:
             return cls(
                 errors=[ErrorType(field="service", messages=[_("Insufficient amount to purchase service.")])])
 
-        form.instance.account = info.context.user.account
+        form.instance.account = account
         form.instance.price = price
         form.instance.delay = delay
         form.instance.commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        init_service_purchase(obj)
-        obj.refresh_from_db()
+        init_service_purchase(form.instance)
+
+        form.save()
+        form.instance.refresh_from_db()
+
+        return cls(servicePurchase=form.instance, errors=[])
 
 
 class AcceptServicePurchase(AccountDjangoModelMutation):
@@ -49,7 +56,7 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
 
-        if service_purchase.service.account_id != info.context.user.account.id:
+        if service_purchase.is_not_seller(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         if service_purchase.cannot_be_accepted:
@@ -70,7 +77,7 @@ class DeliverServicePurchase(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
 
-        if service_purchase.service.account_id != info.context.user.account.id:
+        if service_purchase.is_not_seller(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         if service_purchase.cannot_be_delivered:
@@ -88,10 +95,11 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
         for_update = True
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
 
-        if service_purchase.account_id != info.context.user.account.id:
+        if service_purchase.is_not_buyer(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         if service_purchase.cannot_be_approved:
@@ -99,12 +107,13 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
                 errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
-        service_purchase.set_as_approved()
+        approve_service_purchase(service_purchase)
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        approve_service_purchase(obj)
-        obj.refresh_from_db()
+        service_purchase.set_as_approved()
+        form.save()
+        service_purchase.refresh_from_db()
+
+        return cls(servicePurchase=service_purchase, errors=[])
 
 
 class CancelServicePurchase(AccountDjangoModelMutation):
@@ -114,10 +123,11 @@ class CancelServicePurchase(AccountDjangoModelMutation):
         for_update = True
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
         service_purchase: ServicePurchase = form.instance
 
-        if service_purchase.account_id != info.context.user.account.id:
+        if service_purchase.is_not_buyer(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         if service_purchase.cannot_be_canceled:
@@ -125,12 +135,13 @@ class CancelServicePurchase(AccountDjangoModelMutation):
                 errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
-        service_purchase.set_as_canceled()
+        cancel_service_purchase(service_purchase)
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        cancel_service_purchase(obj)
-        obj.refresh_from_db()
+        service_purchase.set_as_canceled()
+        form.save()
+        service_purchase.refresh_from_db()
+
+        return cls(servicePurchase=service_purchase, errors=[])
 
 
 class PurchaseMutations(graphene.ObjectType):

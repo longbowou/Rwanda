@@ -82,7 +82,13 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_canceled(self):
-        return self.initialized or self.can_be_canceled_for_delay
+        if self.initialized:
+            return True
+
+        if self.canceled:
+            return False
+
+        return self.can_be_canceled_for_delay
 
     @property
     def cannot_be_canceled(self):
@@ -123,6 +129,18 @@ class ServicePurchase(models.Model):
     def set_as_canceled(self):
         self.status = self.STATUS_CANCELED
         self.canceled_at = timezone.now()
+
+    def is_buyer(self, account: Account):
+        return self.account_id == account.id
+
+    def is_not_buyer(self, account: Account):
+        return not self.is_buyer(account)
+
+    def is_seller(self, account: Account):
+        return self.service.account_id == account.id
+
+    def is_not_seller(self, account: Account):
+        return not self.is_seller(account)
 
 
 class ServicePurchaseServiceOption(models.Model):

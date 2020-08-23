@@ -83,17 +83,45 @@ class ServiceOptionType(DjangoObjectType):
 
 
 class ServicePurchaseType(DjangoObjectType):
-    can_be_accepted = graphene.Boolean(required=True, source='can_be_accepted')
-    can_be_delivered = graphene.Boolean(required=True, source='can_be_delivered')
-    can_be_approved = graphene.Boolean(required=True, source='can_be_approved')
-    can_be_canceled = graphene.Boolean(required=True, source='can_be_canceled')
-    can_create_litigation = graphene.Boolean(required=True, source='can_create_litigation')
+    can_be_accepted = graphene.Boolean(required=True)
+    can_be_delivered = graphene.Boolean(required=True)
+    can_be_approved = graphene.Boolean(required=True)
+    can_be_canceled = graphene.Boolean(required=True)
+    can_create_litigation = graphene.Boolean(required=True)
 
     class Meta:
         model = ServicePurchase
         filter_fields = {
             "id": ("exact",),
         }
+
+    def resolve_can_be_accepted(self, info):
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_accepted and self.is_seller(user.account)
+
+    def resolve_can_be_delivered(self, info):
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_delivered and self.is_seller(user.account)
+
+    def resolve_can_be_approved(self, info):
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_approved and self.is_buyer(user.account)
+
+    def resolve_can_be_canceled(self, info):
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_canceled and self.is_buyer(user.account)
 
 
 class ServicePurchaseServiceOptionType(DjangoObjectType):

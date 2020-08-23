@@ -65,8 +65,10 @@ class CreateDeposit(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         instance = form.instance
         account = info.context.user.account
-        credit_account(account, instance.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
         instance.account = account
+
+        credit_account(account, instance.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
+
         form.save()
         instance.refresh_from_db()
 
@@ -84,6 +86,7 @@ class CreateRefund(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
         instance = form.instance
+        instance.account = account
 
         if input.amount > account.balance:
             return cls(
@@ -91,7 +94,6 @@ class CreateRefund(AccountDjangoModelMutation):
 
         debit_account(account, instance.amount, Operation.DESC_DEBIT_FOR_REFUND)
 
-        instance.account = account
         form.save()
         instance.refresh_from_db()
 
