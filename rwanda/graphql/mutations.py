@@ -269,7 +269,7 @@ class DjangoModelMutation(Mutation):
             else:
                 pk = input.id
                 try:
-                    instance = cls._meta.model._default_manager.get(pk=input)
+                    instance = cls._meta.model._default_manager.get(pk=pk)
                 except Exception:
                     return cls.respond(input, errors=not_found_error(cls._meta.model.__name__, pk)), None
 

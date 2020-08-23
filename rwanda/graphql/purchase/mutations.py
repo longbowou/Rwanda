@@ -26,7 +26,7 @@ class InitServicePurchase(AccountDjangoModelMutation):
 
         if info.context.user.account.balance < price:
             return cls(
-                errors=[ErrorType(field="account", messages=[_("Insufficient amount to purchase service.")])])
+                errors=[ErrorType(field="service", messages=[_("Insufficient amount to purchase service.")])])
 
         form.instance.account = info.context.user.account
         form.instance.price = price
@@ -54,7 +54,7 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_accepted:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
+                errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_accepted()
@@ -75,7 +75,7 @@ class DeliverServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_delivered:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
+                errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_delivered()
@@ -96,7 +96,7 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_approved:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("Purchase already processed.")])],
+                errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_approved()
@@ -122,7 +122,7 @@ class CancelServicePurchase(AccountDjangoModelMutation):
 
         if service_purchase.cannot_be_canceled:
             return cls(
-                errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])],
+                errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_canceled()
