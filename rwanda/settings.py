@@ -28,6 +28,13 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,12 +51,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'graphene_django',
-    'graphql_jwt.refresh_token.apps.RefreshTokenConfig'
+    'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

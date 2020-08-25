@@ -4,3 +4,4 @@ graphene-django>=2.12
 graphene-django-extras>=0.4
 inflect>=4.1
 django-graphql-jwt>=0.3
+django-cors-headers>=3.4

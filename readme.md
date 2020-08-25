@@ -1,5 +1,5 @@
 # Rwanda
-Django based project for a Web freelance services.
+Django based project for Web freelances services.
 
 ## Requirements
 - [Docker](https://docs.docker.com/install/)
