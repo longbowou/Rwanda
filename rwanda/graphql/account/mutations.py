@@ -15,7 +15,7 @@ from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutatio
 from rwanda.graphql.decorators import anonymous_account, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.purchase.operations import credit_account, debit_account
-from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType
+from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
@@ -26,10 +26,7 @@ class LoginAccount(graphene.Mutation):
 
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
-
-    token = graphene.String()
-    refresh_token = graphene.String()
-    token_expires_in = graphene.Int()
+    auth = graphene.Field(AuthType)
 
     @anonymous_account
     def mutate(self, info, input):
@@ -50,8 +47,9 @@ class LoginAccount(graphene.Mutation):
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
         refresh_token = create_refresh_token(user).get_token()
 
-        return LoginAccount(account=user.account, token=token, refresh_token=refresh_token,
-                            token_expires_in=payload['exp'], errors=[])
+        auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
+
+        return LoginAccount(account=user.account, auth=auth, errors=[])
 
 
 # MUTATION DEPOSIT

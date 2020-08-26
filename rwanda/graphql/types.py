@@ -1,4 +1,5 @@
 import graphene
+from graphene import ObjectType
 from graphene_django import DjangoObjectType
 
 from rwanda.account.models import Deposit, Refund
@@ -8,6 +9,12 @@ from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
+
+
+class AuthType(ObjectType):
+    token = graphene.String(required=True)
+    refresh_token = graphene.String(required=True)
+    token_expires_in = graphene.String(required=True)
 
 
 class DepositType(DjangoObjectType):
