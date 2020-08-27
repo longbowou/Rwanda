@@ -17,6 +17,11 @@ class AuthType(ObjectType):
     token_expires_in = graphene.String(required=True)
 
 
+class ParametersType(ObjectType):
+    currency = graphene.String(required=True)
+    base_price = graphene.String(required=True)
+
+
 class DepositType(DjangoObjectType):
     class Meta:
         model = Deposit
