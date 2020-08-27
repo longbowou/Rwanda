@@ -55,12 +55,23 @@ class ServiceType(DjangoObjectType):
 
 
 class AccountType(DjangoObjectType):
+    services_count = graphene.Int(required=True)
+    purchases_count = graphene.Int(required=True)
+
     class Meta:
         model = Account
         interfaces = (UserInterface,)
         filter_fields = {
             "id": ("exact",),
         }
+
+    @staticmethod
+    def resolve_services_count(cls, info):
+        return Service.objects.filter(account=cls).count()
+
+    @staticmethod
+    def resolve_purchases_count(cls, info):
+        return ServicePurchase.objects.filter(account=cls).count()
 
 
 class ServiceMediaType(DjangoObjectType):
