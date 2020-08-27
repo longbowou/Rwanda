@@ -1,11 +1,16 @@
 import graphene
+from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
+from graphql_jwt.refresh_token.shortcuts import create_refresh_token
+from graphql_jwt.settings import jwt_settings
 
-from rwanda.graphql.inputs import UserInput, UserUpdateInput
+from rwanda.graphql.decorators import anonymous_account
+from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
@@ -13,6 +18,39 @@ from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, Li
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Admin
 
+
+class LoginAdmin(graphene.Mutation):
+    class Arguments:
+        input = LoginInput(required=True)
+
+    admin = graphene.Field(AdminType)
+    errors = graphene.List(ErrorType)
+
+    token = graphene.String()
+    refresh_token = graphene.String()
+    token_expires_in = graphene.Int()
+
+    @anonymous_account
+    def mutate(self, info, input):
+        user: User = User.objects.filter(Q(username=input.login) & Q(admin__isnull=False) |
+                                         Q(email=input.login) & Q(admin__isnull=False)).first()
+        if user is None:
+            return LoginAdmin(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
+
+        user = authenticate(username=user.username, password=input.password)
+        if user is None:
+            return LoginAdmin(errors=[ErrorType(field="password", messages=[_("Incorrect password")])])
+
+        if not user.is_active:
+            return LoginAdmin(
+                errors=[ErrorType(field="login", messages=[_("Your account has been disabled")])])
+
+        payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
+        token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
+        refresh_token = create_refresh_token(user).get_token()
+
+        return LoginAdmin(admin=user.account, token=token, refresh_token=refresh_token,
+                            token_expires_in=payload['exp'], errors=[])
 
 class CreateServiceCategory(DjangoModelMutation):
     class Meta:
@@ -49,6 +87,7 @@ class CreateAdmin(graphene.Mutation):
     admin = graphene.Field(AdminType)
     errors = graphene.List(ErrorType)
 
+    @anonymous_account
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
         email_validator = EmailValidator()
@@ -109,6 +148,7 @@ class UpdateAdmin(graphene.Mutation):
     admin = graphene.Field(AdminType)
     errors = graphene.List(ErrorType)
 
+    @anonymous_account
     def mutate(self, info, input):
         user = User.objects.filter(admin__id=input.id).first()
         if user is None:
@@ -165,6 +205,7 @@ class HandleLitigation(DjangoModelMutation):
         only_fields = ('admin', 'decision')
         custom_input_fields = {"admin": graphene.UUID(required=True)}
 
+    @anonymous_account
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
         if form.instance.handled:
@@ -190,6 +231,8 @@ class HandleLitigation(DjangoModelMutation):
 
 
 class AdminMutations(graphene.ObjectType):
+    login = LoginAdmin.Field()
+
     create_admin = CreateAdmin.Field()
     update_admin = UpdateAdmin.Field()
     delete_admin = DeleteAdmin.Field()
