@@ -12,7 +12,7 @@ from graphql_jwt.settings import jwt_settings
 
 from rwanda.accounting.models import Operation
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
-from rwanda.graphql.decorators import anonymous_account, account_required
+from rwanda.graphql.decorators import anonymous_account_required, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
@@ -28,7 +28,7 @@ class LoginAccount(graphene.Mutation):
     errors = graphene.List(ErrorType)
     auth = graphene.Field(AuthType)
 
-    @anonymous_account
+    @anonymous_account_required
     def mutate(self, info, input):
         user: User = User.objects.filter(Q(username=input.login) & Q(account__isnull=False) |
                                          Q(email=input.login) & Q(account__isnull=False)).first()
@@ -110,7 +110,7 @@ class CreateAccount(graphene.Mutation):
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)
 
-    @anonymous_account
+    @anonymous_account_required
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
         email_validator = EmailValidator()
@@ -159,13 +159,13 @@ class CreateAccount(graphene.Mutation):
         return CreateAccount(account=account, errors=[])
 
 
-class AccountUpdateInput(UserUpdateInput):
+class UpdateAccountInput(UserUpdateInput):
     pass
 
 
 class UpdateAccount(graphene.Mutation):
     class Arguments:
-        input = AccountUpdateInput(required=True)
+        input = UpdateAccountInput(required=True)
 
     account = graphene.Field(AccountType)
     errors = graphene.List(ErrorType)

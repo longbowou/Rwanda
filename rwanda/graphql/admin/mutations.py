@@ -9,7 +9,6 @@ from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
-from rwanda.graphql.decorators import anonymous_account
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
@@ -30,7 +29,6 @@ class LoginAdmin(graphene.Mutation):
     refresh_token = graphene.String()
     token_expires_in = graphene.Int()
 
-    @anonymous_account
     def mutate(self, info, input):
         user: User = User.objects.filter(Q(username=input.login) & Q(admin__isnull=False) |
                                          Q(email=input.login) & Q(admin__isnull=False)).first()
@@ -87,7 +85,6 @@ class CreateAdmin(graphene.Mutation):
     admin = graphene.Field(AdminType)
     errors = graphene.List(ErrorType)
 
-    @anonymous_account
     def mutate(self, info, input):
         username_validator = UnicodeUsernameValidator()
         email_validator = EmailValidator()
@@ -148,7 +145,6 @@ class UpdateAdmin(graphene.Mutation):
     admin = graphene.Field(AdminType)
     errors = graphene.List(ErrorType)
 
-    @anonymous_account
     def mutate(self, info, input):
         user = User.objects.filter(admin__id=input.id).first()
         if user is None:
@@ -205,7 +201,6 @@ class HandleLitigation(DjangoModelMutation):
         only_fields = ('admin', 'decision')
         custom_input_fields = {"admin": graphene.UUID(required=True)}
 
-    @anonymous_account
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
         if form.instance.handled:
