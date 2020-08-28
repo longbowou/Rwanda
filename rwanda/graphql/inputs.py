@@ -20,3 +20,9 @@ class UserUpdateInput(graphene.InputObjectType):
 class LoginInput(graphene.InputObjectType):
     login = graphene.String(required=True)
     password = graphene.String(required=True)
+
+
+class ChangePasswordInput(graphene.InputObjectType):
+    current_password = graphene.String(required=True)
+    password = graphene.String(required=True)
+    password_confirmation = graphene.String(required=True)

@@ -13,7 +13,7 @@ from graphql_jwt.settings import jwt_settings
 from rwanda.accounting.models import Operation
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account_required, account_required
-from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
+from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase
@@ -50,6 +50,44 @@ class LoginAccount(graphene.Mutation):
         auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
 
         return LoginAccount(account=user.account, auth=auth, errors=[])
+
+
+class ChangeAccountPasswordInput(ChangePasswordInput):
+    pass
+
+
+class ChangeAccountPassword(graphene.Mutation):
+    class Arguments:
+        input = ChangeAccountPasswordInput(required=True)
+
+    account = graphene.Field(AccountType)
+    errors = graphene.List(ErrorType)
+
+    @account_required
+    def mutate(self, info, input):
+        user: User = info.context.user
+
+        if not user.check_password(input.current_password):
+            return ChangeAccountPassword(
+                errors=[ErrorType(field="currentPassword", messages=[_("Bad current password.")])])
+
+        if input.current_password == input.password:
+            return ChangeAccountPassword(
+                errors=[
+                    ErrorType(field='password',
+                              messages=[_("The current password must different from the new password.")])]
+            )
+
+        if input.password != input.password_confirmation:
+            return ChangeAccountPassword(
+                errors=[
+                    ErrorType(field='password', messages=[_("Password does not match password confirmation.")])]
+            )
+
+        user.set_password(input.password)
+        user.save()
+
+        return ChangeAccountPassword(account=user.account, errors=[])
 
 
 # MUTATION DEPOSIT
@@ -240,5 +278,6 @@ class AccountMutations(graphene.ObjectType):
 
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
+    change_account_password = ChangeAccountPassword.Field()
 
     create_litigation = CreateLitigation.Field()
