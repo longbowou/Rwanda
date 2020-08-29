@@ -51,20 +51,28 @@ class Account(models.Model):
     def purchases_count(self):
         from rwanda.purchase.models import ServicePurchase
         return ServicePurchase.objects.filter(account=self).count()
-        pass
 
     @property
     def deposits_sum(self):
         from rwanda.account.models import Deposit
-        return Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+        deposits_sum = Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+        if deposits_sum is None:
+            deposits_sum = 0
+        return deposits_sum
 
     @property
     def refunds_sum(self):
         from rwanda.account.models import Refund
-        return Refund.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+        refunds_sum = Refund.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+        if refunds_sum is None:
+            refunds_sum = 0
+        return refunds_sum
 
     @property
     def earnings_sum(self):
         from rwanda.accounting.models import Operation
-        return Operation.objects.filter(account=self, description=Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED) \
+        earnings_sum = Operation.objects.filter(account=self, description=Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED) \
             .aggregate(Sum('amount'))['amount__sum']
+        if earnings_sum is None:
+            earnings_sum = 0
+        return earnings_sum
