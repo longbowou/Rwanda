@@ -55,8 +55,11 @@ class ServiceType(DjangoObjectType):
 
 
 class AccountType(DjangoObjectType):
-    services_count = graphene.Int(required=True)
-    purchases_count = graphene.Int(required=True)
+    services_count = graphene.Int(required=True, source="services_count")
+    purchases_count = graphene.Int(required=True, source="purchases_count")
+    deposits_sum = graphene.Int(required=True, source="deposits_sum")
+    refunds_sum = graphene.Int(required=True, source="refunds_sum")
+    earnings_sum = graphene.Int(required=True, source="earnings_sum")
 
     class Meta:
         model = Account
@@ -64,14 +67,6 @@ class AccountType(DjangoObjectType):
         filter_fields = {
             "id": ("exact",),
         }
-
-    @staticmethod
-    def resolve_services_count(cls, info):
-        return Service.objects.filter(account=cls).count()
-
-    @staticmethod
-    def resolve_purchases_count(cls, info):
-        return ServicePurchase.objects.filter(account=cls).count()
 
 
 class ServiceMediaType(DjangoObjectType):

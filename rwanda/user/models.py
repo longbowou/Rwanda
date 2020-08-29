@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models import Sum
 
 
 class User(AbstractUser):
@@ -40,3 +41,30 @@ class Account(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    @property
+    def services_count(self):
+        from rwanda.service.models import Service
+        return Service.objects.filter(account=self).count()
+
+    @property
+    def purchases_count(self):
+        from rwanda.purchase.models import ServicePurchase
+        return ServicePurchase.objects.filter(account=self).count()
+        pass
+
+    @property
+    def deposits_sum(self):
+        from rwanda.account.models import Deposit
+        return Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+
+    @property
+    def refunds_sum(self):
+        from rwanda.account.models import Refund
+        return Refund.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
+
+    @property
+    def earnings_sum(self):
+        from rwanda.accounting.models import Operation
+        return Operation.objects.filter(account=self, description=Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED) \
+            .aggregate(Sum('amount'))['amount__sum']
