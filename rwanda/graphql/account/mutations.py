@@ -75,7 +75,7 @@ class ChangeAccountPassword(graphene.Mutation):
             return ChangeAccountPassword(
                 errors=[
                     ErrorType(field='password',
-                              messages=[_("The current password must different from the new password.")])]
+                              messages=[_("The new password must different from the current password.")])]
             )
 
         if input.password != input.password_confirmation:
