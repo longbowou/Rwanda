@@ -31,7 +31,6 @@ ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://rwanda.cifs-togo.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -158,8 +157,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'static'
+# STATIC_ROOT = 'static'
 STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
 ]
 
 MEDIA_URL = '/media/'
