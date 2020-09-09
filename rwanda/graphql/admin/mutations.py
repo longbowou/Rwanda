@@ -13,7 +13,7 @@ from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput
 from rwanda.graphql.mutations import DjangoModelMutation, DjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
-from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Admin
 
@@ -24,10 +24,7 @@ class LoginAdmin(graphene.Mutation):
 
     admin = graphene.Field(AdminType)
     errors = graphene.List(ErrorType)
-
-    token = graphene.String()
-    refresh_token = graphene.String()
-    token_expires_in = graphene.Int()
+    auth = graphene.Field(AuthType)
 
     def mutate(self, info, input):
         user: User = User.objects.filter(Q(username=input.login) & Q(admin__isnull=False) |
@@ -47,8 +44,9 @@ class LoginAdmin(graphene.Mutation):
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
         refresh_token = create_refresh_token(user).get_token()
 
-        return LoginAdmin(admin=user.account, token=token, refresh_token=refresh_token,
-                          token_expires_in=payload['exp'], errors=[])
+        auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
+
+        return LoginAdmin(admin=user.account, auth=auth, errors=[])
 
 
 class CreateServiceCategory(DjangoModelMutation):
