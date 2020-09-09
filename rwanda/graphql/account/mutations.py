@@ -28,6 +28,10 @@ class LoginAccount(graphene.Mutation):
     errors = graphene.List(ErrorType)
     auth = graphene.Field(AuthType)
 
+    token = graphene.String()
+    refresh_token = graphene.String()
+    token_expires_in = graphene.Int()
+
     @anonymous_account_required
     def mutate(self, info, input):
         user: User = User.objects.filter(Q(username=input.login) & Q(account__isnull=False) |
@@ -49,7 +53,8 @@ class LoginAccount(graphene.Mutation):
 
         auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
 
-        return LoginAccount(account=user.account, auth=auth, errors=[])
+        return LoginAccount(account=user.account, auth=auth, token=token, refresh_token=refresh_token,
+                          token_expires_in=payload['exp'], errors=[])
 
 
 class ChangeAccountPasswordInput(ChangePasswordInput):

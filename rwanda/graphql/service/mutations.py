@@ -30,7 +30,7 @@ class ServiceMediaInput(graphene.InputObjectType):
 class CreateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
-        exclude_fields = ("activated", "stars", "account")
+        exclude_fields = ("activated", "stars")
         extra_input_fields = {
             "service_options": graphene.List(ServiceOptionInput),
             "service_medias": graphene.List(ServiceMediaInput)

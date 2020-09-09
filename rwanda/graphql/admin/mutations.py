@@ -48,7 +48,8 @@ class LoginAdmin(graphene.Mutation):
         refresh_token = create_refresh_token(user).get_token()
 
         return LoginAdmin(admin=user.account, token=token, refresh_token=refresh_token,
-                            token_expires_in=payload['exp'], errors=[])
+                          token_expires_in=payload['exp'], errors=[])
+
 
 class CreateServiceCategory(DjangoModelMutation):
     class Meta:
@@ -237,5 +238,4 @@ class AdminMutations(graphene.ObjectType):
     delete_service_category = DeleteServiceCategory.Field()
 
     update_service = UpdateService.Field()
-
     handle_litigation = HandleLitigation.Field()

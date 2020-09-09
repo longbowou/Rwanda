@@ -18,3 +18,4 @@ class AdminMutation(AdminMutations):
 
 
 admin_schema = graphene.Schema(query=AdminQuery, mutation=AdminMutation)
+
