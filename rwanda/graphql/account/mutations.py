@@ -115,7 +115,8 @@ class CreateDeposit(AccountDjangoModelMutation):
 class CreateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
-        only_fields = ('amount',)
+        only_fields = ('amount', "phone_number")
+        custom_input_fields = {'phone_number': graphene.String(required=True)}
 
     @classmethod
     @transaction.atomic
@@ -126,7 +127,7 @@ class CreateRefund(AccountDjangoModelMutation):
 
         if input.amount > account.balance:
             return cls(
-                errors=[ErrorType(field='seller_service', messages=[_("Insufficient amount to process the refund.")])])
+                errors=[ErrorType(field='amount', messages=[_("Insufficient amount to process the refund.")])])
 
         debit_account(account, instance.amount, Operation.DESC_DEBIT_FOR_REFUND)
 
