@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from datetime import timedelta
+
+from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -146,7 +148,7 @@ GRAPHQL_JWT = {
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -155,6 +157,15 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LANGUAGES = [
+    ('fr', _('French')),
+    ('en', _('English')),
+]
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, "locales"),
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.auth.models import AbstractUser
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
 from django.db.models import Sum
 
@@ -45,12 +46,12 @@ class Account(models.Model):
     @property
     def services_count(self):
         from rwanda.service.models import Service
-        return Service.objects.filter(account=self).count()
+        return intcomma(Service.objects.filter(account=self).count())
 
     @property
     def purchases_count(self):
         from rwanda.purchase.models import ServicePurchase
-        return ServicePurchase.objects.filter(account=self).count()
+        return intcomma(ServicePurchase.objects.filter(account=self).count())
 
     @property
     def deposits_sum(self):
@@ -58,7 +59,7 @@ class Account(models.Model):
         deposits_sum = Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
         if deposits_sum is None:
             deposits_sum = 0
-        return deposits_sum
+        return intcomma(deposits_sum)
 
     @property
     def refunds_sum(self):
@@ -66,7 +67,7 @@ class Account(models.Model):
         refunds_sum = Refund.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
         if refunds_sum is None:
             refunds_sum = 0
-        return refunds_sum
+        return intcomma(refunds_sum)
 
     @property
     def earnings_sum(self):
@@ -75,4 +76,4 @@ class Account(models.Model):
             .aggregate(Sum('amount'))['amount__sum']
         if earnings_sum is None:
             earnings_sum = 0
-        return earnings_sum
+        return intcomma(earnings_sum)
