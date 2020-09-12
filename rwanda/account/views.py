@@ -1,3 +1,4 @@
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
@@ -11,7 +12,9 @@ class DepositsDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
-        if column == "created_at":
+        if column == "amount":
+            return intcomma(row.amount)
+        elif column == "created_at":
             return date(row.created_at)
         else:
             return super(DepositsDatatableView, self).render_column(row, column)
@@ -28,7 +31,9 @@ class RefundsDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
-        if column == "created_at":
+        if column == "amount":
+            return intcomma(row.amount)
+        elif column == "created_at":
             return date(row.created_at)
         else:
             return super(RefundsDatatableView, self).render_column(row, column)

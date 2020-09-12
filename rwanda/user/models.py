@@ -44,14 +44,26 @@ class Account(models.Model):
         return self.user.username
 
     @property
+    def balance_display(self):
+        return intcomma(self.balance)
+
+    @property
     def services_count(self):
         from rwanda.service.models import Service
-        return intcomma(Service.objects.filter(account=self).count())
+        return Service.objects.filter(account=self).count()
+
+    @property
+    def services_count_display(self):
+        return intcomma(self.services_count)
 
     @property
     def purchases_count(self):
         from rwanda.purchase.models import ServicePurchase
-        return intcomma(ServicePurchase.objects.filter(account=self).count())
+        return ServicePurchase.objects.filter(account=self).count()
+
+    @property
+    def purchases_count_display(self):
+        return intcomma(self.purchases_count)
 
     @property
     def deposits_sum(self):
@@ -59,7 +71,11 @@ class Account(models.Model):
         deposits_sum = Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
         if deposits_sum is None:
             deposits_sum = 0
-        return intcomma(deposits_sum)
+        return deposits_sum
+
+    @property
+    def deposits_sum_display(self):
+        return intcomma(self.deposits_sum)
 
     @property
     def refunds_sum(self):
@@ -67,7 +83,11 @@ class Account(models.Model):
         refunds_sum = Refund.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
         if refunds_sum is None:
             refunds_sum = 0
-        return intcomma(refunds_sum)
+        return refunds_sum
+
+    @property
+    def refunds_sum_display(self):
+        return intcomma(self.refunds_sum)
 
     @property
     def earnings_sum(self):
@@ -76,4 +96,8 @@ class Account(models.Model):
             .aggregate(Sum('amount'))['amount__sum']
         if earnings_sum is None:
             earnings_sum = 0
-        return intcomma(earnings_sum)
+        return earnings_sum
+
+    @property
+    def earnings_sum_display(self):
+        return intcomma(self.earnings_sum)

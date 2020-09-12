@@ -55,11 +55,12 @@ class ServiceType(DjangoObjectType):
 
 
 class AccountType(DjangoObjectType):
-    services_count = graphene.Int(required=True, source="services_count")
-    purchases_count = graphene.Int(required=True, source="purchases_count")
-    deposits_sum = graphene.Int(required=True, source="deposits_sum")
-    refunds_sum = graphene.Int(required=True, source="refunds_sum")
-    earnings_sum = graphene.Int(required=True, source="earnings_sum")
+    balance = graphene.String(required=True, source="balance_display")
+    services_count = graphene.String(required=True, source="services_count_display")
+    purchases_count = graphene.String(required=True, source="purchases_count_display")
+    deposits_sum = graphene.String(required=True, source="deposits_sum_display")
+    refunds_sum = graphene.String(required=True, source="refunds_sum_display")
+    earnings_sum = graphene.String(required=True, source="earnings_sum_display")
 
     class Meta:
         model = Account
