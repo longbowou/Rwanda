@@ -6,3 +6,6 @@ venv
 **/migrations/0*.py
 media
 **/test**.graphql
+static/admin/
+static/graphene_django/
+.reload
