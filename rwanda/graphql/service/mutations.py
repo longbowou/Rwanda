@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, ServiceMediaType, AccountType, ServiceCommentType, ServiceOptionType
+from rwanda.graphql.types import ServiceType, ServiceMediaType, ServiceCommentType, ServiceOptionType
 from rwanda.service.models import ServiceOption, ServiceMedia
 
 
@@ -84,7 +84,7 @@ class UpdateService(AccountDjangoModelMutation):
 
 class DeleteService(AccountDjangoModelDeleteMutation):
     class Meta:
-        model_type = AccountType
+        model_type = ServiceType
 
     @classmethod
     def pre_delete(cls, info, obj):

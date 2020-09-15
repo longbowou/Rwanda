@@ -426,14 +426,13 @@ class DjangoModelDeleteMutation(GrapheneMutation):
 
     @classmethod
     def perform_delete(cls, info, id):
-        instance = None
         old_obj = None
         errors = []
         try:
             instance = cls._meta.model._default_manager.get(pk=id)
             old_obj = deepcopy(instance)
         except Exception:
-            errors += not_found_error(cls._meta.model.__name__, id)
+            return not_found_error(cls._meta.model.__name__, id), old_obj
 
         pre_delete = cls.pre_delete(info, instance)
         if isinstance(pre_delete, cls):

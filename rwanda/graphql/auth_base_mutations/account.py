@@ -18,5 +18,5 @@ class AccountDjangoModelDeleteMutation(DjangoModelDeleteMutation):
 
     @classmethod
     @account_required
-    def mutate(cls, root, info, input):
-        return super().mutate(root, info, input)
+    def mutate(cls, root, info, id):
+        return super().mutate(root, info, id)
