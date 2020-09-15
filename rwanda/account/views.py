@@ -71,14 +71,14 @@ class ServicesDatatableView(BaseDatatableView):
             if row.activated:
                 class_name = 'success'
 
-            return '<span style="height: 10px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.activated_display)
         elif column == "published":
             class_name = 'warning'
             if row.published:
                 class_name = 'success'
 
-            return '<span style="height: 10px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.published_display)
         elif column == "data":
             return ServiceSerializer(row).data
