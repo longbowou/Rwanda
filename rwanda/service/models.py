@@ -41,9 +41,9 @@ class Service(models.Model):
     @property
     def activated_display(self):
         if self.activated:
-            return _('Activated')
+            return _('Yes')
 
-        return _('Not Activated')
+        return _('No')
 
     @property
     def published_display(self):
