@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from rwanda.user.models import Account
 
@@ -32,6 +33,24 @@ class Service(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def not_activated(self):
+        return not self.activated
+
+    @property
+    def activated_display(self):
+        if self.activated:
+            return _('Activated')
+
+        return _('Not Activated')
+
+    @property
+    def published_display(self):
+        if self.published:
+            return _('Yes')
+
+        return _('No')
 
 
 class ServiceMedia(models.Model):
