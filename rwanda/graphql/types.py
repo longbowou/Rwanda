@@ -94,6 +94,9 @@ class ServiceCommentType(DjangoObjectType):
 
 
 class ServiceOptionType(DjangoObjectType):
+    price = graphene.String(source="price_display", required=True)
+    delay = graphene.String(source="delay_display", required=True)
+
     class Meta:
         model = ServiceOption
         filter_fields = {
@@ -198,3 +201,18 @@ class OperationType(DjangoObjectType):
         filter_fields = {
             "id": ("exact",),
         }
+
+
+class ServiceOrderType(ObjectType):
+    total_order_price = graphene.String(required=True)
+    total_order_price_ttc = graphene.String(required=True)
+    cannot_pay_with_wallet = graphene.Boolean(required=True)
+    base_price = graphene.String(required=True)
+    commission = graphene.String(required=True)
+    commission_tva = graphene.String(required=True)
+    total_price = graphene.String(required=True)
+    total_price_tva = graphene.String(required=True)
+    must_be_delivered_at = graphene.String(required=True)
+    total_delay = graphene.String(required=True)
+    service = graphene.Field(ServiceType)
+    serviceOptions = graphene.List(ServiceOptionType)

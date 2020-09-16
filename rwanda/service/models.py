@@ -1,5 +1,6 @@
 import uuid
 
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -91,3 +92,13 @@ class ServiceOption(models.Model):
 
     def __str__(self):
         return self.label
+
+    @property
+    def price_display(self):
+        return intcomma(self.price)
+
+    @property
+    def delay_display(self):
+        if self.delay == 0:
+            return _("No additional delay")
+        return str(self.delay)
