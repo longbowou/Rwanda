@@ -5,10 +5,13 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
+from rwanda.administration.models import Parameter
+from rwanda.purchase.models import ServicePurchase
 from rwanda.service.models import Service
 
 
 class DepositsDatatableView(BaseDatatableView):
+    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
         'amount',
         'created_at',
@@ -16,17 +19,18 @@ class DepositsDatatableView(BaseDatatableView):
 
     def render_column(self, row, column):
         if column == "amount":
-            return intcomma(row.amount)
+            return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
             return date(row.created_at)
         else:
             return super(DepositsDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Deposit.objects.filter(account__user=self.request.user).order_by("-created_at")
+        return Deposit.objects.filter(account__user=self.request.user)
 
 
 class RefundsDatatableView(BaseDatatableView):
+    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
         'amount',
         'phone_number',
@@ -35,14 +39,14 @@ class RefundsDatatableView(BaseDatatableView):
 
     def render_column(self, row, column):
         if column == "amount":
-            return intcomma(row.amount)
+            return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
             return date(row.created_at)
         else:
             return super(RefundsDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Refund.objects.filter(account__user=self.request.user).order_by("-created_at")
+        return Refund.objects.filter(account__user=self.request.user)
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -65,7 +69,7 @@ class ServicesDatatableView(BaseDatatableView):
         if column == "created_at":
             return date_filter(row.created_at)
         elif column == "delay":
-            return intcomma(row.delay)
+            return row.delay_display
         elif column == "activated":
             class_name = 'warning'
             if row.activated:
@@ -86,4 +90,55 @@ class ServicesDatatableView(BaseDatatableView):
             return super(ServicesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Service.objects.filter(account__user=self.request.user).order_by("-created_at").all()
+        return Service.objects.filter(account__user=self.request.user)
+
+
+class ServicePurchaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServicePurchase
+        fields = "__all__"
+
+
+class ServicePurchasesDatatableView(BaseDatatableView):
+    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
+    columns = [
+        'service',
+        'status',
+        'delay',
+        'price',
+        'must_be_delivered_at',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        if column == "service":
+            return row.service.title
+        elif column == "status":
+            class_name = 'dark'
+            if row.accepted:
+                class_name = 'primary'
+
+            if row.delivered:
+                class_name = 'warning'
+
+            if row.approved:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+                .format(class_name, row.status_display)
+        elif column == "delay":
+            return row.delay_display
+        elif column == "price":
+            return row.price_display + " " + self.currency
+        elif column == "created_at":
+            return date_filter(row.created_at)
+        elif column == "must_be_delivered_at":
+            return date_filter(row.must_be_delivered_at)
+        elif column == "data":
+            return ServicePurchaseSerializer(row).data
+        else:
+            return super(ServicePurchasesDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return ServicePurchase.objects.prefetch_related("service").filter(account__user=self.request.user)

@@ -36,6 +36,10 @@ class Service(models.Model):
         return self.title
 
     @property
+    def delay_display(self):
+        return str(self.delay) + " {}".format(_('Days'))
+
+    @property
     def not_activated(self):
         return not self.activated
 
@@ -101,4 +105,4 @@ class ServiceOption(models.Model):
     def delay_display(self):
         if self.delay == 0:
             return _("No additional delay")
-        return str(self.delay)
+        return str(self.delay) + " {}".format(_('Days'))

@@ -1,8 +1,10 @@
 import uuid
 from datetime import timedelta
 
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from rwanda.administration.models import Parameter
 from rwanda.service.models import Service, ServiceOption
@@ -14,12 +16,12 @@ class ServicePurchase(models.Model):
     delay = models.PositiveBigIntegerField()
     price = models.PositiveBigIntegerField()
     commission = models.PositiveBigIntegerField()
-    STATUS_INITIALIZED = 'INITIALIZED'
+    STATUS_INITIATED = 'INITIATED'
     STATUS_ACCEPTED = 'ACCEPTED'
     STATUS_APPROVED = 'APPROVED'
     STATUS_DELIVERED = 'DELIVERED'
     STATUS_CANCELED = 'CANCELED'
-    status = models.CharField(max_length=255, default=STATUS_INITIALIZED)
+    status = models.CharField(max_length=255, default=STATUS_INITIATED)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     service_options = models.ManyToManyField(ServiceOption, blank=True,
@@ -33,12 +35,36 @@ class ServicePurchase(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
-    def fees(self):
-        return self.price - self.commission
+    def price_display(self):
+        return intcomma(self.price)
 
     @property
-    def initialized(self):
-        return self.status == self.STATUS_INITIALIZED
+    def delay_display(self):
+        return str(self.delay) + " {}".format(_('Days'))
+
+    @property
+    def status_display(self):
+        if self.accepted:
+            return _('Accepted')
+
+        if self.delivered:
+            return _('Delivered')
+
+        if self.approved:
+            return _('Approved')
+
+        if self.canceled:
+            return _('Canceled')
+
+        return _("Initiated")
+
+    @property
+    def total_price(self):
+        return self.price + self.commission
+
+    @property
+    def initiated(self):
+        return self.status == self.STATUS_INITIATED
 
     @property
     def accepted(self):
@@ -58,7 +84,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_accepted(self):
-        return self.initialized
+        return self.initiated
 
     @property
     def cannot_be_accepted(self):
@@ -82,7 +108,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_canceled(self):
-        if self.initialized:
+        if self.initiated:
             return True
 
         if self.canceled:

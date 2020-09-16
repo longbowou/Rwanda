@@ -47,6 +47,8 @@ class ServiceCategoryType(DjangoObjectType):
 
 
 class ServiceType(DjangoObjectType):
+    delay = graphene.String(source="delay_display", required=True)
+
     class Meta:
         model = Service
         filter_fields = {
@@ -58,6 +60,7 @@ class AccountType(DjangoObjectType):
     balance = graphene.String(required=True, source="balance_display")
     services_count = graphene.String(required=True, source="services_count_display")
     purchases_count = graphene.String(required=True, source="purchases_count_display")
+    orders_count = graphene.String(required=True, source="orders_count_display")
     deposits_sum = graphene.String(required=True, source="deposits_sum_display")
     refunds_sum = graphene.String(required=True, source="refunds_sum_display")
     earnings_sum = graphene.String(required=True, source="earnings_sum_display")
@@ -105,6 +108,10 @@ class ServiceOptionType(DjangoObjectType):
 
 
 class ServicePurchaseType(DjangoObjectType):
+    price = graphene.String(source="price_display", required=True)
+    delay = graphene.String(source="delay_display", required=True)
+    status = graphene.String(source="status_display", required=True)
+
     can_be_accepted = graphene.Boolean(required=True)
     can_be_delivered = graphene.Boolean(required=True)
     can_be_approved = graphene.Boolean(required=True)

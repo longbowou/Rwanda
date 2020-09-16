@@ -27,8 +27,7 @@ class InitServicePurchase(AccountDjangoModelMutation):
         service = form.instance.service
         delay = service.delay
 
-        price += commission
-        for service_option in form.instance.service_options:
+        for service_option in form.cleaned_data['service_options']:
             price += service_option.price
             delay += service_option.delay
 

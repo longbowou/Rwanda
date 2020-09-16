@@ -66,6 +66,15 @@ class Account(models.Model):
         return intcomma(self.purchases_count)
 
     @property
+    def orders_count(self):
+        from rwanda.purchase.models import ServicePurchase
+        return ServicePurchase.objects.filter(service__account=self).count()
+
+    @property
+    def orders_count_display(self):
+        return intcomma(self.orders_count)
+
+    @property
     def deposits_sum(self):
         from rwanda.account.models import Deposit
         deposits_sum = Deposit.objects.filter(account=self).aggregate(Sum('amount'))['amount__sum']
