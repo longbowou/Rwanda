@@ -22,10 +22,13 @@ class InitServicePurchase(AccountDjangoModelMutation):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
 
         price = int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)
-        service = form.cleaned_data["service"]
+        commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
+
+        service = form.instance.service
         delay = service.delay
 
-        for service_option in form.cleaned_data["service_options"]:
+        price += commission
+        for service_option in form.instance.service_options:
             price += service_option.price
             delay += service_option.delay
 
@@ -36,7 +39,7 @@ class InitServicePurchase(AccountDjangoModelMutation):
         form.instance.account = account
         form.instance.price = price
         form.instance.delay = delay
-        form.instance.commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
+        form.instance.commission = commission
 
         init_service_purchase(form.instance)
 
