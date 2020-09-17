@@ -145,7 +145,7 @@ class ServicePurchasesDatatableView(BaseDatatableView):
             if row.canceled:
                 class_name = 'danger'
 
-            if row.canceled:
+            if row.in_dispute:
                 class_name = 'info'
 
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
