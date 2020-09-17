@@ -94,6 +94,8 @@ class ServicesDatatableView(BaseDatatableView):
 
 
 class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
+    service_title = serializers.CharField()
+
     class Meta:
         model = ServicePurchase
         fields = "__all__"
@@ -130,6 +132,9 @@ class ServicePurchasesDatatableView(BaseDatatableView):
 
             if row.approved:
                 class_name = 'success'
+
+            if row.canceled:
+                class_name = 'danger'
 
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.status_display)

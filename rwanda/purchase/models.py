@@ -35,6 +35,10 @@ class ServicePurchase(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
+    def service_title(self):
+        return self.service.title
+
+    @property
     def price_display(self):
         return intcomma(self.price)
 
