@@ -21,6 +21,7 @@ class ServicePurchase(models.Model):
     STATUS_APPROVED = 'APPROVED'
     STATUS_DELIVERED = 'DELIVERED'
     STATUS_CANCELED = 'CANCELED'
+    STATUS_IN_DISPUTE = 'IN_DISPUTE'
     status = models.CharField(max_length=255, default=STATUS_INITIATED)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
@@ -30,6 +31,7 @@ class ServicePurchase(models.Model):
     delivered_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     canceled_at = models.DateTimeField(null=True, blank=True)
+    in_dispute_at = models.DateTimeField(null=True, blank=True)
     must_be_delivered_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -87,6 +89,38 @@ class ServicePurchase(models.Model):
         return self.status == self.STATUS_CANCELED
 
     @property
+    def in_dispute(self):
+        return self.status == self.STATUS_IN_DISPUTE
+
+    @property
+    def has_been_accepted(self):
+        return self.accepted or self.delivered or self.in_dispute or self.approved
+
+    @property
+    def has_not_been_accepted(self):
+        return not self.has_been_accepted
+
+    @property
+    def has_been_delivered(self):
+        return self.delivered or self.in_dispute or self.approved
+
+    @property
+    def has_been_approved(self):
+        return self.approved
+
+    @property
+    def has_been_canceled(self):
+        return self.canceled
+
+    @property
+    def has_been_in_dispute(self):
+        return self.in_dispute_at is not None
+
+    @property
+    def has_not_been_in_dispute(self):
+        return not self.has_been_in_dispute
+
+    @property
     def can_be_accepted(self):
         return self.initiated
 
@@ -125,12 +159,12 @@ class ServicePurchase(models.Model):
         return not self.can_be_canceled
 
     @property
-    def can_create_litigation(self):
+    def can_be_in_dispute(self):
         return self.delivered
 
     @property
-    def cannot_create_litigation(self):
-        return not self.can_create_litigation
+    def cannot_be_in_dispute(self):
+        return not self.can_be_in_dispute
 
     @property
     def can_be_canceled_for_delay(self):
@@ -159,6 +193,10 @@ class ServicePurchase(models.Model):
     def set_as_canceled(self):
         self.status = self.STATUS_CANCELED
         self.canceled_at = timezone.now()
+
+    def set_in_dispute(self):
+        self.status = self.STATUS_IN_DISPUTE
+        self.in_dispute_at = timezone.now()
 
     def is_buyer(self, account: Account):
         return self.account_id == account.id

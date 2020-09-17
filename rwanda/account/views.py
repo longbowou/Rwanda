@@ -104,6 +104,7 @@ class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
 class ServicePurchaseSerializer(ServicePurchaseBaseSerializer):
     can_be_approved = serializers.BooleanField()
     can_be_canceled = serializers.BooleanField()
+    can_be_in_dispute = serializers.BooleanField()
 
 
 class ServicePurchasesDatatableView(BaseDatatableView):

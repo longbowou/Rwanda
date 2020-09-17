@@ -257,18 +257,25 @@ class CreateLitigation(AccountDjangoModelMutation):
         only_fields = ('service_purchase', 'title', 'description')
 
     @classmethod
+    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
-        account = info.context.user.account
+        account: Account = info.context.user.account
 
         if form.cleaned_data["service_purchase"].account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         service_purchase: ServicePurchase = form.cleaned_data["service_purchase"]
-        if service_purchase.cannot_create_litigation:
+        if service_purchase.cannot_be_in_dispute:
             return cls(
                 errors=[ErrorType(field="service_purchase", messages=[_("You cannot perform this action.")])])
 
+        service_purchase.set_in_dispute()
+        service_purchase.save()
+
         form.instance.account = account
+        form.save()
+
+        return cls(litigation=form.instance, errors=[])
 
 
 class AccountMutations(graphene.ObjectType):
