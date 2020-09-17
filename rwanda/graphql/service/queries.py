@@ -3,16 +3,22 @@ from datetime import datetime, timedelta
 import graphene
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
+from graphene_django_extras import DjangoFilterListField
 
 from rwanda.administration.models import Parameter
 from rwanda.graphql.decorators import account_required
-from rwanda.graphql.types import ServiceOrderType
+from rwanda.graphql.types import ServiceOrderType, ServiceType
 from rwanda.service.models import Service, ServiceOption
 
 
 class ServiceQueries(graphene.ObjectType):
-    service_order_preview = graphene.Field(ServiceOrderType, service=graphene.UUID(required=True),
+    services = DjangoFilterListField(ServiceType)
+    service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
+    service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
+
+    def resolve_service(self, info, id):
+        return Service.objects.get(pk=id)
 
     @account_required
     def resolve_service_order_preview(self, info, service, service_options):
