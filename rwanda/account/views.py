@@ -93,13 +93,19 @@ class ServicesDatatableView(BaseDatatableView):
         return Service.objects.filter(account__user=self.request.user)
 
 
-class ServicePurchaseSerializer(serializers.ModelSerializer):
+class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServicePurchase
         fields = "__all__"
 
 
+class ServicePurchaseSerializer(ServicePurchaseBaseSerializer):
+    can_be_approved = serializers.BooleanField()
+    can_be_canceled = serializers.BooleanField()
+
+
 class ServicePurchasesDatatableView(BaseDatatableView):
+    serializer = ServicePurchaseSerializer
     currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
         'service',
@@ -136,9 +142,21 @@ class ServicePurchasesDatatableView(BaseDatatableView):
         elif column == "must_be_delivered_at":
             return date_filter(row.must_be_delivered_at)
         elif column == "data":
-            return ServicePurchaseSerializer(row).data
+            return self.serializer(row).data
         else:
             return super(ServicePurchasesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
         return ServicePurchase.objects.prefetch_related("service").filter(account__user=self.request.user)
+
+
+class ServiceOrderSerializer(ServicePurchaseBaseSerializer):
+    can_be_accepted = serializers.BooleanField()
+    can_be_delivered = serializers.BooleanField()
+
+
+class ServiceOrdersDatatableView(ServicePurchasesDatatableView):
+    serializer = ServiceOrderSerializer
+
+    def get_initial_queryset(self):
+        return ServicePurchase.objects.prefetch_related("service").filter(service__account__user=self.request.user)
