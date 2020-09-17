@@ -112,6 +112,14 @@ class ServicePurchaseType(DjangoObjectType):
     delay = graphene.String(source="delay_display", required=True)
     status = graphene.String(source="status_display", required=True)
 
+    number = graphene.String(required=True)
+
+    initiated = graphene.Boolean(source="initiated", required=True)
+    accepted = graphene.Boolean(source="accepted", required=True)
+    delivered = graphene.Boolean(source="delivered", required=True)
+    approved = graphene.Boolean(source="approved", required=True)
+    canceled = graphene.Boolean(source="canceled", required=True)
+
     can_be_accepted = graphene.Boolean(required=True)
     can_be_delivered = graphene.Boolean(required=True)
     can_be_approved = graphene.Boolean(required=True)
@@ -123,6 +131,9 @@ class ServicePurchaseType(DjangoObjectType):
         filter_fields = {
             "id": ("exact",),
         }
+
+    def resolve_number(self, info):
+        return "#" + str(self.id)[24:].upper()
 
     def resolve_can_be_accepted(self, info):
         user = info.context.user
