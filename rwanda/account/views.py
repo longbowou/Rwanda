@@ -18,6 +18,8 @@ class DepositsDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
+        row: Deposit
+
         if column == "amount":
             return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
@@ -38,6 +40,8 @@ class RefundsDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
+        row: Refund
+
         if column == "amount":
             return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
@@ -66,6 +70,8 @@ class ServicesDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
+        row: Service
+
         if column == "created_at":
             return date_filter(row.created_at)
         elif column == "delay":
@@ -121,6 +127,8 @@ class ServicePurchasesDatatableView(BaseDatatableView):
     ]
 
     def render_column(self, row, column):
+        row: ServicePurchase
+
         if column == "service":
             return row.service.title
         elif column == "status":
@@ -136,6 +144,9 @@ class ServicePurchasesDatatableView(BaseDatatableView):
 
             if row.canceled:
                 class_name = 'danger'
+
+            if row.canceled:
+                class_name = 'info'
 
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                 .format(class_name, row.status_display)
