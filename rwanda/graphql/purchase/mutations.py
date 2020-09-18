@@ -153,7 +153,7 @@ class CreateDeliverable(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.instance.service_purchase.service.is_not_owner(info.context.user.account):
+        if form.instance.service_purchase.is_not_seller(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
@@ -165,7 +165,7 @@ class UpdateDeliverable(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.instance.service_purchase.service.is_not_owner(info.context.user.account):
+        if form.instance.service_purchase.is_not_seller(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
@@ -175,7 +175,7 @@ class DeleteDeliverable(AccountDjangoModelDeleteMutation):
 
     @classmethod
     def pre_delete(cls, info, obj):
-        if obj.service_purchase.service.is_not_owner(info.context.user.account):
+        if obj.service_purchase.is_not_seller(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
