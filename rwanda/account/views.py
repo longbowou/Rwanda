@@ -1,13 +1,20 @@
+import os
+import uuid
+
+from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Count
+from django.http import JsonResponse
 from django.template.defaultfilters import date
 from django.template.defaultfilters import date as date_filter
+from django.views import View
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
 from rwanda.administration.models import Parameter
-from rwanda.purchase.models import ServicePurchase, Deliverable
+from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service
 
 
@@ -229,3 +236,23 @@ class OrderDeliverablesDatatableView(BaseDatatableView):
     def get_initial_queryset(self):
         return Deliverable.objects.annotate(file_counts=Count('deliverablefile')) \
             .filter(service_purchase=self.kwargs['pk'])
+
+
+class DeliverableUploadView(View):
+    def post(self, request, *args, **kwargs):
+        f: UploadedFile = request.FILES['file']
+        if f is not None:
+            file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
+            folder = "deliverables"
+            file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
+
+            with open(file_path, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            deliverable_file = DeliverableFile()
+            deliverable_file.deliverable_id = kwargs['pk']
+            deliverable_file.name = f.name
+            deliverable_file.file = folder + "/" + file_name
+            deliverable_file.save()
+        return JsonResponse("True", safe=False)
