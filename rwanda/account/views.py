@@ -101,6 +101,7 @@ class ServicesDatatableView(BaseDatatableView):
 
 class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
     service_title = serializers.CharField()
+    number = serializers.CharField()
 
     class Meta:
         model = ServicePurchase

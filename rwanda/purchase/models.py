@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
+from django.template.defaultfilters import date as date_filter
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -35,6 +36,17 @@ class ServicePurchase(models.Model):
     must_be_delivered_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def number(self):
+        return "#" + str(self.id)[24:].upper()
+
+    @property
+    def must_be_delivered_at_display(self):
+        if self.has_not_been_accepted:
+            return None
+
+        return date_filter(self.must_be_delivered_at)
 
     @property
     def service_title(self):
@@ -256,3 +268,48 @@ class Litigation(models.Model):
     @property
     def canceled(self):
         return self.decision == self.DECISION_CANCELED
+
+
+class Deliverable(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    VERSION_ALPHA = 'ALPHA'
+    VERSION_BETA = 'BETA'
+    VERSION_FINAL = 'FINAL'
+    version = models.CharField(max_length=255)
+    description = models.TextField()
+    published = models.BooleanField(default=False)
+    service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def alpha(self):
+        return self.version == self.VERSION_ALPHA
+
+    @property
+    def beta(self):
+        return self.version == self.VERSION_BETA
+
+    @property
+    def final(self):
+        return self.version == self.VERSION_FINAL
+
+    @property
+    def version_display(self):
+        if self.alpha:
+            return _('Alpha')
+
+        if self.beta:
+            return _('Beta')
+
+        return _('Final')
+
+
+class DeliverableFile(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    file = models.FileField(upload_to='deliverables/')
+    deliverable = models.ForeignKey(Deliverable, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
