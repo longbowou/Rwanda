@@ -12,7 +12,7 @@ from rwanda.account.models import Deposit, Refund
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.graphql.interfaces import UserInterface
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation, Deliverable
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
 
@@ -318,6 +318,21 @@ class ServicePurchaseType(DjangoObjectType):
             ))
 
         return timelines
+
+
+class DeliverableType(DjangoObjectType):
+    version_display = graphene.String(source="version_display", required=True)
+
+    class Meta:
+        model = Deliverable
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class DeliverableVersionType(ObjectType):
+    label = graphene.String(required=True)
+    value = graphene.String(required=True)
 
 
 class ServicePurchaseServiceOptionType(DjangoObjectType):

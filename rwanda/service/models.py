@@ -35,6 +35,12 @@ class Service(models.Model):
     def __str__(self):
         return self.title
 
+    def is_owner(self, account):
+        return self.account_id == account.id
+
+    def is_not_owner(self, account):
+        return not self.is_owner(account)
+
     @property
     def delay_display(self):
         return str(self.delay) + " {}".format(_('Days'))

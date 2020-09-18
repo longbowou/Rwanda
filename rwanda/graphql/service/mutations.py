@@ -78,7 +78,7 @@ class UpdateService(AccountDjangoModelMutation):
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.instance.account_id != info.context.user.account.id:
+        if form.instance.is_not_owner(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
@@ -88,7 +88,7 @@ class DeleteService(AccountDjangoModelDeleteMutation):
 
     @classmethod
     def pre_delete(cls, info, obj):
-        if obj.account_id != info.context.user.account.id:
+        if obj.is_not_owner(info.context.user.account):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 

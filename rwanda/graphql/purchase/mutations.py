@@ -4,9 +4,9 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.administration.models import Parameter
-from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
+from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
-from rwanda.graphql.types import ServicePurchaseType
+from rwanda.graphql.types import ServicePurchaseType, DeliverableType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import Account
 
@@ -146,9 +146,46 @@ class CancelServicePurchase(AccountDjangoModelMutation):
         return cls(servicePurchase=service_purchase, errors=[])
 
 
+class CreateDeliverable(AccountDjangoModelMutation):
+    class Meta:
+        model_type = DeliverableType
+        exclude_fields = ("published",)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.service_purchase.service.is_not_owner(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
+class UpdateDeliverable(AccountDjangoModelMutation):
+    class Meta:
+        model_type = DeliverableType
+        for_update = True
+        exclude_fields = ("service_purchase",)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.service_purchase.service.is_not_owner(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
+class DeleteDeliverable(AccountDjangoModelDeleteMutation):
+    class Meta:
+        model_type = DeliverableType
+
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.service_purchase.service.is_not_owner(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
 class PurchaseMutations(graphene.ObjectType):
     init_service_purchase = InitServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
     approve_service_purchase = ApproveServicePurchase.Field()
     deliver_service_purchase = DeliverServicePurchase.Field()
     cancel_service_purchase = CancelServicePurchase.Field()
+
+    create_deliverable = CreateDeliverable.Field()
+    update_deliverable = UpdateDeliverable.Field()
+    delete_deliverable = DeleteDeliverable.Field()
