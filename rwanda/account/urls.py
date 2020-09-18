@@ -9,5 +9,5 @@ urlpatterns = [
     path('services.json', ServicesDatatableView.as_view()),
     path('service-purchases.json', ServicePurchasesDatatableView.as_view()),
     path('service-orders.json', ServiceOrdersDatatableView.as_view()),
-    path('deliverables/<uuid:pk>', OrderDeliverablesDatatableView.as_view()),
+    path('orders/<uuid:pk>/deliverables.json', OrderDeliverablesDatatableView.as_view()),
 ]
