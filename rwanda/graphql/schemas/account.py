@@ -7,7 +7,6 @@ from rwanda.graphql.account.mutations import AccountMutations
 from rwanda.graphql.account.queries import AccountQueries
 from rwanda.graphql.admin.mutations import AdminMutations
 from rwanda.graphql.purchase.mutations import PurchaseMutations
-from rwanda.graphql.decorators import account_required
 from rwanda.graphql.service.mutations import ServiceMutations
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, LitigationType, ServicePurchaseType, ParametersType, \
     ServiceOptionType
@@ -19,7 +18,6 @@ class AccountQuery(AccountQueries):
     service_purchases = DjangoFilterListField(ServicePurchaseType)
     services = DjangoFilterListField(ServiceType)
     serviceOptions = DjangoFilterListField(ServiceOptionType)
-    serviceOption = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
     service = graphene.Field(ServiceType, id=graphene.UUID(required=True))
     litigation = DjangoFilterListField(LitigationType)
     parameters = graphene.Field(ParametersType)
