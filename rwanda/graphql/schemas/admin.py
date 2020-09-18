@@ -3,12 +3,14 @@ from graphene_django_extras import DjangoFilterListField
 
 from rwanda.graphql.admin.mutations import AdminMutations
 from rwanda.graphql.admin.queries import AdminQueries
-from rwanda.graphql.types import ServiceCategoryType, ServiceType, FundType, ParameterType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, FundType, ParameterType, ServiceOptionType
+from rwanda.service.models import ServiceOption
 
 
 class AdminQuery(AdminQueries):
     service_categories = DjangoFilterListField(ServiceCategoryType)
     services = DjangoFilterListField(ServiceType)
+    serviceOptions = DjangoFilterListField(ServiceOptionType)
     funds = DjangoFilterListField(FundType)
     parameters = DjangoFilterListField(ParameterType)
 
