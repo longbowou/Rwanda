@@ -140,6 +140,7 @@ class ServicePurchaseType(DjangoObjectType):
     can_be_approved = graphene.Boolean(required=True)
     can_be_canceled = graphene.Boolean(required=True)
     can_be_in_dispute = graphene.Boolean(required=True)
+    can_add_deliverable = graphene.Boolean(required=True)
 
     timelines = graphene.List(ServicePurchaseTimeLine, required=True)
 
@@ -166,6 +167,15 @@ class ServicePurchaseType(DjangoObjectType):
             return False
 
         return self.can_be_delivered and self.is_seller(user.account)
+
+    def resolve_can_add_deliverable(self, info):
+        self: ServicePurchase
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_add_deliverable and self.is_seller(user.account)
 
     def resolve_can_be_approved(self, info):
         self: ServicePurchase

@@ -133,6 +133,10 @@ class ServicePurchase(models.Model):
         return not self.has_been_in_dispute
 
     @property
+    def can_add_deliverable(self):
+        return self.accepted or self.delivered
+
+    @property
     def can_be_accepted(self):
         return self.initiated
 
@@ -304,6 +308,13 @@ class Deliverable(models.Model):
             return _('Beta')
 
         return _('Final')
+
+    @property
+    def published_display(self):
+        if self.published:
+            return _('Yes')
+
+        return _('No')
 
 
 class DeliverableFile(models.Model):

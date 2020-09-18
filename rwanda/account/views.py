@@ -1,4 +1,5 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.db.models import Count
 from django.template.defaultfilters import date
 from django.template.defaultfilters import date as date_filter
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -6,7 +7,7 @@ from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
 from rwanda.administration.models import Parameter
-from rwanda.purchase.models import ServicePurchase
+from rwanda.purchase.models import ServicePurchase, Deliverable
 from rwanda.service.models import Service
 
 
@@ -178,3 +179,53 @@ class ServiceOrdersDatatableView(ServicePurchasesDatatableView):
 
     def get_initial_queryset(self):
         return ServicePurchase.objects.prefetch_related("service").filter(service__account__user=self.request.user)
+
+
+class DeliverableSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Deliverable
+        fields = "__all__"
+
+
+class OrderDeliverablesDatatableView(BaseDatatableView):
+    columns = [
+        'title',
+        'version',
+        'file_counts',
+        'published',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        row: Deliverable
+
+        if column == "created_at":
+            return date_filter(row.created_at)
+        elif column == "file_counts":
+            return intcomma(row.file_counts)
+        elif column == "version":
+            class_name = 'success'
+            if row.alpha:
+                class_name = 'primary'
+
+            if row.beta:
+                class_name = 'warning'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.version_display)
+        elif column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
+        elif column == "data":
+            return DeliverableSerializer(row).data
+        else:
+            return super(OrderDeliverablesDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return Deliverable.objects.annotate(file_counts=Count('deliverablefile')) \
+            .filter(service_purchase=self.kwargs['pk'])
