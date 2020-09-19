@@ -10,9 +10,10 @@ from django.template.defaultfilters import date
 from django.template.defaultfilters import date as date_filter
 from django.views import View
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
+from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
+    DeliverableSerializer, DeliverableFileSerializer
 from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
@@ -62,12 +63,6 @@ class RefundsDatatableView(BaseDatatableView):
         return Refund.objects.filter(account__user=self.request.user)
 
 
-class ServiceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Service
-        fields = "__all__"
-
-
 class ServicesDatatableView(BaseDatatableView):
     columns = [
         'title',
@@ -108,23 +103,8 @@ class ServicesDatatableView(BaseDatatableView):
         return Service.objects.filter(account__user=self.request.user)
 
 
-class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
-    service_title = serializers.CharField()
-    number = serializers.CharField()
-
-    class Meta:
-        model = ServicePurchase
-        fields = "__all__"
-
-
-class ServicePurchaseSerializer(ServicePurchaseBaseSerializer):
-    can_be_approved = serializers.BooleanField()
-    can_be_canceled = serializers.BooleanField()
-    can_be_in_dispute = serializers.BooleanField()
-
-
 class PurchasesDatatableView(BaseDatatableView):
-    serializer = ServicePurchaseSerializer
+    serializer = PurchaseSerializer
     currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
         'service',
@@ -179,11 +159,6 @@ class PurchasesDatatableView(BaseDatatableView):
             .filter(account__user=self.request.user)
 
 
-class OrderSerializer(ServicePurchaseBaseSerializer):
-    can_be_accepted = serializers.BooleanField()
-    can_be_delivered = serializers.BooleanField()
-
-
 class OrdersDatatableView(PurchasesDatatableView):
     serializer = OrderSerializer
 
@@ -193,13 +168,7 @@ class OrdersDatatableView(PurchasesDatatableView):
             .filter(service__account__user=self.request.user)
 
 
-class DeliverableSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Deliverable
-        fields = "__all__"
-
-
-class DeliverablesDatatableView(BaseDatatableView):
+class OrderDeliverablesDatatableView(BaseDatatableView):
     columns = [
         'title',
         'version',
@@ -236,17 +205,17 @@ class DeliverablesDatatableView(BaseDatatableView):
         elif column == "data":
             return DeliverableSerializer(row).data
         else:
-            return super(DeliverablesDatatableView, self).render_column(row, column)
+            return super(OrderDeliverablesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
         return Deliverable.objects.annotate(annotate_files_count=Count('deliverablefile')) \
             .filter(service_purchase=self.kwargs['pk'])
 
 
-class DeliverableFileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DeliverableFile
-        fields = "__all__"
+class PurchaseDeliverablesDatatableView(OrderDeliverablesDatatableView):
+    def get_initial_queryset(self):
+        return Deliverable.objects.annotate(annotate_files_count=Count('deliverablefile')) \
+            .filter(service_purchase=self.kwargs['pk'], published=True)
 
 
 class DeliverableFilesDatatableView(BaseDatatableView):

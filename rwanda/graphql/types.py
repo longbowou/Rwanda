@@ -135,6 +135,7 @@ class ServicePurchaseType(DjangoObjectType):
     approved = graphene.Boolean(source="approved", required=True)
     canceled = graphene.Boolean(source="canceled", required=True)
     in_dispute = graphene.Boolean(source="in_dispute", required=True)
+    has_been_accepted = graphene.Boolean(source="has_been_accepted", required=True)
 
     can_be_accepted = graphene.Boolean(required=True)
     can_be_delivered = graphene.Boolean(required=True)
