@@ -54,7 +54,7 @@ class CreateService(AccountDjangoModelMutation):
                 if item.file is not None:
                     f: UploadedFile = info.context.FILES[item.file]
                     if f is not None:
-                        file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[1]
+                        file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
                         folder = "service-medias"
                         file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
 

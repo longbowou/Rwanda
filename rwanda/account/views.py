@@ -13,6 +13,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
+from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service
@@ -194,7 +195,7 @@ class DeliverableSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class OrderDeliverablesDatatableView(BaseDatatableView):
+class DeliverablesDatatableView(BaseDatatableView):
     columns = [
         'title',
         'version',
@@ -231,11 +232,41 @@ class OrderDeliverablesDatatableView(BaseDatatableView):
         elif column == "data":
             return DeliverableSerializer(row).data
         else:
-            return super(OrderDeliverablesDatatableView, self).render_column(row, column)
+            return super(DeliverablesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
         return Deliverable.objects.annotate(file_counts=Count('deliverablefile')) \
             .filter(service_purchase=self.kwargs['pk'])
+
+
+class DeliverableFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeliverableFile
+        fields = "__all__"
+
+
+class DeliverableFilesDatatableView(BaseDatatableView):
+    columns = [
+        'name',
+        'size',
+        'created_at',
+        'data',
+    ]
+
+    def render_column(self, row, column):
+        row: DeliverableFile
+
+        if column == "created_at":
+            return date_filter(row.created_at)
+        elif column == "size":
+            return natural_size(row.file.size)
+        elif column == "data":
+            return DeliverableFileSerializer(row).data
+        else:
+            return super(DeliverableFilesDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return DeliverableFile.objects.filter(deliverable=self.kwargs['pk'])
 
 
 class DeliverableUploadView(View):
@@ -255,4 +286,4 @@ class DeliverableUploadView(View):
             deliverable_file.name = f.name
             deliverable_file.file = folder + "/" + file_name
             deliverable_file.save()
-        return JsonResponse("True", safe=False)
+        return JsonResponse({"message": "Uploaded successfully"}, safe=False)

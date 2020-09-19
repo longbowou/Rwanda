@@ -149,7 +149,6 @@ class CancelServicePurchase(AccountDjangoModelMutation):
 class CreateDeliverable(AccountDjangoModelMutation):
     class Meta:
         model_type = DeliverableType
-        exclude_fields = ("published",)
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
