@@ -287,9 +287,24 @@ class Deliverable(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    deliverable_files_count = None
+
+    def __str__(self):
+        return self.title
+
     @property
     def alpha(self):
         return self.version == self.VERSION_ALPHA
+
+    @property
+    def files_count(self):
+        if self.deliverable_files_count is None:
+            self.deliverable_files_count = DeliverableFile.objects.filter(deliverable=self).count()
+        return self.deliverable_files_count
+
+    @property
+    def files_count_display(self):
+        return intcomma(self.files_count)
 
     @property
     def beta(self):
@@ -321,6 +336,10 @@ class DeliverableFile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
     file = models.FileField(upload_to='deliverables/')
+    size = models.BigIntegerField(default=0)
     deliverable = models.ForeignKey(Deliverable, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

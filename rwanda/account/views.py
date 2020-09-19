@@ -199,7 +199,7 @@ class DeliverablesDatatableView(BaseDatatableView):
     columns = [
         'title',
         'version',
-        'file_counts',
+        'annotate_files_count',
         'published',
         'created_at',
         'data'
@@ -210,8 +210,8 @@ class DeliverablesDatatableView(BaseDatatableView):
 
         if column == "created_at":
             return date_filter(row.created_at)
-        elif column == "file_counts":
-            return intcomma(row.file_counts)
+        elif column == "annotate_files_count":
+            return intcomma(row.annotate_files_count)
         elif column == "version":
             class_name = 'success'
             if row.alpha:
@@ -235,7 +235,7 @@ class DeliverablesDatatableView(BaseDatatableView):
             return super(DeliverablesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Deliverable.objects.annotate(file_counts=Count('deliverablefile')) \
+        return Deliverable.objects.annotate(annotate_files_count=Count('deliverablefile')) \
             .filter(service_purchase=self.kwargs['pk'])
 
 
@@ -259,9 +259,11 @@ class DeliverableFilesDatatableView(BaseDatatableView):
         if column == "created_at":
             return date_filter(row.created_at)
         elif column == "size":
-            return natural_size(row.file.size)
+            return natural_size(row.size)
         elif column == "data":
-            return DeliverableFileSerializer(row).data
+            data = DeliverableFileSerializer(row).data
+            data['file_url'] = self.request.scheme + "://" + self.request.META['HTTP_HOST'] + row.file.url
+            return data
         else:
             return super(DeliverableFilesDatatableView, self).render_column(row, column)
 
@@ -285,5 +287,7 @@ class DeliverableUploadView(View):
             deliverable_file.deliverable_id = kwargs['pk']
             deliverable_file.name = f.name
             deliverable_file.file = folder + "/" + file_name
+            deliverable_file.size = f.size
             deliverable_file.save()
+
         return JsonResponse({"message": "Uploaded successfully"}, safe=False)

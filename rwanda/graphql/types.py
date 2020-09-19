@@ -322,6 +322,8 @@ class ServicePurchaseType(DjangoObjectType):
 
 
 class DeliverableType(DjangoObjectType):
+    files_count = graphene.Int(source="files_count", required=True)
+    files_count_display = graphene.String(source="files_counts_display", required=True)
     version_display = graphene.String(source="version_display", required=True)
 
     class Meta:
