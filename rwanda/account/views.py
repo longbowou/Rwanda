@@ -123,7 +123,7 @@ class ServicePurchaseSerializer(ServicePurchaseBaseSerializer):
     can_be_in_dispute = serializers.BooleanField()
 
 
-class ServicePurchasesDatatableView(BaseDatatableView):
+class PurchasesDatatableView(BaseDatatableView):
     serializer = ServicePurchaseSerializer
     currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
@@ -171,22 +171,26 @@ class ServicePurchasesDatatableView(BaseDatatableView):
         elif column == "data":
             return self.serializer(row).data
         else:
-            return super(ServicePurchasesDatatableView, self).render_column(row, column)
+            return super(PurchasesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return ServicePurchase.objects.prefetch_related("service").filter(account__user=self.request.user)
+        return ServicePurchase.objects \
+            .prefetch_related("service") \
+            .filter(account__user=self.request.user)
 
 
-class ServiceOrderSerializer(ServicePurchaseBaseSerializer):
+class OrderSerializer(ServicePurchaseBaseSerializer):
     can_be_accepted = serializers.BooleanField()
     can_be_delivered = serializers.BooleanField()
 
 
-class ServiceOrdersDatatableView(ServicePurchasesDatatableView):
-    serializer = ServiceOrderSerializer
+class OrdersDatatableView(PurchasesDatatableView):
+    serializer = OrderSerializer
 
     def get_initial_queryset(self):
-        return ServicePurchase.objects.prefetch_related("service").filter(service__account__user=self.request.user)
+        return ServicePurchase.objects \
+            .prefetch_related("service") \
+            .filter(service__account__user=self.request.user)
 
 
 class DeliverableSerializer(serializers.ModelSerializer):

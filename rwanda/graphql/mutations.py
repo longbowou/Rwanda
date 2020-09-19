@@ -436,7 +436,7 @@ class DjangoModelDeleteMutation(GrapheneMutation):
 
         pre_delete = cls.pre_delete(info, instance)
         if isinstance(pre_delete, cls):
-            return pre_delete
+            return pre_delete, None
 
         instance.delete()
 

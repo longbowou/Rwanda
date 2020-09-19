@@ -34,6 +34,7 @@ class ServicePurchase(models.Model):
     canceled_at = models.DateTimeField(null=True, blank=True)
     in_dispute_at = models.DateTimeField(null=True, blank=True)
     must_be_delivered_at = models.DateTimeField(null=True, blank=True)
+    has_final_deliverable = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -146,7 +147,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_delivered(self):
-        return self.accepted
+        return self.accepted and self.has_final_deliverable
 
     @property
     def cannot_be_delivered(self):
