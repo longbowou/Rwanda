@@ -6,7 +6,7 @@ from graphene_django.types import ErrorType
 from rwanda.administration.models import Parameter
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
-from rwanda.graphql.types import ServicePurchaseType, DeliverableType
+from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import Account
 
@@ -178,6 +178,16 @@ class DeleteDeliverable(AccountDjangoModelDeleteMutation):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
+class DeleteDeliverableFile(AccountDjangoModelDeleteMutation):
+    class Meta:
+        model_type = DeliverableFileType
+
+    @classmethod
+    def pre_delete(cls, info, obj):
+        if obj.deliverable.service_purchase.is_not_seller(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+
 class PurchaseMutations(graphene.ObjectType):
     init_service_purchase = InitServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
@@ -188,3 +198,5 @@ class PurchaseMutations(graphene.ObjectType):
     create_deliverable = CreateDeliverable.Field()
     update_deliverable = UpdateDeliverable.Field()
     delete_deliverable = DeleteDeliverable.Field()
+
+    delete_deliverable_file = DeleteDeliverableFile.Field()

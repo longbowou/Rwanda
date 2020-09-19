@@ -12,7 +12,8 @@ from rwanda.account.models import Deposit, Refund
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.graphql.interfaces import UserInterface
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation, Deliverable
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation, Deliverable, \
+    DeliverableFile
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
 
@@ -325,6 +326,14 @@ class DeliverableType(DjangoObjectType):
 
     class Meta:
         model = Deliverable
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class DeliverableFileType(DjangoObjectType):
+    class Meta:
+        model = DeliverableFile
         filter_fields = {
             "id": ("exact",),
         }
