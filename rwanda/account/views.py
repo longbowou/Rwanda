@@ -21,7 +21,7 @@ from rwanda.service.models import Service
 
 
 class DepositsDatatableView(BaseDatatableView):
-    currency = param_currency
+    currency = None
     columns = [
         'amount',
         'created_at',
@@ -29,7 +29,7 @@ class DepositsDatatableView(BaseDatatableView):
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
-        self.currency = self.currency()
+        self.currency = param_currency()
 
     def render_column(self, row, column):
         row: Deposit
@@ -46,7 +46,7 @@ class DepositsDatatableView(BaseDatatableView):
 
 
 class RefundsDatatableView(BaseDatatableView):
-    currency = param_currency
+    currency = None
     columns = [
         'amount',
         'phone_number',
@@ -55,7 +55,7 @@ class RefundsDatatableView(BaseDatatableView):
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
-        self.currency = self.currency()
+        self.currency = param_currency()
 
     def render_column(self, row, column):
         row: Refund
@@ -113,7 +113,7 @@ class ServicesDatatableView(BaseDatatableView):
 
 class PurchasesDatatableView(BaseDatatableView):
     serializer = PurchaseSerializer
-    currency = param_currency
+    currency = None
     columns = [
         'number',
         'service',
@@ -127,7 +127,7 @@ class PurchasesDatatableView(BaseDatatableView):
 
     def initialize(self, *args, **kwargs):
         super().initialize(*args, **kwargs)
-        self.currency = self.currency()
+        self.currency = param_currency()
 
     def render_column(self, row, column):
         row: ServicePurchase

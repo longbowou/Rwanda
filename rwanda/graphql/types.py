@@ -55,6 +55,7 @@ class ServiceCategoryType(DjangoObjectType):
 
 class ServiceType(DjangoObjectType):
     delay_display = graphene.String(source="delay_display", required=True)
+    created_at = graphene.String(source="created_at_display", required=True)
 
     class Meta:
         model = Service

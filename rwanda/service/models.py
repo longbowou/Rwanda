@@ -2,6 +2,7 @@ import uuid
 
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
+from django.template.defaultfilters import date as date_filter
 from django.utils.translation import gettext_lazy as _
 
 from rwanda.user.models import Account
@@ -44,6 +45,10 @@ class Service(models.Model):
     @property
     def delay_display(self):
         return str(self.delay) + " {}".format(_('Days'))
+
+    @property
+    def created_at_display(self):
+        return date_filter(self.created_at)
 
     @property
     def not_activated(self):
