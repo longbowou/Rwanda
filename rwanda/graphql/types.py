@@ -261,6 +261,23 @@ class ServicePurchaseType(DjangoObjectType):
 
             last_happen_at = self.accepted_at
 
+        for deliverable in self.deliverable_set.filter(published=True) \
+                .order_by("created_at") \
+                .all():
+            happen_at = str(t_filter(deliverable.created_at))
+            if last_happen_at.date() != deliverable.created_at.date():
+                happen_at = str(d_filter(deliverable.created_at)) + " " + happen_at
+
+            timelines.append(ServicePurchaseTimeLine(
+                happen_at=happen_at.title(),
+                status=_('Deliverable Published'),
+                color='info',
+                description=_('Deliverable <strong>{}</strong> published in version <strong>{}</strong>.'
+                              .format(deliverable.title, deliverable.version_display)),
+            ))
+
+            last_happen_at = deliverable.created_at
+
         if self.has_been_canceled and self.has_been_accepted:
             happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():

@@ -216,7 +216,9 @@ class OrderDeliverablesDatatableView(BaseDatatableView):
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                 .format(class_name, row.published_display)
         elif column == "data":
-            return DeliverableSerializer(row).data
+            data = DeliverableSerializer(row).data
+            data['files_count'] = row.annotate_files_count
+            return data
         else:
             return super(OrderDeliverablesDatatableView, self).render_column(row, column)
 
