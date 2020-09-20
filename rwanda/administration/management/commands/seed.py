@@ -25,7 +25,7 @@ class Command(BaseCommand):
             if not Fund.objects.filter(label=item).exists():
                 Fund(label=item).save()
 
-        for item in ["TECH", ]:
+        for item in ["Technology", "Art", "Business"]:
             if not ServiceCategory.objects.filter(label=item).exists():
                 ServiceCategory(label=item).save()
 
