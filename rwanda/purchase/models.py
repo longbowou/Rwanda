@@ -33,7 +33,7 @@ class ServicePurchase(models.Model):
     approved_at = models.DateTimeField(null=True, blank=True)
     canceled_at = models.DateTimeField(null=True, blank=True)
     in_dispute_at = models.DateTimeField(null=True, blank=True)
-    must_be_delivered_at = models.DateTimeField(null=True, blank=True)
+    deadline_at = models.DateTimeField(null=True, blank=True)
     has_final_deliverable = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,11 +43,11 @@ class ServicePurchase(models.Model):
         return "#" + str(self.id)[24:].upper()
 
     @property
-    def must_be_delivered_at_display(self):
+    def deadline_at_display(self):
         if self.has_not_been_accepted:
             return None
 
-        return date_filter(self.must_be_delivered_at)
+        return date_filter(self.deadline_at)
 
     @property
     def service_title(self):
@@ -185,19 +185,19 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_canceled_for_delay(self):
-        in_between_days = (timezone.now() - self.must_be_delivered_at).days
+        in_between_days = (timezone.now() - self.deadline_at).days
         cancellation_delay_days = int(Parameter.objects.get(label=Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY).value)
         return not self.approved and in_between_days > cancellation_delay_days
 
     @property
     def canceled_for_delay(self):
-        return self.accepted and self.canceled and self.canceled_at > self.must_be_delivered_at
+        return self.accepted and self.canceled and self.canceled_at > self.deadline_at
 
     def set_as_accepted(self):
         self.status = self.STATUS_ACCEPTED
         today = timezone.now()
         self.accepted_at = today
-        self.must_be_delivered_at = today + timedelta(days=self.delay)
+        self.deadline_at = today + timedelta(days=self.delay)
 
     def set_as_delivered(self):
         self.status = self.STATUS_DELIVERED

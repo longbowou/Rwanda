@@ -31,7 +31,9 @@ class InitServicePurchase(AccountDjangoModelMutation):
             price += service_option.price
             delay += service_option.delay
 
-        if account.balance < price:
+        total_price = price + commission
+
+        if account.balance < total_price:
             return cls(
                 errors=[ErrorType(field="service", messages=[_("Insufficient amount to purchase service.")])])
 

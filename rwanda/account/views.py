@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.db.models import Count
 from django.http import JsonResponse
 from django.template.defaultfilters import date
-from django.template.defaultfilters import date as date_filter
+from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.views import View
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
@@ -33,7 +33,7 @@ class DepositsDatatableView(BaseDatatableView):
         if column == "amount":
             return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
-            return date(row.created_at)
+            return date(row.created_at) + ' ' + time_filter(row.created_at)
         else:
             return super(DepositsDatatableView, self).render_column(row, column)
 
@@ -55,7 +55,7 @@ class RefundsDatatableView(BaseDatatableView):
         if column == "amount":
             return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
-            return date(row.created_at)
+            return date(row.created_at) + ' ' + time_filter(row.created_at)
         else:
             return super(RefundsDatatableView, self).render_column(row, column)
 
@@ -77,7 +77,7 @@ class ServicesDatatableView(BaseDatatableView):
         row: Service
 
         if column == "created_at":
-            return date_filter(row.created_at)
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "delay":
             return row.delay_display
         elif column == "activated":
@@ -145,9 +145,9 @@ class PurchasesDatatableView(BaseDatatableView):
         elif column == "price":
             return row.price_display + " " + self.currency
         elif column == "created_at":
-            return date_filter(row.created_at)
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "must_be_delivered_at":
-            return date_filter(row.must_be_delivered_at)
+            return date_filter(row.deadline_at)
         elif column == "data":
             return self.serializer(row).data
         else:
@@ -182,7 +182,7 @@ class OrderDeliverablesDatatableView(BaseDatatableView):
         row: Deliverable
 
         if column == "created_at":
-            return date_filter(row.created_at)
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "annotate_files_count":
             return intcomma(row.annotate_files_count)
         elif column == "version":
@@ -230,7 +230,7 @@ class DeliverableFilesDatatableView(BaseDatatableView):
         row: DeliverableFile
 
         if column == "created_at":
-            return date_filter(row.created_at)
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "size":
             return natural_size(row.size)
         elif column == "data":

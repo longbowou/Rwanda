@@ -34,20 +34,21 @@ class ServiceQueries(graphene.ObjectType):
             total_delay += service_option.delay
             total_price += service_option.price
 
-        must_be_delivered_at = datetime.today() + timedelta(days=total_delay)
+        deadline_at = datetime.today() + timedelta(days=total_delay)
 
         total_order_price = total_price + commission
         total_order_price_ttc = total_order_price
 
+        cannot_pay_with_wallet = info.context.user.account.balance < total_order_price
+
         total_order_price = intcomma(total_order_price)
         total_order_price_ttc = intcomma(total_order_price_ttc)
-        cannot_pay_with_wallet = info.context.user.account.balance < total_price
         base_price = intcomma(base_price)
         commission = intcomma(commission)
         commission_tva = intcomma(0)
         total_price = intcomma(total_price)
         total_price_tva = intcomma(0)
-        must_be_delivered_at = date_filter(must_be_delivered_at)
+        deadline_at = date_filter(deadline_at)
 
         return ServiceOrderType(
             total_order_price=total_order_price,
@@ -58,7 +59,7 @@ class ServiceQueries(graphene.ObjectType):
             commission_tva=commission_tva,
             total_price=total_price,
             total_price_tva=total_price_tva,
-            must_be_delivered_at=must_be_delivered_at,
+            deadline_at=deadline_at,
             total_delay=str(total_delay),
             service=service,
             serviceOptions=service_options,

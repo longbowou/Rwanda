@@ -125,7 +125,7 @@ class ServicePurchaseType(DjangoObjectType):
     price = graphene.String(source="price_display", required=True)
     delay = graphene.String(source="delay_display", required=True)
     status = graphene.String(source="status_display", required=True)
-    must_be_delivered_at = graphene.String(source="must_be_delivered_at_display")
+    deadline_at = graphene.String(source="deadline_at_display")
 
     number = graphene.String(source="number", required=True)
 
@@ -210,7 +210,7 @@ class ServicePurchaseType(DjangoObjectType):
         self: ServicePurchase
 
         today = timezone.now()
-        yesterday = timezone.now() - timedelta(days=1)
+        yesterday = timezone.now() - timedelta(1)
 
         d_filter = date_filter
         t_filter = time_filter
@@ -222,7 +222,7 @@ class ServicePurchaseType(DjangoObjectType):
             d_filter = naturalday
             t_filter = time_filter
 
-        happen_at = d_filter(self.created_at) + ' ' + t_filter(self.created_at)
+        happen_at = str(d_filter(self.created_at)) + ' ' + str(t_filter(self.created_at))
 
         timelines = [ServicePurchaseTimeLine(
             happen_at=happen_at.title(),
@@ -233,9 +233,9 @@ class ServicePurchaseType(DjangoObjectType):
         last_happen_at = self.created_at
 
         if self.has_been_canceled and self.has_not_been_accepted:
-            happen_at = t_filter(self.canceled_at)
+            happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():
-                happen_at = d_filter(self.canceled_at) + " " + happen_at
+                happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -246,24 +246,24 @@ class ServicePurchaseType(DjangoObjectType):
             last_happen_at = self.canceled_at
 
         if self.has_been_accepted:
-            happen_at = t_filter(self.accepted_at)
+            happen_at = str(t_filter(self.accepted_at))
             if last_happen_at.date() != self.accepted_at.date():
-                happen_at = d_filter(self.created_at) + " " + happen_at
+                happen_at = str(d_filter(self.created_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
                 status=_('Accepted'),
                 color='primary',
                 description=_('Deadline set to <strong>{}</strong>'.format(
-                    date_filter(self.must_be_delivered_at))),
+                    date_filter(self.deadline_at))),
             ))
 
             last_happen_at = self.accepted_at
 
         if self.has_been_canceled and self.has_been_accepted:
-            happen_at = t_filter(self.canceled_at)
+            happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():
-                happen_at = d_filter(self.canceled_at) + " " + happen_at
+                happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -272,9 +272,9 @@ class ServicePurchaseType(DjangoObjectType):
             ))
 
         if self.has_been_delivered:
-            happen_at = t_filter(self.delivered_at)
+            happen_at = str(t_filter(self.delivered_at))
             if last_happen_at.date() != self.delivered_at.date():
-                happen_at = d_filter(self.delivered_at) + " " + happen_at
+                happen_at = str(d_filter(self.delivered_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -285,9 +285,9 @@ class ServicePurchaseType(DjangoObjectType):
             last_happen_at = self.delivered_at
 
         if self.has_been_in_dispute:
-            happen_at = t_filter(self.in_dispute_at)
+            happen_at = str(t_filter(self.in_dispute_at))
             if last_happen_at.date() != self.in_dispute_at.date():
-                happen_at = d_filter(self.in_dispute_at) + " " + happen_at
+                happen_at = str(d_filter(self.in_dispute_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -298,9 +298,9 @@ class ServicePurchaseType(DjangoObjectType):
             last_happen_at = self.in_dispute_at
 
         if self.has_been_canceled and self.has_been_in_dispute:
-            happen_at = t_filter(self.canceled_at)
+            happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():
-                happen_at = d_filter(self.canceled_at) + " " + happen_at
+                happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -309,9 +309,9 @@ class ServicePurchaseType(DjangoObjectType):
             ))
 
         if self.has_been_approved:
-            happen_at = t_filter(self.approved_at)
+            happen_at = str(t_filter(self.approved_at))
             if last_happen_at.date() != self.approved_at.date():
-                happen_at = d_filter(self.approved_at) + " " + happen_at
+                happen_at = str(d_filter(self.approved_at)) + " " + happen_at
 
             timelines.append(ServicePurchaseTimeLine(
                 happen_at=happen_at.title(),
@@ -413,7 +413,7 @@ class ServiceOrderType(ObjectType):
     commission_tva = graphene.String(required=True)
     total_price = graphene.String(required=True)
     total_price_tva = graphene.String(required=True)
-    must_be_delivered_at = graphene.String(required=True)
+    deadline_at = graphene.String(required=True)
     total_delay = graphene.String(required=True)
     service = graphene.Field(ServiceType)
     serviceOptions = graphene.List(ServiceOptionType)
