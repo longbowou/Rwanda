@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import graphene
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
-from graphene_django_extras import DjangoFilterListField
+from graphene_django_extras import DjangoFilterPaginateListField, LimitOffsetGraphqlPagination
 
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.decorators import account_required
@@ -11,8 +11,16 @@ from rwanda.graphql.types import ServiceOrderType, ServiceType
 from rwanda.service.models import Service, ServiceOption
 
 
+class ServiceFilterPaginateListField(DjangoFilterPaginateListField):
+    def get_queryset(self, manager, info, **kwargs):
+        query_set = super().get_queryset(manager, info, **kwargs)
+        return query_set.filter(published=True)
+
+
 class ServiceQueries(graphene.ObjectType):
-    services = DjangoFilterListField(ServiceType)
+    services = ServiceFilterPaginateListField(ServiceType,
+                                              pagination=LimitOffsetGraphqlPagination(default_limit=5,
+                                                                                      ordering="-created_at"))
     service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
