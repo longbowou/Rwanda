@@ -3,7 +3,7 @@ import graphql_jwt
 from django.contrib.humanize.templatetags.humanize import intcomma
 from graphene_django_extras import DjangoFilterListField
 
-from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_currency, param_base_price
 from rwanda.graphql.account.mutations import AccountMutations
 from rwanda.graphql.account.queries import AccountQueries
 from rwanda.graphql.admin.mutations import AdminMutations
@@ -19,8 +19,8 @@ class AccountQuery(ServiceQueries, PurchaseQueries, AccountQueries):
     parameters = graphene.Field(ParametersType, required=True)
 
     def resolve_parameters(root, info, **kwargs):
-        return ParametersType(currency=Parameter.objects.get(label=Parameter.CURRENCY).value,
-                              base_price=intcomma(int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)))
+        return ParametersType(currency=param_currency(),
+                              base_price=intcomma(int(param_base_price())))
 
 
 class AccountMutation(AccountMutations, ServiceMutations, PurchaseMutations, AdminMutations):

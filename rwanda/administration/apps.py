@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CoreConfig(AppConfig):
+class AdministrationConfig(AppConfig):
     name = 'rwanda.administration'

@@ -15,17 +15,21 @@ from rwanda.account.models import Deposit, Refund
 from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
     DeliverableSerializer, DeliverableFileSerializer
 from rwanda.account.utils import natural_size
-from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_currency
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service
 
 
 class DepositsDatatableView(BaseDatatableView):
-    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
+    currency = param_currency
     columns = [
         'amount',
         'created_at',
     ]
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        self.currency = self.currency()
 
     def render_column(self, row, column):
         row: Deposit
@@ -42,12 +46,16 @@ class DepositsDatatableView(BaseDatatableView):
 
 
 class RefundsDatatableView(BaseDatatableView):
-    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
+    currency = param_currency
     columns = [
         'amount',
         'phone_number',
         'created_at',
     ]
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        self.currency = self.currency()
 
     def render_column(self, row, column):
         row: Refund
@@ -105,7 +113,7 @@ class ServicesDatatableView(BaseDatatableView):
 
 class PurchasesDatatableView(BaseDatatableView):
     serializer = PurchaseSerializer
-    currency = Parameter.objects.get(label=Parameter.CURRENCY).value
+    currency = param_currency
     columns = [
         'number',
         'service',
@@ -116,6 +124,10 @@ class PurchasesDatatableView(BaseDatatableView):
         'created_at',
         'data'
     ]
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        self.currency = self.currency()
 
     def render_column(self, row, column):
         row: ServicePurchase

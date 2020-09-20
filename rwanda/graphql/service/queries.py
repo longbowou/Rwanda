@@ -5,7 +5,7 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
 from graphene_django_extras import DjangoFilterListField
 
-from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.types import ServiceOrderType, ServiceType
 from rwanda.service.models import Service, ServiceOption
@@ -25,8 +25,8 @@ class ServiceQueries(graphene.ObjectType):
         service = Service.objects.get(pk=service)
         service_options = ServiceOption.objects.filter(id__in=service_options, service=service)
 
-        base_price = int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)
-        commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
+        base_price = int(param_base_price())
+        commission = int(param_commission())
 
         total_price = base_price
         total_delay = service.delay

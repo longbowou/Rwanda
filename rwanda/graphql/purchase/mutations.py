@@ -3,7 +3,7 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
-from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType
@@ -21,8 +21,8 @@ class InitServicePurchase(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
 
-        price = int(Parameter.objects.get(label=Parameter.BASE_PRICE).value)
-        commission = int(Parameter.objects.get(label=Parameter.COMMISSION).value)
+        price = int(param_base_price())
+        commission = int(param_commission())
 
         service = form.instance.service
         delay = service.delay

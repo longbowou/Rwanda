@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_service_purchase_cancellation_delay
 from rwanda.service.models import Service, ServiceOption
 from rwanda.user.models import Account, Admin
 
@@ -186,7 +187,7 @@ class ServicePurchase(models.Model):
     @property
     def can_be_canceled_for_delay(self):
         in_between_days = (timezone.now() - self.deadline_at).days
-        cancellation_delay_days = int(Parameter.objects.get(label=Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY).value)
+        cancellation_delay_days = int(param_service_purchase_cancellation_delay())
         return not self.approved and in_between_days > cancellation_delay_days
 
     @property
