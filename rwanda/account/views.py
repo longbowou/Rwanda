@@ -107,11 +107,12 @@ class PurchasesDatatableView(BaseDatatableView):
     serializer = PurchaseSerializer
     currency = Parameter.objects.get(label=Parameter.CURRENCY).value
     columns = [
+        'number',
         'service',
         'status',
         'delay',
         'price',
-        'must_be_delivered_at',
+        'deadline_at',
         'created_at',
         'data'
     ]
@@ -146,9 +147,9 @@ class PurchasesDatatableView(BaseDatatableView):
             return row.price_display + " " + self.currency
         elif column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
-        elif column == "must_be_delivered_at":
+        elif column == "deadline_at":
             return date_filter(row.deadline_at)
-        elif column == "data":
+        elif column in ["data", 'number']:
             return self.serializer(row).data
         else:
             return super(PurchasesDatatableView, self).render_column(row, column)
