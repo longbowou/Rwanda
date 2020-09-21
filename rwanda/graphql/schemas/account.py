@@ -18,6 +18,7 @@ class AccountQuery(AccountQueries):
     service_purchases = DjangoFilterListField(ServicePurchaseType)
     services = DjangoFilterListField(ServiceType)
     serviceOptions = DjangoFilterListField(ServiceOptionType)
+    serviceOption = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
     service = graphene.Field(ServiceType, id=graphene.UUID(required=True))
     litigation = DjangoFilterListField(LitigationType)
     parameters = graphene.Field(ParametersType)

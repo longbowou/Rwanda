@@ -5,7 +5,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from rest_framework import serializers
 
 from rwanda.account.models import Deposit, Refund
-from rwanda.service.models import Service
+from rwanda.service.models import Service, ServiceOption
 
 
 class DepositsDatatableView(BaseDatatableView):
@@ -50,6 +50,12 @@ class ServiceSerializer(serializers.ModelSerializer):
         model = Service
         fields = "__all__"
 
+class ServiceOptionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceOption
+        fields = "__all__"
+
+
 
 class ServicesDatatableView(BaseDatatableView):
     columns = [
@@ -58,7 +64,8 @@ class ServicesDatatableView(BaseDatatableView):
         'activated',
         'published',
         'created_at',
-        'data'
+        'data',
+
     ]
 
     def render_column(self, row, column):
@@ -66,11 +73,12 @@ class ServicesDatatableView(BaseDatatableView):
             return date_filter(row.created_at)
         elif column == "delay":
             return intcomma(row.delay)
+        elif column == "price":
+            return intcomma(row.price)
         elif column == "activated":
             class_name = 'warning'
             if row.activated:
                 class_name = 'success'
-
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.activated_display)
         elif column == "published":
@@ -87,3 +95,37 @@ class ServicesDatatableView(BaseDatatableView):
 
     def get_initial_queryset(self):
         return Service.objects.filter(account__user=self.request.user).order_by("-created_at").all()
+
+
+class ServiceOptionsDatatableView(BaseDatatableView):
+    columns = [
+        'label',
+        'delay',
+        'price',
+        'published',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        if column == "created_at":
+            return date_filter(row.created_at)
+        elif column == "label":
+            return intcomma(row.label)
+        elif column == "delay":
+            return intcomma(row.delay)
+        elif column == "price":
+            return intcomma(row.price)
+        elif column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
+        elif column == "data":
+            return ServiceOptionsSerializer(row).data
+        else:
+            return super(ServiceOptionsDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return ServiceOption.objects.filter(service=self.kwargs["pk"]).all()
