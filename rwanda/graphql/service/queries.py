@@ -75,5 +75,5 @@ class ServiceQueries(graphene.ObjectType):
             deadline_at=deadline_at,
             total_delay=str(total_delay),
             service=service,
-            serviceOptions=service_options,
+            service_options=service_options,
         )

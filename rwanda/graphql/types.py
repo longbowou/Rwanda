@@ -106,7 +106,7 @@ class ServiceCommentType(DjangoObjectType):
 
 class ServiceOptionType(DjangoObjectType):
     price = graphene.String(source="price_display", required=True)
-    delay = graphene.String(source="delay_display", required=True)
+    delay_display = graphene.String(source="delay_display", required=True)
 
     class Meta:
         model = ServiceOption
@@ -434,4 +434,4 @@ class ServiceOrderType(ObjectType):
     deadline_at = graphene.String(required=True)
     total_delay = graphene.String(required=True)
     service = graphene.Field(ServiceType)
-    serviceOptions = graphene.List(ServiceOptionType)
+    service_options = graphene.List(ServiceOptionType)
