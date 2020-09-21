@@ -10,7 +10,7 @@ from rwanda.graphql.purchase.mutations import PurchaseMutations
 from rwanda.graphql.service.mutations import ServiceMutations
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, LitigationType, ServicePurchaseType, ParametersType, \
     ServiceOptionType
-from rwanda.service.models import Service
+from rwanda.service.models import Service, ServiceOption
 
 
 class AccountQuery(AccountQueries):
@@ -29,6 +29,11 @@ class AccountQuery(AccountQueries):
 
     def resolve_service(self, info, id):
         return Service.objects.filter(pk=id).first()
+
+
+    def resolve_serviceOption(self, info, id):
+        return ServiceOption.objects.filter(pk=id).first()
+
 
 
 class AccountMutation(AccountMutations, ServiceMutations, PurchaseMutations, AdminMutations):
