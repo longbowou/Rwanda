@@ -3,11 +3,11 @@ from datetime import datetime, timedelta
 import graphene
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
-from graphene_django_extras import DjangoFilterPaginateListField, LimitOffsetGraphqlPagination
+from graphene_django_extras import DjangoFilterPaginateListField, LimitOffsetGraphqlPagination, DjangoFilterListField
 
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.decorators import account_required
-from rwanda.graphql.types import ServiceOrderType, ServiceType
+from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceOptionType
 from rwanda.service.models import Service, ServiceOption
 
 
@@ -24,6 +24,8 @@ class ServiceQueries(graphene.ObjectType):
     service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
+    serviceOptions = DjangoFilterListField(ServiceOptionType)
+    serviceOption = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
 
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)

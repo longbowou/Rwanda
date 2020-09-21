@@ -18,6 +18,7 @@ from rwanda.account.utils import natural_size
 from rwanda.administration.utils import param_currency
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service
+from rwanda.service.models import Service, ServiceOption
 
 
 class DepositsDatatableView(BaseDatatableView):
@@ -279,3 +280,37 @@ class DeliverableUploadView(View):
             deliverable_file.save()
 
         return JsonResponse({"message": "Uploaded successfully"}, safe=False)
+
+
+class ServiceOptionsDatatableView(BaseDatatableView):
+    columns = [
+        'label',
+        'delay',
+        'price',
+        'published',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        if column == "created_at":
+            return date_filter(row.created_at)
+        elif column == "label":
+            return intcomma(row.label)
+        elif column == "delay":
+            return intcomma(row.delay)
+        elif column == "price":
+            return intcomma(row.price)
+        elif column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
+        elif column == "data":
+            return ServiceOptionsSerializer(row).data
+        else:
+            return super(ServiceOptionsDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return ServiceOption.objects.filter(service=self.kwargs["pk"]).all()

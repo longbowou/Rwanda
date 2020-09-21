@@ -102,11 +102,20 @@ class ServiceOption(models.Model):
     delay = models.PositiveBigIntegerField()
     price = models.PositiveBigIntegerField()
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.label
+
+    @property
+    def published_display(self):
+        if self.published:
+            return _('Yes')
+
+        return _('No')
+
 
     @property
     def price_display(self):
