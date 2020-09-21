@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
-from rwanda.service.models import Service
+from rwanda.service.models import Service, ServiceOption
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -40,4 +40,10 @@ class DeliverableSerializer(serializers.ModelSerializer):
 class DeliverableFileSerializer(serializers.ModelSerializer):
     class Meta:
         model = DeliverableFile
+        fields = "__all__"
+
+
+class ServiceOptionsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceOption
         fields = "__all__"

@@ -24,8 +24,11 @@ class ServiceQueries(graphene.ObjectType):
     service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
-    serviceOptions = DjangoFilterListField(ServiceOptionType)
-    serviceOption = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
+    service_options = DjangoFilterListField(ServiceOptionType)
+    service_option = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
+
+    def resolve_service_option(self, info, id):
+        return ServiceOption.objects.filter(pk=id).first()
 
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)

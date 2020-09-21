@@ -13,11 +13,10 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from rwanda.account.models import Deposit, Refund
 from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
-    DeliverableSerializer, DeliverableFileSerializer
+    DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer
 from rwanda.account.utils import natural_size
 from rwanda.administration.utils import param_currency
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
-from rwanda.service.models import Service
 from rwanda.service.models import Service, ServiceOption
 
 
