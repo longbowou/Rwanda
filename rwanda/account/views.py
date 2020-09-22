@@ -282,6 +282,7 @@ class DeliverableUploadView(View):
 
 
 class ServiceOptionsDatatableView(BaseDatatableView):
+    currency = None
     columns = [
         'label',
         'delay',
@@ -291,20 +292,24 @@ class ServiceOptionsDatatableView(BaseDatatableView):
         'data'
     ]
 
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        self.currency = param_currency()
+
     def render_column(self, row, column):
+        row: ServiceOption
+
         if column == "created_at":
-            return date_filter(row.created_at)
-        elif column == "label":
-            return intcomma(row.label)
+            return date_filter(row.created_at) + " " + time_filter(row.created_at)
         elif column == "delay":
-            return intcomma(row.delay)
+            return row.delay_display
         elif column == "price":
-            return intcomma(row.price)
+            return row.price_display + ' ' + self.currency
         elif column == "published":
             class_name = 'warning'
             if row.published:
                 class_name = 'success'
-            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-light-{}">{}</span>' \
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-square label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.published_display)
         elif column == "data":
             return ServiceOptionsSerializer(row).data

@@ -11,6 +11,7 @@ from graphene_django import DjangoObjectType
 from rwanda.account.models import Deposit, Refund
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_base_price
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation, Deliverable, \
     DeliverableFile
@@ -53,15 +54,42 @@ class ServiceCategoryType(DjangoObjectType):
         }
 
 
+class ServiceOptionType(DjangoObjectType):
+    price_display = graphene.String(source="price_display", required=True)
+    delay_preview_display = graphene.String(source="delay_preview_display", required=True)
+    delay_display = graphene.String(source="delay_display", required=True)
+    published_display = graphene.String(source="published_display", required=True)
+
+    class Meta:
+        model = ServiceOption
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
 class ServiceType(DjangoObjectType):
     delay_display = graphene.String(source="delay_display", required=True)
+    published_display = graphene.String(source="published_display", required=True)
+    options_count = graphene.Int(source="options_count", required=True)
+    options_count_display = graphene.String(source="options_count_display", required=True)
     created_at = graphene.String(source="created_at_display", required=True)
+    options = graphene.List(ServiceOptionType, required=True)
+    base_price = graphene.Int(required=True)
 
     class Meta:
         model = Service
         filter_fields = {
             "id": ("exact",),
         }
+
+    @staticmethod
+    def resolve_options(cls, info):
+        cls: Service
+        return cls.serviceoption_set.filter(published=True)
+
+    @staticmethod
+    def resolve_base_price(cls, info):
+        return param_base_price()
 
 
 class AccountType(DjangoObjectType):
@@ -99,17 +127,6 @@ class ServiceMediaType(DjangoObjectType):
 class ServiceCommentType(DjangoObjectType):
     class Meta:
         model = ServiceComment
-        filter_fields = {
-            "id": ("exact",),
-        }
-
-
-class ServiceOptionType(DjangoObjectType):
-    price = graphene.String(source="price_display", required=True)
-    delay_display = graphene.String(source="delay_display", required=True)
-
-    class Meta:
-        model = ServiceOption
         filter_fields = {
             "id": ("exact",),
         }

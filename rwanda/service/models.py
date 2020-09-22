@@ -33,6 +33,8 @@ class Service(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    service_options_count = None
+
     def __str__(self):
         return self.title
 
@@ -44,7 +46,17 @@ class Service(models.Model):
 
     @property
     def delay_display(self):
-        return str(self.delay) + " {}".format(_('Days'))
+        return str(self.delay) + " delivery {}".format(_('days'))
+
+    @property
+    def options_count(self):
+        if self.service_options_count is None:
+            self.service_options_count = ServiceOption.objects.filter(service=self).count()
+        return self.service_options_count
+
+    @property
+    def options_count_display(self):
+        return intcomma(self.options_count)
 
     @property
     def created_at_display(self):
@@ -116,7 +128,6 @@ class ServiceOption(models.Model):
 
         return _('No')
 
-
     @property
     def price_display(self):
         return intcomma(self.price)
@@ -124,5 +135,11 @@ class ServiceOption(models.Model):
     @property
     def delay_display(self):
         if self.delay == 0:
-            return _("No additional delay")
-        return str(self.delay) + " {}".format(_('Days'))
+            return _("No additional delivery delay")
+        return str(self.delay) + " delivery {}".format(_('days'))
+
+    @property
+    def delay_preview_display(self):
+        if self.delay == 0:
+            return _("No additional delivery delay")
+        return "{} additional delivery {}".format(str(self.delay), _('days'))
