@@ -264,7 +264,11 @@ class DeliverableUploadView(View):
         f: UploadedFile = request.FILES['file']
         if f is not None:
             file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
+
             folder = "deliverables"
+            if not os.path.exists(os.path.join(settings.BASE_DIR, "media", folder)):
+                os.makedirs(os.path.join(settings.BASE_DIR, "media", folder))
+
             file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
 
             with open(file_path, 'wb+') as destination:
