@@ -237,9 +237,12 @@ class ServicePurchaseServiceOption(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
-class Chat(models.Model):
+class ChatMessage(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    content = models.TextField()
+    content = models.TextField(null=True, blank=True)
+    is_file = models.BooleanField(default=False)
+    file = models.FileField(upload_to="chat_files/", null=True, blank=True)
+    file_name = models.TextField(null=True, blank=True)
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

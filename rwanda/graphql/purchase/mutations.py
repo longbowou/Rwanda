@@ -6,7 +6,7 @@ from graphene_django.types import ErrorType
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
-from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType
+from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType
 from rwanda.purchase.models import ServicePurchase, Deliverable
 from rwanda.user.models import Account
 
@@ -240,6 +240,16 @@ class DeleteDeliverableFile(AccountDjangoModelDeleteMutation):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
+class CreateChatMessage(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ChatMessageType
+        only_fields = ('service_purchase', 'content',)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        form.instance.account = info.context.user.account
+
+
 class PurchaseMutations(graphene.ObjectType):
     init_service_purchase = InitServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
@@ -252,3 +262,5 @@ class PurchaseMutations(graphene.ObjectType):
     delete_deliverable = DeleteDeliverable.Field()
 
     delete_deliverable_file = DeleteDeliverableFile.Field()
+
+    create_chat_message = CreateChatMessage.Field()

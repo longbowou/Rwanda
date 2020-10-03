@@ -12,8 +12,9 @@ from rwanda.account.models import Deposit, Refund
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_base_price
+from rwanda.graphql.decorators import account_required
 from rwanda.graphql.interfaces import UserInterface
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, Chat, Litigation, Deliverable, \
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
     DeliverableFile
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
@@ -132,11 +133,23 @@ class ServiceCommentType(DjangoObjectType):
         }
 
 
-class ServicePurchaseTimeLine(ObjectType):
+class ServicePurchaseTimeLineType(ObjectType):
     happen_at = graphene.String(required=True)
     status = graphene.String(required=True)
     color = graphene.String(required=True)
     description = graphene.String()
+
+
+class ServicePurchaseChatMessageType(ObjectType):
+    id = graphene.UUID(required=True)
+    is_file = graphene.Boolean(required=True)
+    from_current_account = graphene.Boolean(required=True)
+    show_date = graphene.Boolean(required=True)
+    time = graphene.String(required=True)
+    content = graphene.String()
+    file_name = graphene.String()
+    file_url = graphene.String()
+    date = graphene.String()
 
 
 class ServicePurchaseType(DjangoObjectType):
@@ -162,7 +175,8 @@ class ServicePurchaseType(DjangoObjectType):
     can_be_in_dispute = graphene.Boolean(required=True)
     can_add_deliverable = graphene.Boolean(required=True)
 
-    timelines = graphene.List(ServicePurchaseTimeLine, required=True)
+    timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
+    chat = graphene.List(ServicePurchaseChatMessageType, required=True)
 
     class Meta:
         model = ServicePurchase
@@ -242,7 +256,7 @@ class ServicePurchaseType(DjangoObjectType):
 
         happen_at = str(d_filter(self.created_at)) + ' ' + str(t_filter(self.created_at))
 
-        timelines = [ServicePurchaseTimeLine(
+        timelines = [ServicePurchaseTimeLineType(
             happen_at=happen_at.title(),
             status=_('Initiated'),
             color='dark'
@@ -255,7 +269,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.canceled_at.date():
                 happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Canceled'),
                 color='danger'
@@ -268,7 +282,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.accepted_at.date():
                 happen_at = str(d_filter(self.created_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Accepted'),
                 color='primary',
@@ -285,7 +299,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != deliverable.created_at.date():
                 happen_at = str(d_filter(deliverable.created_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Deliverable Published'),
                 color='info',
@@ -300,7 +314,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.canceled_at.date():
                 happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Canceled'),
                 color='danger'
@@ -311,7 +325,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.delivered_at.date():
                 happen_at = str(d_filter(self.delivered_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Delivered'),
                 color='warning'
@@ -324,7 +338,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.in_dispute_at.date():
                 happen_at = str(d_filter(self.in_dispute_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Canceled'),
                 color='info'
@@ -337,7 +351,7 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.canceled_at.date():
                 happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Canceled'),
                 color='danger'
@@ -348,13 +362,56 @@ class ServicePurchaseType(DjangoObjectType):
             if last_happen_at.date() != self.approved_at.date():
                 happen_at = str(d_filter(self.approved_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLine(
+            timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Approved'),
                 color='success'
             ))
 
         return timelines
+
+    @account_required
+    def resolve_chat(self, info):
+        self: ServicePurchase
+        chat_messages = []
+
+        today = timezone.now()
+        yesterday = timezone.now() - timedelta(1)
+
+        messages = ChatMessage.objects.filter(service_purchase=self).order_by('created_at')
+        last_created_at = None
+        for message in messages:
+            message: ChatMessage
+
+            d_filter = date_filter
+            t_filter = time_filter
+            if message.created_at.date() == today.date() or message.created_at.date() == yesterday.date():
+                d_filter = naturalday
+
+            chat_message = ServicePurchaseChatMessageType()
+            chat_message.id = message.id
+            chat_message.content = message.content
+            chat_message.time = t_filter(message.created_at).title()
+
+            chat_message.is_file = message.is_file
+            if message.is_file:
+                chat_message.file_name = message.file_name
+                chat_message.file_url = info.context.scheme + "://" + info.context.META['HTTP_HOST'] + message.file.url
+
+            chat_message.from_current_account = False
+            if message.account_id == info.context.user.account.id:
+                chat_message.from_current_account = True
+
+            chat_message.show_date = False
+            if last_created_at is None or last_created_at is not None and last_created_at.date() == message.created_at:
+                chat_message.show_date = True
+                chat_message.date = d_filter(message.created_at).title()
+
+            chat_messages.append(chat_message)
+
+            last_created_at = message.created_at
+
+        return chat_messages
 
 
 class DeliverableType(DjangoObjectType):
@@ -390,9 +447,9 @@ class ServicePurchaseServiceOptionType(DjangoObjectType):
         }
 
 
-class ChatType(DjangoObjectType):
+class ChatMessageType(DjangoObjectType):
     class Meta:
-        model = Chat
+        model = ChatMessage
         filter_fields = {
             "id": ("exact",),
         }
