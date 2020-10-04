@@ -5,8 +5,6 @@ from rwanda.graphql.schemas.account import schema
 
 
 def auth_middleware(next_middleware, root, info, *args, **kwds):
-    """My custom GraphQL middleware."""
-    # Invoke next middleware.
     if kwds.__contains__("auth_token"):
         user = get_user_by_token(kwds['auth_token'])
         info.context.user = user
