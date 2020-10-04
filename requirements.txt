@@ -7,3 +7,6 @@ django-graphql-jwt>=0.3
 django-cors-headers>=3.4
 django-datatables-view>=1.19
 django-decorator-include>=3.0
+channels>=2.4
+django-channels-graphql-ws>=0.7
+channels_redis>=3.1

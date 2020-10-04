@@ -2,8 +2,9 @@ import uuid
 from datetime import timedelta
 
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.contrib.humanize.templatetags.humanize import naturalday
 from django.db import models
-from django.template.defaultfilters import date as date_filter
+from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
@@ -247,6 +248,38 @@ class ChatMessage(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def to_chat_message_type(self, info, last_created_at=None):
+        from rwanda.graphql.types import ServicePurchaseChatMessageType
+
+        today = timezone.now()
+        yesterday = timezone.now() - timedelta(1)
+
+        d_filter = date_filter
+        t_filter = time_filter
+        if self.created_at.date() == today.date() or self.created_at.date() == yesterday.date():
+            d_filter = naturalday
+
+        chat_message = ServicePurchaseChatMessageType()
+        chat_message.id = self.id
+        chat_message.content = self.content
+        chat_message.time = t_filter(self.created_at).title()
+
+        chat_message.is_file = self.is_file
+        if self.is_file:
+            chat_message.file_name = self.file_name
+            chat_message.file_url = info.context.scheme + "://" + info.context.META['HTTP_HOST'] + self.file.url
+
+        chat_message.from_current_account = False
+        if self.account_id == info.context.user.account.id:
+            chat_message.from_current_account = True
+
+        chat_message.show_date = False
+        if last_created_at is None or last_created_at is not None and last_created_at.date() == self.created_at:
+            chat_message.show_date = True
+            chat_message.date = d_filter(self.created_at).title()
+
+        return chat_message
 
 
 class Litigation(models.Model):

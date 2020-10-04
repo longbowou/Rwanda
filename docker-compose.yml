@@ -20,6 +20,7 @@ services:
     depends_on:
       - postgres
       - pgadmin4
+      - redis
 
   pgadmin4:
     container_name: rwanda_pgadmin4
@@ -32,3 +33,7 @@ services:
     ports:
       - 5050:80
 
+  redis:
+    container_name: rwanda_redis
+    image: library/redis:6.0-alpine
+    restart: unless-stopped

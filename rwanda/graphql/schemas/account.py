@@ -9,6 +9,7 @@ from rwanda.graphql.account.queries import AccountQueries
 from rwanda.graphql.admin.mutations import AdminMutations
 from rwanda.graphql.purchase.mutations import PurchaseMutations
 from rwanda.graphql.purchase.queries import PurchaseQueries
+from rwanda.graphql.purchase.subscriptions import PurchaseSubscriptions
 from rwanda.graphql.service.mutations import ServiceMutations
 from rwanda.graphql.service.queries import ServiceQueries
 from rwanda.graphql.types import ServiceCategoryType, ParametersType
@@ -29,4 +30,8 @@ class AccountMutation(AccountMutations, ServiceMutations, PurchaseMutations, Adm
     revoke_token = graphql_jwt.Revoke.Field()
 
 
-schema = graphene.Schema(query=AccountQuery, mutation=AccountMutation)
+class Subscription(PurchaseSubscriptions):
+    pass
+
+
+schema = graphene.Schema(query=AccountQuery, mutation=AccountMutation, subscription=Subscription)

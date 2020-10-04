@@ -375,39 +375,12 @@ class ServicePurchaseType(DjangoObjectType):
         self: ServicePurchase
         chat_messages = []
 
-        today = timezone.now()
-        yesterday = timezone.now() - timedelta(1)
-
         messages = ChatMessage.objects.filter(service_purchase=self).order_by('created_at')
         last_created_at = None
         for message in messages:
             message: ChatMessage
 
-            d_filter = date_filter
-            t_filter = time_filter
-            if message.created_at.date() == today.date() or message.created_at.date() == yesterday.date():
-                d_filter = naturalday
-
-            chat_message = ServicePurchaseChatMessageType()
-            chat_message.id = message.id
-            chat_message.content = message.content
-            chat_message.time = t_filter(message.created_at).title()
-
-            chat_message.is_file = message.is_file
-            if message.is_file:
-                chat_message.file_name = message.file_name
-                chat_message.file_url = info.context.scheme + "://" + info.context.META['HTTP_HOST'] + message.file.url
-
-            chat_message.from_current_account = False
-            if message.account_id == info.context.user.account.id:
-                chat_message.from_current_account = True
-
-            chat_message.show_date = False
-            if last_created_at is None or last_created_at is not None and last_created_at.date() == message.created_at:
-                chat_message.show_date = True
-                chat_message.date = d_filter(message.created_at).title()
-
-            chat_messages.append(chat_message)
+            chat_messages.append(message.to_chat_message_type(info, last_created_at))
 
             last_created_at = message.created_at
 

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -96,6 +97,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rwanda.wsgi.application'
+ASGI_APPLICATION = 'rwanda.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
