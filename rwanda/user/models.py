@@ -1,15 +1,35 @@
 import uuid
+from datetime import timedelta
 
 from django.contrib.auth.models import AbstractUser
 from django.contrib.humanize.templatetags.humanize import intcomma
+from django.contrib.humanize.templatetags.humanize import naturalday
 from django.db import models
 from django.db.models import Sum
+from django.template.defaultfilters import date as date_filter, time as time_filter
+from django.utils import timezone
 
 
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    is_online = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def last_login_display(self):
+        if self.last_login is not None:
+            today = timezone.now()
+            yesterday = timezone.now() - timedelta(1)
+
+            d_filter = date_filter
+            t_filter = time_filter
+            if self.last_login.date() == today.date() or self.last_login.date() == yesterday.date():
+                d_filter = naturalday
+
+            return d_filter(self.last_login).title() + " " + t_filter(self.last_login)
+
+        return None
 
     @property
     def is_account(self):

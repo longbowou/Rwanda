@@ -275,7 +275,7 @@ class ChatMessage(models.Model):
             chat_message.from_current_account = True
 
         chat_message.show_date = False
-        if last_created_at is None or last_created_at is not None and last_created_at.date() == self.created_at:
+        if last_created_at is None or last_created_at is not None and last_created_at.date() != self.created_at.date():
             chat_message.show_date = True
             chat_message.date = d_filter(self.created_at).title()
 

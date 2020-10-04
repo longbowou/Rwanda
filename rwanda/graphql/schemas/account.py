@@ -6,6 +6,7 @@ from graphene_django_extras import DjangoFilterListField
 from rwanda.administration.utils import param_currency, param_base_price
 from rwanda.graphql.account.mutations import AccountMutations
 from rwanda.graphql.account.queries import AccountQueries
+from rwanda.graphql.account.subscriptions import AccountSubscriptions
 from rwanda.graphql.admin.mutations import AdminMutations
 from rwanda.graphql.purchase.mutations import PurchaseMutations
 from rwanda.graphql.purchase.queries import PurchaseQueries
@@ -30,7 +31,7 @@ class AccountMutation(AccountMutations, ServiceMutations, PurchaseMutations, Adm
     revoke_token = graphql_jwt.Revoke.Field()
 
 
-class Subscription(PurchaseSubscriptions):
+class Subscription(PurchaseSubscriptions, AccountSubscriptions):
     pass
 
 

@@ -7,7 +7,6 @@ from rwanda.purchase.models import ChatMessage
 
 class ChatSubscription(channels_graphql_ws.Subscription):
     name = "chat-{}"
-    user = None
     message = graphene.Field(ServicePurchaseChatMessageType)
 
     class Arguments:
@@ -26,6 +25,9 @@ class ChatSubscription(channels_graphql_ws.Subscription):
                                                               last_message.created_at if last_message is not None else None)
         return ChatSubscription(message=chat_message_type)
 
+    @staticmethod
+    def unsubscribed(root, info, auth_token, service_purchase):
+        pass
 
 class PurchaseSubscriptions(graphene.ObjectType):
     chat_subscription = ChatSubscription.Field()
