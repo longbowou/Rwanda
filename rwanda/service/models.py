@@ -1,5 +1,6 @@
 import uuid
 
+from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
 from django.template.defaultfilters import date as date_filter
@@ -92,7 +93,7 @@ class ServiceMedia(models.Model):
 
     @property
     def file_url(self):
-        return self.file.url if self.file else None
+        return settings.BASE_URL + self.file.url if self.file else None
 
 
 class ServiceComment(models.Model):

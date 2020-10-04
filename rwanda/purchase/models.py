@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.contrib.humanize.templatetags.humanize import naturalday
 from django.db import models
@@ -8,6 +9,7 @@ from django.template.defaultfilters import date as date_filter, time as time_fil
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_service_purchase_cancellation_delay
 from rwanda.service.models import Service, ServiceOption
@@ -244,10 +246,16 @@ class ChatMessage(models.Model):
     is_file = models.BooleanField(default=False)
     file = models.FileField(upload_to="chat_files/", null=True, blank=True)
     file_name = models.TextField(null=True, blank=True)
+    file_size = models.BigIntegerField(default=0)
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def file_size_display(self):
+        if self.is_file:
+            return natural_size(self.file_size)
 
     def to_chat_message_type(self, info, last_created_at=None):
         from rwanda.graphql.types import ServicePurchaseChatMessageType
@@ -268,7 +276,8 @@ class ChatMessage(models.Model):
         chat_message.is_file = self.is_file
         if self.is_file:
             chat_message.file_name = self.file_name
-            chat_message.file_url = info.context.scheme + "://" + info.context.META['HTTP_HOST'] + self.file.url
+            chat_message.file_size = self.file_size_display
+            chat_message.file_url = settings.BASE_URL + self.file.url
 
         chat_message.from_current_account = False
         if self.account_id == info.context.user.account.id:
@@ -381,3 +390,7 @@ class DeliverableFile(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def size_display(self):
+        return natural_size(self.size)

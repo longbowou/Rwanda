@@ -149,6 +149,7 @@ class ServicePurchaseChatMessageType(ObjectType):
     content = graphene.String()
     file_name = graphene.String()
     file_url = graphene.String()
+    file_size = graphene.String()
     date = graphene.String()
 
 

@@ -14,9 +14,10 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from rwanda.account.models import Deposit, Refund
 from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
     DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer
-from rwanda.account.utils import natural_size
+from rwanda.account.utils import create_folder_if_not_exits
 from rwanda.administration.utils import param_currency
-from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
+from rwanda.graphql.purchase.subscriptions import ChatSubscription
+from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile, ChatMessage
 from rwanda.service.models import Service, ServiceOption
 
 
@@ -247,7 +248,7 @@ class DeliverableFilesDatatableView(BaseDatatableView):
         if column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "size":
-            return natural_size(row.size)
+            return row.size_display
         elif column == "data":
             data = DeliverableFileSerializer(row).data
             data['file_url'] = self.request.scheme + "://" + self.request.META['HTTP_HOST'] + row.file.url
@@ -266,8 +267,7 @@ class DeliverableUploadView(View):
             file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
 
             folder = "deliverables"
-            if not os.path.exists(os.path.join(settings.BASE_DIR, "media", folder)):
-                os.makedirs(os.path.join(settings.BASE_DIR, "media", folder))
+            create_folder_if_not_exits(folder)
 
             file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
 
@@ -282,7 +282,37 @@ class DeliverableUploadView(View):
             deliverable_file.size = f.size
             deliverable_file.save()
 
-        return JsonResponse({"message": "Uploaded successfully"}, safe=False)
+        return JsonResponse({"response_code": 200}, safe=False)
+
+
+class ChatMessageUploadView(View):
+    def post(self, request, *args, **kwargs):
+        f: UploadedFile = request.FILES['file']
+        if f is not None:
+            file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
+
+            folder = "chat_files"
+            create_folder_if_not_exits(folder)
+
+            file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
+
+            with open(file_path, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            chat_message = ChatMessage()
+            chat_message.service_purchase_id = kwargs['pk']
+            chat_message.account = request.user.account
+            chat_message.is_file = True
+            chat_message.file_name = f.name
+            chat_message.file_size = f.size
+            chat_message.file = folder + "/" + file_name
+            chat_message.save()
+
+            ChatSubscription.broadcast(group=ChatSubscription.name.format(kwargs['pk']),
+                                       payload=chat_message.id.urn[9:])
+
+        return JsonResponse({"response_code": 200}, safe=False)
 
 
 class ServiceOptionsDatatableView(BaseDatatableView):
