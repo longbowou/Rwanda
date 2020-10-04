@@ -257,7 +257,7 @@ class ChatMessage(models.Model):
         if self.is_file:
             return natural_size(self.file_size)
 
-    def to_chat_message_type(self, info, last_created_at=None):
+    def to_chat_message_type(self, account, last_created_at=None):
         from rwanda.graphql.types import ServicePurchaseChatMessageType
 
         today = timezone.now()
@@ -280,7 +280,7 @@ class ChatMessage(models.Model):
             chat_message.file_url = settings.BASE_URL + self.file.url
 
         chat_message.from_current_account = False
-        if self.account_id == info.context.user.account.id:
+        if self.account_id == account.id:
             chat_message.from_current_account = True
 
         chat_message.show_date = False

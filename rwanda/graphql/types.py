@@ -178,6 +178,7 @@ class ServicePurchaseType(DjangoObjectType):
 
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
+    chat_files = graphene.List(ServicePurchaseChatMessageType, required=True)
 
     class Meta:
         model = ServicePurchase
@@ -374,18 +375,32 @@ class ServicePurchaseType(DjangoObjectType):
     @account_required
     def resolve_chat(self, info):
         self: ServicePurchase
-        chat_messages = []
 
         messages = ChatMessage.objects.filter(service_purchase=self).order_by('created_at')
-        last_created_at = None
-        for message in messages:
-            message: ChatMessage
 
-            chat_messages.append(message.to_chat_message_type(info, last_created_at))
+        return get_chat_messages(messages, info.context.user.account)
 
-            last_created_at = message.created_at
+    @account_required
+    def resolve_chat_files(self, info):
+        self: ServicePurchase
 
-        return chat_messages
+        messages = ChatMessage.objects.filter(service_purchase=self, is_file=True).order_by('created_at')
+
+        return get_chat_messages(messages, info.context.user.account)
+
+
+def get_chat_messages(messages, account):
+    chat_messages = []
+
+    last_created_at = None
+    for message in messages:
+        message: ChatMessage
+
+        chat_messages.append(message.to_chat_message_type(account, last_created_at))
+
+        last_created_at = message.created_at
+
+    return chat_messages
 
 
 class DeliverableType(DjangoObjectType):

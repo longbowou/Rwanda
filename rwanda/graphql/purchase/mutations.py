@@ -6,7 +6,7 @@ from graphene_django.types import ErrorType
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
-from rwanda.graphql.purchase.subscriptions import ChatSubscription
+from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
 from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType
 from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage
 from rwanda.user.models import Account
@@ -253,8 +253,8 @@ class CreateChatMessage(AccountDjangoModelMutation):
     @classmethod
     def post_save(cls, info, old_obj, form, obj, input):
         obj: ChatMessage
-        ChatSubscription.broadcast(group=ChatSubscription.name.format(obj.service_purchase_id),
-                                   payload=obj.id.urn[9:])
+        ChatMessageSubscription.broadcast(group=ChatMessageSubscription.name.format(obj.service_purchase_id),
+                                          payload=obj.id.urn[9:])
 
 
 class PurchaseMutations(graphene.ObjectType):
