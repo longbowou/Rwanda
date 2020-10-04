@@ -1,6 +1,5 @@
 import channels_graphql_ws
 import graphene
-from django.utils import timezone
 
 from rwanda.graphql.types import AccountType
 from rwanda.user.models import User, Account
@@ -30,9 +29,7 @@ class OnlineSubscription(channels_graphql_ws.Subscription):
     @staticmethod
     def unsubscribed(root, info, auth_token):
         user: User = info.context.user
-        user.is_online = False
-        user.last_login = timezone.now()
-        user.save()
+        user.disconnect()
 
         AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
 

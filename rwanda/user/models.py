@@ -16,6 +16,11 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def disconnect(self):
+        self.is_online = False
+        self.last_login = timezone.now()
+        self.save()
+
     @property
     def last_login_display(self):
         if self.last_login is not None:
