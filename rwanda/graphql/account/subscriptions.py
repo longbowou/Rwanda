@@ -24,7 +24,10 @@ class OnlineSubscription(channels_graphql_ws.Subscription):
 
     @staticmethod
     def publish(payload, info, auth_token):
-        return OnlineSubscription(account=info.context.user.account)
+        if info.context.is_authenticated:
+            return OnlineSubscription(account=info.context.user.account)
+
+        return channels_graphql_ws.Subscription.SKIP
 
     @staticmethod
     def unsubscribed(root, info, auth_token):
@@ -48,7 +51,10 @@ class AccountOnlineSubscription(channels_graphql_ws.Subscription):
 
     @staticmethod
     def publish(payload, info, auth_token, account):
-        return AccountOnlineSubscription(account=Account.objects.get(pk=account))
+        if info.context.is_authenticated:
+            return AccountOnlineSubscription(account=Account.objects.get(pk=account))
+
+        return channels_graphql_ws.Subscription.SKIP
 
 
 class AccountSubscriptions(graphene.ObjectType):

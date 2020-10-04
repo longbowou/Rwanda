@@ -19,15 +19,19 @@ class ChatSubscription(channels_graphql_ws.Subscription):
 
     @staticmethod
     def publish(chat_message_id, info, auth_token, service_purchase):
-        chat_message = ChatMessage.objects.get(pk=chat_message_id)
-        last_message: ChatMessage = ChatMessage.objects.exclude(id=chat_message_id).order_by('created_at').first()
-        chat_message_type = chat_message.to_chat_message_type(info,
-                                                              last_message.created_at if last_message is not None else None)
-        return ChatSubscription(message=chat_message_type)
+        if info.context.is_authenticated:
+            chat_message = ChatMessage.objects.get(pk=chat_message_id)
+            last_message: ChatMessage = ChatMessage.objects.exclude(id=chat_message_id).order_by('-created_at').first()
+            chat_message_type = chat_message.to_chat_message_type(info,
+                                                                  last_message.created_at if last_message is not None else None)
+            return ChatSubscription(message=chat_message_type)
+
+        return channels_graphql_ws.Subscription.SKIP
 
     @staticmethod
     def unsubscribed(root, info, auth_token, service_purchase):
         pass
+
 
 class PurchaseSubscriptions(graphene.ObjectType):
     chat_subscription = ChatSubscription.Field()

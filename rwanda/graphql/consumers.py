@@ -8,9 +8,11 @@ from rwanda.graphql.schemas.account import schema
 
 
 def auth_middleware(next_middleware, root, info, *args, **kwds):
+    info.context.is_authenticated = False
     if kwds.__contains__("auth_token"):
         user = get_user_by_token(kwds['auth_token'])
         info.context.user = user
+        info.context.is_authenticated = True
     return next_middleware(root, info, *args, **kwds)
 
 
