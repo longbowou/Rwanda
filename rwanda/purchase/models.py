@@ -284,10 +284,10 @@ class ChatMessage(models.Model):
         if self.account_id == account.id:
             chat_message.from_current_account = True
 
+        chat_message.date = d_filter(self.created_at).title()
         chat_message.show_date = False
         if last_created_at is None or last_created_at is not None and last_created_at.date() != self.created_at.date():
             chat_message.show_date = True
-            chat_message.date = d_filter(self.created_at).title()
 
         return chat_message
 
