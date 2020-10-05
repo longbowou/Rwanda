@@ -5,10 +5,11 @@ from graphene_django.types import ErrorType
 
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
+from rwanda.graphql.decorators import account_required
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
 from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType
-from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage
+from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked
 from rwanda.user.models import Account
 
 
@@ -257,6 +258,29 @@ class CreateChatMessage(AccountDjangoModelMutation):
                                           payload=obj.id.urn[9:])
 
 
+class MarkUnmarkChatMessage(graphene.Mutation):
+    class Arguments:
+        chat_message = graphene.UUID(required=True)
+
+    marked = graphene.Boolean(required=True)
+
+    @account_required
+    def mutate(self, info, chat_message):
+        account = info.context.user.account
+
+        chat_message_marked = ChatMessageMarked.objects. \
+            filter(chat_message=chat_message, account=account) \
+            .first()
+
+        if chat_message_marked is not None:
+            chat_message_marked.delete()
+            return MarkUnmarkChatMessage(marked=False)
+
+        ChatMessageMarked(chat_message_id=chat_message, account=account).save()
+
+        return MarkUnmarkChatMessage(marked=True)
+
+
 class PurchaseMutations(graphene.ObjectType):
     init_service_purchase = InitServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
@@ -271,3 +295,5 @@ class PurchaseMutations(graphene.ObjectType):
     delete_deliverable_file = DeleteDeliverableFile.Field()
 
     create_chat_message = CreateChatMessage.Field()
+
+    mark_unmark_chat_message = MarkUnmarkChatMessage.Field()

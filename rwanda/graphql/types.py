@@ -2,6 +2,7 @@ from datetime import timedelta
 
 import graphene
 from django.contrib.humanize.templatetags.humanize import naturalday, naturaltime
+from django.db.models import Case, When, BooleanField
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -144,6 +145,7 @@ class ServicePurchaseChatMessageType(ObjectType):
     id = graphene.UUID(required=True)
     is_file = graphene.Boolean(required=True)
     from_current_account = graphene.Boolean(required=True)
+    marked = graphene.Boolean(required=True)
     show_date = graphene.Boolean(required=True)
     time = graphene.String(required=True)
     content = graphene.String()
@@ -179,6 +181,7 @@ class ServicePurchaseType(DjangoObjectType):
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_files = graphene.List(ServicePurchaseChatMessageType, required=True)
+    chat_marked = graphene.List(ServicePurchaseChatMessageType, required=True)
 
     class Meta:
         model = ServicePurchase
@@ -376,7 +379,12 @@ class ServicePurchaseType(DjangoObjectType):
     def resolve_chat(self, info):
         self: ServicePurchase
 
-        messages = ChatMessage.objects.filter(service_purchase=self).order_by('created_at')
+        messages = ChatMessage.objects \
+            .annotate(marked=Case(When(chatmessagemarked__account=info.context.user.account, then=True),
+                                  default=False,
+                                  output_field=BooleanField())) \
+            .filter(service_purchase=self) \
+            .order_by('created_at')
 
         return get_chat_messages(messages, info.context.user.account)
 
@@ -384,7 +392,25 @@ class ServicePurchaseType(DjangoObjectType):
     def resolve_chat_files(self, info):
         self: ServicePurchase
 
-        messages = ChatMessage.objects.filter(service_purchase=self, is_file=True).order_by('created_at')
+        messages = ChatMessage.objects \
+            .annotate(marked=Case(When(chatmessagemarked__account=info.context.user.account, then=True),
+                                  default=False,
+                                  output_field=BooleanField())) \
+            .filter(service_purchase=self, is_file=True) \
+            .order_by('created_at')
+
+        return get_chat_messages(messages, info.context.user.account)
+
+    @account_required
+    def resolve_chat_marked(self, info):
+        self: ServicePurchase
+
+        messages = ChatMessage.objects \
+            .annotate(marked=Case(When(chatmessagemarked__account=info.context.user.account, then=True),
+                                  default=False,
+                                  output_field=BooleanField())) \
+            .filter(service_purchase=self, chatmessagemarked__account=info.context.user.account) \
+            .order_by('created_at')
 
         return get_chat_messages(messages, info.context.user.account)
 

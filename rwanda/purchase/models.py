@@ -271,6 +271,7 @@ class ChatMessage(models.Model):
         chat_message = ServicePurchaseChatMessageType()
         chat_message.id = self.id
         chat_message.content = self.content
+        chat_message.marked = self.marked
         chat_message.time = t_filter(self.created_at).title()
 
         chat_message.is_file = self.is_file
@@ -289,6 +290,13 @@ class ChatMessage(models.Model):
             chat_message.date = d_filter(self.created_at).title()
 
         return chat_message
+
+
+class ChatMessageMarked(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    chat_message = models.ForeignKey(ChatMessage, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Litigation(models.Model):
