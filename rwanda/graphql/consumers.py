@@ -1,24 +1,14 @@
 import channels_graphql_ws
+from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
-from graphql_jwt.shortcuts import get_user_by_token
 
 from rwanda.graphql.account.subscriptions import AccountOnlineSubscription
 from rwanda.graphql.schemas.account import schema
 
 
-def auth_middleware(next_middleware, root, info, *args, **kwds):
-    info.context.is_authenticated = False
-    if kwds.__contains__("auth_token"):
-        user = get_user_by_token(kwds['auth_token'])
-        info.context.user = user
-        info.context.is_authenticated = True
-    return next_middleware(root, info, *args, **kwds)
-
-
 class AccountGraphqlWsConsumer(channels_graphql_ws.GraphqlWsConsumer):
     schema = schema
-    middleware = [auth_middleware]
 
     async def on_connect(self, payload):
         pass
@@ -28,11 +18,16 @@ class AccountGraphqlWsConsumer(channels_graphql_ws.GraphqlWsConsumer):
 
         if self.scope.__contains__("user") and \
                 self.scope['user'] is not None and \
-                self.scope['user'] is not AnonymousUser:
+                not isinstance(self.scope['user'], AnonymousUser):
             await disconnect_user(self.scope['user'])
 
-            await AccountOnlineSubscription.broadcast_async(
-                group=AccountOnlineSubscription.name.format(self.scope['user'].account.id.urn[9:]))
+            await notify_on_disconnect
+
+
+@sync_to_async
+def notify_on_disconnect():
+    AccountOnlineSubscription.broadcast(
+        group=AccountOnlineSubscription.name.format(self.scope['user'].account.id.urn[9:]))
 
 
 @database_sync_to_async

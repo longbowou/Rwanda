@@ -16,7 +16,7 @@ from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, Or
     DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer
 from rwanda.account.utils import create_folder_if_not_exits
 from rwanda.administration.utils import param_currency
-from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription, ChatFileSubscription
+from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile, ChatMessage
 from rwanda.service.models import Service, ServiceOption
 
@@ -311,9 +311,6 @@ class ChatMessageUploadView(View):
 
             ChatMessageSubscription.broadcast(group=ChatMessageSubscription.name.format(kwargs['pk']),
                                               payload=chat_message.id.urn[9:])
-
-            ChatFileSubscription.broadcast(group=ChatFileSubscription.name.format(kwargs['pk']),
-                                           payload=chat_message.id.urn[9:])
 
         return JsonResponse({"response_code": 200}, safe=False)
 

@@ -271,8 +271,11 @@ class ChatMessage(models.Model):
         chat_message = ServicePurchaseChatMessageType()
         chat_message.id = self.id
         chat_message.content = self.content
-        chat_message.marked = self.marked
+        chat_message.marked = getattr(self, "marked", False)
         chat_message.time = t_filter(self.created_at).title()
+        chat_message.date = int(self.created_at.strftime("%Y%m%d"))
+        chat_message.date_display = d_filter(self.created_at).title()
+        chat_message.created_at = self.created_at.timestamp()
 
         chat_message.is_file = self.is_file
         if self.is_file:
@@ -284,7 +287,6 @@ class ChatMessage(models.Model):
         if self.account_id == account.id:
             chat_message.from_current_account = True
 
-        chat_message.date = d_filter(self.created_at).title()
         chat_message.show_date = False
         if last_created_at is None or last_created_at is not None and last_created_at.date() != self.created_at.date():
             chat_message.show_date = True

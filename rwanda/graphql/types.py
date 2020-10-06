@@ -112,7 +112,7 @@ class AccountType(DjangoObjectType):
 
 
 class ServiceMediaType(DjangoObjectType):
-    file_url = graphene.String()
+    file_url = graphene.String(source="file_url")
 
     class Meta:
         model = ServiceMedia
@@ -120,10 +120,6 @@ class ServiceMediaType(DjangoObjectType):
         filter_fields = {
             "id": ("exact",),
         }
-
-    @staticmethod
-    def resolve_file_url(cls, info):
-        return info.context.scheme + "://" + info.context.META['HTTP_HOST'] + cls.file_url if cls.file_url else None
 
 
 class ServiceCommentType(DjangoObjectType):
@@ -148,11 +144,13 @@ class ServicePurchaseChatMessageType(ObjectType):
     marked = graphene.Boolean(required=True)
     show_date = graphene.Boolean(required=True)
     time = graphene.String(required=True)
+    date = graphene.Int(required=True)
+    date_display = graphene.String(required=True)
+    created_at = graphene.Float(required=True)
     content = graphene.String()
     file_name = graphene.String()
     file_url = graphene.String()
     file_size = graphene.String()
-    date = graphene.String()
 
 
 class ServicePurchaseType(DjangoObjectType):

@@ -1,5 +1,6 @@
 import channels_graphql_ws
 import graphene
+from graphql_jwt.shortcuts import get_user_by_token
 
 from rwanda.graphql.types import ServicePurchaseChatMessageType
 from rwanda.purchase.models import ChatMessage
@@ -19,8 +20,11 @@ class ChatMessageSubscription(channels_graphql_ws.Subscription):
 
     @staticmethod
     def publish(chat_message_id, info, auth_token, service_purchase):
-        if info.context.is_authenticated:
-            return ChatMessageSubscription(message=get_chat_message_type(info.context.user.account, chat_message_id))
+        try:
+            user = get_user_by_token(auth_token)
+            return ChatMessageSubscription(message=get_chat_message_type(user.account, chat_message_id))
+        except Exception:
+            pass
 
         return channels_graphql_ws.Subscription.SKIP
 
@@ -37,14 +41,5 @@ def get_chat_message_type(account, chat_message_id):
     return chat_message_type
 
 
-class ChatFileSubscription(ChatMessageSubscription):
-    name = "chat-file-{}"
-
-    @staticmethod
-    def subscribe(root, info, auth_token, service_purchase):
-        return [ChatFileSubscription.name.format(service_purchase.urn[9:])]
-
-
 class PurchaseSubscriptions(graphene.ObjectType):
     chat_message_subscription = ChatMessageSubscription.Field()
-    chat_file_subscription = ChatFileSubscription.Field()
