@@ -1,6 +1,8 @@
 import channels_graphql_ws
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
+from django.core import signing
+from django.core.signing import Signer
 from graphql_jwt.shortcuts import get_user_by_token
 
 from rwanda.graphql.account.subscriptions import AccountOnlineSubscription
@@ -13,11 +15,15 @@ class AccountGraphqlWsConsumer(channels_graphql_ws.GraphqlWsConsumer):
     async def on_connect(self, payload):
         self.scope["is_authenticated"] = False
 
-        if self.scope.__contains__("cookies") and self.scope['cookies'].__contains__("authToken"):
-            user = await get_user(self.scope['cookies']['authToken'])
-            if user is not None:
-                self.scope["is_authenticated"] = True
-                self.scope["user"] = user
+        if self.scope.__contains__("cookies") and self.scope['cookies'].__contains__("auth_token"):
+            try:
+                token = Signer().unsign(self.scope['cookies']['auth_token'])
+                user = await get_user(token)
+                if user is not None:
+                    self.scope["is_authenticated"] = True
+                    self.scope["user"] = user
+            except signing.BadSignature:
+                pass
 
     async def disconnect(self, code):
         await super().disconnect(code)

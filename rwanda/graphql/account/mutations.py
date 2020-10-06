@@ -4,6 +4,7 @@ from channels.auth import login
 from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
+from django.core.signing import Signer
 from django.core.validators import EmailValidator
 from django.db import transaction
 from django.db.models import Q
@@ -51,6 +52,8 @@ class LoginAccount(graphene.Mutation):
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
         refresh_token = create_refresh_token(user).get_token()
+
+        token = Signer().sign(token)
 
         auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
 
