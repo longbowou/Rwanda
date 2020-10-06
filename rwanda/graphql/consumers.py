@@ -21,13 +21,13 @@ class AccountGraphqlWsConsumer(channels_graphql_ws.GraphqlWsConsumer):
                 not isinstance(self.scope['user'], AnonymousUser):
             await disconnect_user(self.scope['user'])
 
-            await notify_on_disconnect
+            await notify_on_disconnect(self.scope['user'])
 
 
 @sync_to_async
-def notify_on_disconnect():
+def notify_on_disconnect(user):
     AccountOnlineSubscription.broadcast(
-        group=AccountOnlineSubscription.name.format(self.scope['user'].account.id.urn[9:]))
+        group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
 
 
 @database_sync_to_async
