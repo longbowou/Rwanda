@@ -1,52 +1,40 @@
 import channels_graphql_ws
 import graphene
-from graphql_jwt.shortcuts import get_user_by_token
 
 from rwanda.graphql.types import AccountType
-from rwanda.user.models import Account
+from rwanda.user.models import User, Account
 
 
 class OnlineSubscription(channels_graphql_ws.Subscription):
     name = "online-{}"
     account = graphene.Field(AccountType)
 
-    class Arguments:
-        auth_token = graphene.String(required=True)
-
     @staticmethod
-    def subscribe(root, info, auth_token):
-        try:
-            user = get_user_by_token(auth_token)
+    def subscribe(root, info):
+        if info.context.is_authenticated:
+            user: User = info.context.user
             user.is_online = True
             user.save()
 
             AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
 
             return [OnlineSubscription.name.format(user.account.id.urn[9:])]
-        except Exception:
-            pass
-
         return []
 
     @staticmethod
-    def publish(payload, info, auth_token):
-        try:
-            user = get_user_by_token(auth_token)
-            return OnlineSubscription(account=user.account)
-        except Exception:
-            pass
+    def publish(payload, info):
+        if info.context.is_authenticated:
+            return OnlineSubscription(account=info.context.user.account)
 
         return channels_graphql_ws.Subscription.SKIP
 
     @staticmethod
-    def unsubscribed(root, info, auth_token):
-        try:
-            user = get_user_by_token(auth_token)
+    def unsubscribed(root, info):
+        if info.context.is_authenticated:
+            user: User = info.context.user
             user.disconnect()
 
-            AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
-        except Exception:
-            pass
+        AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
 
 
 class AccountOnlineSubscription(channels_graphql_ws.Subscription):
@@ -54,16 +42,18 @@ class AccountOnlineSubscription(channels_graphql_ws.Subscription):
     account = graphene.Field(AccountType)
 
     class Arguments:
-        auth_token = graphene.String(required=True)
         account = graphene.UUID(required=True)
 
     @staticmethod
-    def subscribe(root, info, auth_token, account):
+    def subscribe(root, info, account):
         return [AccountOnlineSubscription.name.format(account.urn[9:])]
 
     @staticmethod
-    def publish(payload, info, auth_token, account):
-        return AccountOnlineSubscription(account=Account.objects.get(pk=account))
+    def publish(payload, info, account):
+        if info.context.is_authenticated:
+            return AccountOnlineSubscription(account=Account.objects.get(pk=account))
+
+        return channels_graphql_ws.Subscription.SKIP
 
 
 class AccountSubscriptions(graphene.ObjectType):

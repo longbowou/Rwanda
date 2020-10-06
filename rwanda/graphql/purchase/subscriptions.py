@@ -1,6 +1,5 @@
 import channels_graphql_ws
 import graphene
-from graphql_jwt.shortcuts import get_user_by_token
 
 from rwanda.graphql.types import ServicePurchaseChatMessageType
 from rwanda.purchase.models import ChatMessage
@@ -11,20 +10,16 @@ class ChatMessageSubscription(channels_graphql_ws.Subscription):
     message = graphene.Field(ServicePurchaseChatMessageType)
 
     class Arguments:
-        auth_token = graphene.String(required=True)
         service_purchase = graphene.UUID(required=True)
 
     @staticmethod
-    def subscribe(root, info, auth_token, service_purchase):
+    def subscribe(root, info, service_purchase):
         return [ChatMessageSubscription.name.format(service_purchase.urn[9:])]
 
     @staticmethod
-    def publish(chat_message_id, info, auth_token, service_purchase):
-        try:
-            user = get_user_by_token(auth_token)
-            return ChatMessageSubscription(message=get_chat_message_type(user.account, chat_message_id))
-        except Exception:
-            pass
+    def publish(chat_message_id, info, service_purchase):
+        if info.context.is_authenticated:
+            return ChatMessageSubscription(message=get_chat_message_type(info.context.user.account, chat_message_id))
 
         return channels_graphql_ws.Subscription.SKIP
 

@@ -1,4 +1,6 @@
 import graphene
+from asgiref.sync import async_to_sync
+from channels.auth import login
 from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -42,6 +44,9 @@ class LoginAccount(graphene.Mutation):
         if not user.is_active:
             return LoginAccount(
                 errors=[ErrorType(field="login", messages=[_("Your account has been disabled.")])])
+
+        async_to_sync(login)(info.context.__dict__, user)
+        info.context.session.save()
 
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
