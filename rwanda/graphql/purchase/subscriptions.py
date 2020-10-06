@@ -24,7 +24,7 @@ class ChatMessageSubscription(channels_graphql_ws.Subscription):
         return channels_graphql_ws.Subscription.SKIP
 
     @staticmethod
-    def unsubscribed(root, info, auth_token, service_purchase):
+    def unsubscribed(root, info, service_purchase):
         pass
 
 
