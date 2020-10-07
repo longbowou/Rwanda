@@ -97,7 +97,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'rwanda.wsgi.application'
-ASGI_APPLICATION = 'rwanda.asgi.application'
+ASGI_APPLICATION = 'rwanda.routing.application'
 
 CHANNEL_LAYERS = {
     'default': {

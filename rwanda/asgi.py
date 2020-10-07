@@ -7,14 +7,10 @@ For more information on this file, see
 https://docs.djangoproject.com/en/3.0/howto/deployment/asgi/
 """
 
-import channels
-from channels.routing import ProtocolTypeRouter
-from django.urls import path
+import os
 
-from rwanda.graphql.consumers import AccountGraphqlWsConsumer
+from django.core.asgi import get_asgi_application
 
-application = ProtocolTypeRouter({
-    'websocket': channels.routing.URLRouter([
-        path('graphql-ws/', AccountGraphqlWsConsumer),
-    ])
-})
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rwanda.settings')
+
+application = get_asgi_application()
