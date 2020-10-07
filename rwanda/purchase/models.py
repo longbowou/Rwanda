@@ -257,7 +257,7 @@ class ChatMessage(models.Model):
         if self.is_file:
             return natural_size(self.file_size)
 
-    def to_chat_message_type(self, account, last_created_at=None):
+    def display(self, account, last_created_at=None):
         from rwanda.graphql.types import ServicePurchaseChatMessageType
 
         today = timezone.now()

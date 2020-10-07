@@ -15,9 +15,9 @@ class AccountGraphqlWsConsumer(channels_graphql_ws.GraphqlWsConsumer):
     async def on_connect(self, payload):
         self.scope["is_authenticated"] = False
 
-        if self.scope.__contains__("cookies") and self.scope['cookies'].__contains__("auth_token"):
+        if payload.__contains__("AuthToken"):
             try:
-                token = Signer().unsign(self.scope['cookies']['auth_token'])
+                token = Signer().unsign(payload['AuthToken'])
                 user = await get_user(token)
                 if user is not None:
                     self.scope["is_authenticated"] = True

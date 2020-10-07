@@ -34,7 +34,7 @@ class OnlineSubscription(channels_graphql_ws.Subscription):
             user: User = info.context.user
             user.disconnect()
 
-        AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
+            AccountOnlineSubscription.broadcast(group=AccountOnlineSubscription.name.format(user.account.id.urn[9:]))
 
 
 class AccountOnlineSubscription(channels_graphql_ws.Subscription):

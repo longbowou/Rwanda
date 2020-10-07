@@ -420,7 +420,7 @@ def get_chat_messages(messages, account):
     for message in messages:
         message: ChatMessage
 
-        chat_messages.append(message.to_chat_message_type(account, last_created_at))
+        chat_messages.append(message.display(account, last_created_at))
 
         last_created_at = message.created_at
 
@@ -461,11 +461,19 @@ class ServicePurchaseServiceOptionType(DjangoObjectType):
 
 
 class ChatMessageType(DjangoObjectType):
+    display = graphene.Field(ServicePurchaseChatMessageType, required=True)
+
     class Meta:
         model = ChatMessage
         filter_fields = {
             "id": ("exact",),
         }
+
+    @account_required
+    def resolve_display(self, info):
+        self: ChatMessage
+
+        return self.display(info.context.user.account)
 
 
 class LitigationType(DjangoObjectType):
