@@ -10,7 +10,7 @@ from rwanda.graphql.consumers import AccountGraphqlWsConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rwanda.settings')
 
-django.setup(set_prefix=False)
+django.setup()
 
 application = ProtocolTypeRouter({
     'websocket': AuthMiddlewareStack(
