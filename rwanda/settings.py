@@ -42,6 +42,7 @@ CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'rwanda.user',
     'rwanda.service',
     'rwanda.administration',
@@ -57,7 +58,6 @@ INSTALLED_APPS = [
     'graphene_django',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'corsheaders',
-    'channels',
 ]
 
 MIDDLEWARE = [
