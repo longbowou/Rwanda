@@ -9,8 +9,19 @@ https://docs.djangoproject.com/en/3.0/howto/deployment/asgi/
 
 import os
 
-from django.core.asgi import get_asgi_application
+import channels
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter
+from django.urls import path
+
+from rwanda.graphql.consumers import AccountGraphqlWsConsumer
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'rwanda.settings')
 
-application = get_asgi_application()
+application = ProtocolTypeRouter({
+    'websocket': AuthMiddlewareStack(
+        channels.routing.URLRouter([
+            path('graphql-ws/', AccountGraphqlWsConsumer),
+        ])
+    )
+})
