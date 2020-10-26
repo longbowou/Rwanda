@@ -8,8 +8,10 @@ from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutatio
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
-from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType
-from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked
+from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType, \
+    ServicePurchaseUpdateRequestType
+from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked, \
+    ServicePurchaseUpdateRequest
 from rwanda.user.models import Account
 
 
@@ -281,6 +283,76 @@ class MarkUnmarkChatMessage(graphene.Mutation):
         return MarkUnmarkChatMessage(marked=True)
 
 
+class CreateServicePurchaseUpdateRequest(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServicePurchaseUpdateRequestType
+        only_fields = ('title', 'content', 'service_purchase')
+
+    @classmethod
+    @transaction.atomic()
+    def pre_save(cls, info, old_obj, form, input):
+        update_request: ServicePurchaseUpdateRequest = form.instance
+        service_purchase: ServicePurchase = form.cleaned_data['service_purchase']
+
+        if service_purchase.cannot_ask_for_update or service_purchase.is_not_buyer(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service_purchase.set_as_request_update()
+        service_purchase.save()
+
+        update_request.save()
+
+        return cls(servicePurchaseUpdateRequest=update_request, errors=[])
+
+
+class AcceptServicePurchaseUpdateRequest(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServicePurchaseUpdateRequestType
+        only_fields = ("",)
+        for_update = True
+
+    @classmethod
+    @transaction.atomic()
+    def pre_save(cls, info, old_obj, form, input):
+        update_request: ServicePurchaseUpdateRequest = form.instance
+        service_purchase: ServicePurchase = update_request.service_purchase
+
+        if update_request.cannot_be_accepted or service_purchase.is_not_seller(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service_purchase.set_as_update_accepted()
+        service_purchase.save()
+
+        update_request.set_as_accepted()
+        update_request.save()
+
+        return cls(servicePurchaseUpdateRequest=update_request, errors=[])
+
+
+class RejectServicePurchaseUpdateRequest(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServicePurchaseUpdateRequestType
+        only_fields = ("",)
+        for_update = True
+
+    @classmethod
+    @transaction.atomic()
+    def pre_save(cls, info, old_obj, form, input):
+        update_request: ServicePurchaseUpdateRequest = form.instance
+        service_purchase: ServicePurchase = update_request.service_purchase
+
+        if update_request.cannot_be_rejected or service_purchase.is_not_seller(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service_purchase.set_as_update_rejected()
+        service_purchase.save()
+
+        update_request.set_as_rejected()
+        update_request.save()
+
+        return cls(servicePurchaseUpdateRequest=update_request, errors=[])
+
+
 class PurchaseMutations(graphene.ObjectType):
     init_service_purchase = InitServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
@@ -295,5 +367,8 @@ class PurchaseMutations(graphene.ObjectType):
     delete_deliverable_file = DeleteDeliverableFile.Field()
 
     create_chat_message = CreateChatMessage.Field()
-
     mark_unmark_chat_message = MarkUnmarkChatMessage.Field()
+
+    create_service_purchase_update_request = CreateServicePurchaseUpdateRequest.Field()
+    accept_service_purchase_update_request = AcceptServicePurchaseUpdateRequest.Field()
+    reject_service_purchase_update_request = RejectServicePurchaseUpdateRequest.Field()

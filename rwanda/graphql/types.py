@@ -16,7 +16,7 @@ from rwanda.administration.utils import param_base_price
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
-    DeliverableFile
+    DeliverableFile, ServicePurchaseUpdateRequest
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
 from rwanda.user.models import Admin, Account
 
@@ -153,6 +153,40 @@ class ServicePurchaseChatMessageType(ObjectType):
     file_size = graphene.String()
 
 
+class ServicePurchaseUpdateRequestType(DjangoObjectType):
+    status = graphene.String(source="status_display", required=True)
+    initiated = graphene.Boolean(source="initiated", required=True)
+    accepted = graphene.Boolean(source="accepted", required=True)
+    rejected = graphene.Boolean(source="rejected", required=True)
+
+    can_be_accepted = graphene.Boolean(required=True)
+    can_be_rejected = graphene.Boolean(required=True)
+
+    class Meta:
+        model = ServicePurchaseUpdateRequest
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+    def resolve_can_be_accepted(self, info):
+        self: ServicePurchaseUpdateRequest
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_accepted and self.service_purchase.is_seller(user.account)
+
+    def resolve_can_be_rejected(self, info):
+        self: ServicePurchaseUpdateRequest
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.cannot_be_rejected and self.service_purchase.is_seller(user.account)
+
+
 class ServicePurchaseType(DjangoObjectType):
     price = graphene.String(source="price_display", required=True)
     delay = graphene.String(source="delay_display", required=True)
@@ -163,8 +197,12 @@ class ServicePurchaseType(DjangoObjectType):
 
     initiated = graphene.Boolean(source="initiated", required=True)
     accepted = graphene.Boolean(source="accepted", required=True)
+    rejected = graphene.Boolean(source="rejected", required=True)
     delivered = graphene.Boolean(source="delivered", required=True)
     approved = graphene.Boolean(source="approved", required=True)
+    request_update = graphene.Boolean(source="request_update", required=True)
+    update_accepted = graphene.Boolean(source="update_accepted", required=True)
+    update_rejected = graphene.Boolean(source="update_rejected", required=True)
     canceled = graphene.Boolean(source="canceled", required=True)
     in_dispute = graphene.Boolean(source="in_dispute", required=True)
     has_been_accepted = graphene.Boolean(source="has_been_accepted", required=True)
@@ -175,17 +213,28 @@ class ServicePurchaseType(DjangoObjectType):
     can_be_canceled = graphene.Boolean(required=True)
     can_be_in_dispute = graphene.Boolean(required=True)
     can_add_deliverable = graphene.Boolean(required=True)
+    can_ask_for_update = graphene.Boolean(required=True)
 
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_files = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_marked = graphene.List(ServicePurchaseChatMessageType, required=True)
 
+    update_request = graphene.Field(ServicePurchaseUpdateRequestType)
+
     class Meta:
         model = ServicePurchase
         filter_fields = {
             "id": ("exact",),
         }
+
+    def resolve_update_request(self, info):
+        self: ServicePurchase
+
+        if self.request_update:
+            return ServicePurchaseUpdateRequest.objects \
+                .filter(status=ServicePurchaseUpdateRequest.STATUS_INITIATED, service_purchase=self) \
+                .first()
 
     def resolve_can_be_accepted(self, info):
         self: ServicePurchase
@@ -222,6 +271,15 @@ class ServicePurchaseType(DjangoObjectType):
             return False
 
         return self.can_be_approved and self.is_buyer(user.account)
+
+    def resolve_can_ask_for_update(self, info):
+        self: ServicePurchase
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_ask_for_update and self.is_buyer(user.account)
 
     def resolve_can_be_canceled(self, info):
         self: ServicePurchase
@@ -306,13 +364,13 @@ class ServicePurchaseType(DjangoObjectType):
                 happen_at=happen_at.title(),
                 status=_('Deliverable Published'),
                 color='info',
-                description=_('Deliverable <strong>{}</strong> published in version <strong>{}</strong>.'
-                              .format(deliverable.title, deliverable.version_display)),
+                description=_('Deliverable <strong>{}</strong> published in version <strong>{}</strong>.')
+                    .format(deliverable.title, deliverable.version_display),
             ))
 
             last_happen_at = deliverable.created_at
 
-        if self.has_been_canceled and self.has_been_accepted:
+        if self.has_been_accepted and self.has_been_canceled:
             happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():
                 happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
@@ -336,6 +394,53 @@ class ServicePurchaseType(DjangoObjectType):
 
             last_happen_at = self.delivered_at
 
+        for update_request in self.servicepurchaseupdaterequest_set \
+                .order_by("created_at") \
+                .all():
+            happen_at = str(t_filter(update_request.created_at))
+            if last_happen_at.date() != update_request.created_at.date():
+                happen_at = str(d_filter(update_request.created_at)) + " " + happen_at
+
+            timelines.append(ServicePurchaseTimeLineType(
+                happen_at=happen_at.title(),
+                status=_('Request for update'),
+                color='warning',
+                description=_('The buyer make an update request <strong>{}</strong>')
+                    .format(update_request.title),
+            ))
+
+            last_happen_at = update_request.created_at
+
+            if update_request.accepted:
+                happen_at = str(t_filter(update_request.accepted_at))
+                if last_happen_at.date() != update_request.accepted_at.date():
+                    happen_at = str(d_filter(update_request.accepted_at)) + " " + happen_at
+
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Request for update accepted'),
+                    color='primary',
+                    description=_('The update request <strong>{}</strong> have been accepted.')
+                        .format(update_request.title),
+                ))
+
+                last_happen_at = update_request.accepted_at
+
+            if update_request.rejected:
+                happen_at = str(t_filter(update_request.rejected_at))
+                if last_happen_at.date() != update_request.rejected_at.date():
+                    happen_at = str(d_filter(update_request.rejected_at)) + " " + happen_at
+
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Request for update rejected'),
+                    color='danger',
+                    description=_('The update request <strong>{}</strong> have been rejected.')
+                        .format(update_request.title),
+                ))
+
+                last_happen_at = update_request.rejected_at
+
         if self.has_been_in_dispute:
             happen_at = str(t_filter(self.in_dispute_at))
             if last_happen_at.date() != self.in_dispute_at.date():
@@ -349,7 +454,7 @@ class ServicePurchaseType(DjangoObjectType):
 
             last_happen_at = self.in_dispute_at
 
-        if self.has_been_canceled and self.has_been_in_dispute:
+        if self.has_been_in_dispute and self.has_been_canceled:
             happen_at = str(t_filter(self.canceled_at))
             if last_happen_at.date() != self.canceled_at.date():
                 happen_at = str(d_filter(self.canceled_at)) + " " + happen_at

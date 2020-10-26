@@ -23,10 +23,14 @@ class ServicePurchase(models.Model):
     commission = models.PositiveBigIntegerField()
     STATUS_INITIATED = 'INITIATED'
     STATUS_ACCEPTED = 'ACCEPTED'
+    STATUS_REJECTED = 'REJECTED'
     STATUS_APPROVED = 'APPROVED'
     STATUS_DELIVERED = 'DELIVERED'
     STATUS_CANCELED = 'CANCELED'
     STATUS_IN_DISPUTE = 'IN_DISPUTE'
+    STATUS_REQUEST_UPDATE = 'REQUEST_UPDATE'
+    STATUS_UPDATE_ACCEPTED = 'REQUEST_ACCEPTED'
+    STATUS_UPDATE_REJECTED = 'REQUEST_REJECTED'
     status = models.CharField(max_length=255, default=STATUS_INITIATED)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
@@ -79,6 +83,15 @@ class ServicePurchase(models.Model):
         if self.canceled:
             return _('Canceled')
 
+        if self.request_update:
+            return _('Update request made')
+
+        if self.update_accepted:
+            return _('Update request accepted')
+
+        if self.update_accepted:
+            return _('Update request rejected')
+
         return _("Initiated")
 
     @property
@@ -94,6 +107,10 @@ class ServicePurchase(models.Model):
         return self.status == self.STATUS_ACCEPTED
 
     @property
+    def rejected(self):
+        return self.status == self.STATUS_REJECTED
+
+    @property
     def delivered(self):
         return self.status == self.STATUS_DELIVERED
 
@@ -106,12 +123,24 @@ class ServicePurchase(models.Model):
         return self.status == self.STATUS_CANCELED
 
     @property
+    def request_update(self):
+        return self.status == self.STATUS_REQUEST_UPDATE
+
+    @property
+    def update_accepted(self):
+        return self.status == self.STATUS_UPDATE_ACCEPTED
+
+    @property
+    def update_rejected(self):
+        return self.status == self.STATUS_UPDATE_REJECTED
+
+    @property
     def in_dispute(self):
         return self.status == self.STATUS_IN_DISPUTE
 
     @property
     def has_been_accepted(self):
-        return self.accepted or self.delivered or self.in_dispute or self.approved
+        return self.accepted_at is not None
 
     @property
     def has_not_been_accepted(self):
@@ -119,15 +148,15 @@ class ServicePurchase(models.Model):
 
     @property
     def has_been_delivered(self):
-        return self.delivered or self.in_dispute or self.approved
+        return self.delivered_at is not None
 
     @property
     def has_been_approved(self):
-        return self.approved
+        return self.approved_at is not None
 
     @property
     def has_been_canceled(self):
-        return self.canceled
+        return self.canceled_at is not None
 
     @property
     def has_been_in_dispute(self):
@@ -188,6 +217,14 @@ class ServicePurchase(models.Model):
         return not self.can_be_in_dispute
 
     @property
+    def can_ask_for_update(self):
+        return self.delivered
+
+    @property
+    def cannot_ask_for_update(self):
+        return not self.can_ask_for_update
+
+    @property
     def can_be_canceled_for_delay(self):
         in_between_days = (timezone.now() - self.deadline_at).days
         cancellation_delay_days = int(param_service_purchase_cancellation_delay())
@@ -219,6 +256,15 @@ class ServicePurchase(models.Model):
         self.status = self.STATUS_IN_DISPUTE
         self.in_dispute_at = timezone.now()
 
+    def set_as_request_update(self):
+        self.status = self.STATUS_REQUEST_UPDATE
+
+    def set_as_update_accepted(self):
+        self.status = self.STATUS_UPDATE_ACCEPTED
+
+    def set_as_update_rejected(self):
+        self.status = self.STATUS_UPDATE_REJECTED
+
     def is_buyer(self, account: Account):
         return self.account_id == account.id
 
@@ -230,6 +276,66 @@ class ServicePurchase(models.Model):
 
     def is_not_seller(self, account: Account):
         return not self.is_seller(account)
+
+
+class ServicePurchaseUpdateRequest(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    STATUS_INITIATED = "INITIATED"
+    STATUS_ACCEPTED = "ACCEPTED"
+    STATUS_REJECTED = "REJECTED"
+    status = models.CharField(max_length=255, default=STATUS_INITIATED)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    rejected_at = models.DateTimeField(null=True, blank=True)
+    service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def status_display(self):
+        if self.accepted:
+            return _('Accepted')
+
+        if self.rejected:
+            return _('Rejected')
+
+        return _("Initiated")
+
+    @property
+    def initiated(self):
+        return self.status == self.STATUS_INITIATED
+
+    @property
+    def accepted(self):
+        return self.status == self.STATUS_ACCEPTED
+
+    @property
+    def rejected(self):
+        return self.status == self.STATUS_REJECTED
+
+    @property
+    def can_be_accepted(self):
+        return self.initiated
+
+    @property
+    def cannot_be_accepted(self):
+        return not self.can_be_accepted
+
+    @property
+    def can_be_rejected(self):
+        return self.initiated
+
+    @property
+    def cannot_be_rejected(self):
+        return not self.can_be_accepted
+
+    def set_as_accepted(self):
+        self.status = self.STATUS_ACCEPTED
+        self.accepted_at = timezone.now()
+
+    def set_as_rejected(self):
+        self.status = self.STATUS_REJECTED
+        self.rejected_at = timezone.now()
 
 
 class ServicePurchaseServiceOption(models.Model):
