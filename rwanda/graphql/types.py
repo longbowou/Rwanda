@@ -2,7 +2,7 @@ from datetime import timedelta
 
 import graphene
 from django.contrib.humanize.templatetags.humanize import naturalday, naturaltime
-from django.db.models import Case, When, BooleanField
+from django.db.models import Case, When, BooleanField, Q
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -157,10 +157,13 @@ class ServicePurchaseUpdateRequestType(DjangoObjectType):
     status = graphene.String(source="status_display", required=True)
     initiated = graphene.Boolean(source="initiated", required=True)
     accepted = graphene.Boolean(source="accepted", required=True)
-    rejected = graphene.Boolean(source="rejected", required=True)
+    refused = graphene.Boolean(source="refused", required=True)
+    delivered = graphene.Boolean(source="delivered", required=True)
+    deadline_at = graphene.String(source="deadline_at_display")
 
     can_be_accepted = graphene.Boolean(required=True)
-    can_be_rejected = graphene.Boolean(required=True)
+    can_be_refused = graphene.Boolean(required=True)
+    can_be_delivered = graphene.Boolean(required=True)
 
     class Meta:
         model = ServicePurchaseUpdateRequest
@@ -177,14 +180,23 @@ class ServicePurchaseUpdateRequestType(DjangoObjectType):
 
         return self.can_be_accepted and self.service_purchase.is_seller(user.account)
 
-    def resolve_can_be_rejected(self, info):
+    def resolve_can_be_refused(self, info):
         self: ServicePurchaseUpdateRequest
 
         user = info.context.user
         if user.is_anonymous or user.is_authenticated and user.is_not_account:
             return False
 
-        return self.cannot_be_rejected and self.service_purchase.is_seller(user.account)
+        return self.can_be_refused and self.service_purchase.is_seller(user.account)
+
+    def resolve_can_be_delivered(self, info):
+        self: ServicePurchaseUpdateRequest
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_delivered and self.service_purchase.is_seller(user.account)
 
 
 class ServicePurchaseType(DjangoObjectType):
@@ -197,12 +209,13 @@ class ServicePurchaseType(DjangoObjectType):
 
     initiated = graphene.Boolean(source="initiated", required=True)
     accepted = graphene.Boolean(source="accepted", required=True)
-    rejected = graphene.Boolean(source="rejected", required=True)
+    refused = graphene.Boolean(source="refused", required=True)
     delivered = graphene.Boolean(source="delivered", required=True)
     approved = graphene.Boolean(source="approved", required=True)
-    request_update = graphene.Boolean(source="request_update", required=True)
+    update_initiated = graphene.Boolean(source="update_initiated", required=True)
     update_accepted = graphene.Boolean(source="update_accepted", required=True)
-    update_rejected = graphene.Boolean(source="update_rejected", required=True)
+    update_refused = graphene.Boolean(source="update_refused", required=True)
+    update_delivered = graphene.Boolean(source="update_delivered", required=True)
     canceled = graphene.Boolean(source="canceled", required=True)
     in_dispute = graphene.Boolean(source="in_dispute", required=True)
     has_been_accepted = graphene.Boolean(source="has_been_accepted", required=True)
@@ -231,10 +244,11 @@ class ServicePurchaseType(DjangoObjectType):
     def resolve_update_request(self, info):
         self: ServicePurchase
 
-        if self.request_update:
-            return ServicePurchaseUpdateRequest.objects \
-                .filter(status=ServicePurchaseUpdateRequest.STATUS_INITIATED, service_purchase=self) \
-                .first()
+        return ServicePurchaseUpdateRequest.objects \
+            .filter(service_purchase=self) \
+            .exclude(Q(status=ServicePurchaseUpdateRequest.STATUS_DELIVERED) |
+                     Q(status=ServicePurchaseUpdateRequest.STATUS_REFUSED)) \
+            .first()
 
     def resolve_can_be_accepted(self, info):
         self: ServicePurchase
@@ -347,8 +361,8 @@ class ServicePurchaseType(DjangoObjectType):
                 happen_at=happen_at.title(),
                 status=_('Accepted'),
                 color='primary',
-                description=_('Deadline set to <strong>{}</strong>'.format(
-                    date_filter(self.deadline_at))),
+                description=_('Deadline set to <strong>{}</strong>')
+                    .format(date_filter(self.deadline_at)),
             ))
 
             last_happen_at = self.accepted_at
@@ -403,15 +417,15 @@ class ServicePurchaseType(DjangoObjectType):
 
             timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
-                status=_('Request for update'),
-                color='warning',
+                status=_('Request for update initiated'),
+                color='dark',
                 description=_('The buyer make an update request <strong>{}</strong>')
                     .format(update_request.title),
             ))
 
             last_happen_at = update_request.created_at
 
-            if update_request.accepted:
+            if update_request.has_been_accepted:
                 happen_at = str(t_filter(update_request.accepted_at))
                 if last_happen_at.date() != update_request.accepted_at.date():
                     happen_at = str(d_filter(update_request.accepted_at)) + " " + happen_at
@@ -420,26 +434,42 @@ class ServicePurchaseType(DjangoObjectType):
                     happen_at=happen_at.title(),
                     status=_('Request for update accepted'),
                     color='primary',
-                    description=_('The update request <strong>{}</strong> have been accepted.')
-                        .format(update_request.title),
+                    description=_(
+                        'The update request <strong>{}</strong> have been accepted. Deadline set to <strong>{}</strong>')
+                        .format(update_request.title, date_filter(update_request.deadline_at)),
                 ))
 
                 last_happen_at = update_request.accepted_at
 
-            if update_request.rejected:
-                happen_at = str(t_filter(update_request.rejected_at))
-                if last_happen_at.date() != update_request.rejected_at.date():
-                    happen_at = str(d_filter(update_request.rejected_at)) + " " + happen_at
+            if update_request.has_been_refused:
+                happen_at = str(t_filter(update_request.refused_at))
+                if last_happen_at.date() != update_request.refused_at.date():
+                    happen_at = str(d_filter(update_request.refused_at)) + " " + happen_at
 
                 timelines.append(ServicePurchaseTimeLineType(
                     happen_at=happen_at.title(),
-                    status=_('Request for update rejected'),
+                    status=_('Request for update refused'),
                     color='danger',
-                    description=_('The update request <strong>{}</strong> have been rejected.')
+                    description=_('The update request <strong>{}</strong> have been refused.')
                         .format(update_request.title),
                 ))
 
-                last_happen_at = update_request.rejected_at
+                last_happen_at = update_request.refused_at
+
+            if update_request.has_been_delivered:
+                happen_at = str(t_filter(update_request.delivered_at))
+                if last_happen_at.date() != update_request.delivered_at.date():
+                    happen_at = str(d_filter(update_request.delivered_at)) + " " + happen_at
+
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Request for update delivered'),
+                    color='warning',
+                    description=_('The update request <strong>{}</strong> have been delivered.')
+                        .format(update_request.title),
+                ))
+
+                last_happen_at = update_request.delivered_at
 
         if self.has_been_in_dispute:
             happen_at = str(t_filter(self.in_dispute_at))
