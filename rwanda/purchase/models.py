@@ -85,7 +85,7 @@ class ServicePurchase(models.Model):
             return _('Canceled')
 
         if self.update_initiated:
-            return _('Update request made')
+            return _('Update request initiated')
 
         if self.update_accepted:
             return _('Update request accepted')
@@ -196,7 +196,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_approved(self):
-        return self.delivered or self.update_delivered
+        return self.delivered or self.update_delivered or self.update_refused
 
     @property
     def cannot_be_approved(self):
@@ -303,6 +303,7 @@ class ServicePurchaseUpdateRequest(models.Model):
     refused_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     deadline_at = models.DateTimeField(null=True, blank=True)
+    reason = models.TextField(null=True, blank=True)
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -333,7 +333,8 @@ class AcceptServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 class RefuseServicePurchaseUpdateRequest(AccountDjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseUpdateRequestType
-        only_fields = ("",)
+        only_fields = ("reason",)
+        custom_input_fields = {'reason': graphene.String(required=True)}
         for_update = True
 
     @classmethod

@@ -235,6 +235,8 @@ class ServicePurchaseType(DjangoObjectType):
 
     update_request = graphene.Field(ServicePurchaseUpdateRequestType)
 
+    last_update_request = graphene.Field(ServicePurchaseUpdateRequestType)
+
     class Meta:
         model = ServicePurchase
         filter_fields = {
@@ -249,6 +251,15 @@ class ServicePurchaseType(DjangoObjectType):
             .exclude(Q(status=ServicePurchaseUpdateRequest.STATUS_DELIVERED) |
                      Q(status=ServicePurchaseUpdateRequest.STATUS_REFUSED)) \
             .first()
+
+    def resolve_last_update_request(self, info):
+        self: ServicePurchase
+
+        if self.update_refused or self.update_delivered:
+            return ServicePurchaseUpdateRequest.objects \
+                .filter(service_purchase=self) \
+                .order_by("-created_at") \
+                .first()
 
     def resolve_can_be_accepted(self, info):
         self: ServicePurchase
@@ -450,8 +461,9 @@ class ServicePurchaseType(DjangoObjectType):
                     happen_at=happen_at.title(),
                     status=_('Request for update refused'),
                     color='danger',
-                    description=_('The update request <strong>{}</strong> have been refused.')
-                        .format(update_request.title),
+                    description=_(
+                        'The update request <strong>{}</strong> have been refused. <strong>Reason:</strong> {}')
+                        .format(update_request.title, update_request.reason),
                 ))
 
                 last_happen_at = update_request.refused_at
