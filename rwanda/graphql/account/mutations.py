@@ -262,7 +262,7 @@ class UpdateAccount(graphene.Mutation):
 class CreateLitigation(AccountDjangoModelMutation):
     class Meta:
         model_type = LitigationType
-        only_fields = ('service_purchase', 'title', 'description')
+        only_fields = ('service_purchase', 'title', 'content')
 
     @classmethod
     @transaction.atomic

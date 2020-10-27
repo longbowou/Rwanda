@@ -84,6 +84,9 @@ class ServicePurchase(models.Model):
         if self.canceled:
             return _('Canceled')
 
+        if self.in_dispute:
+            return _('In dispute')
+
         if self.update_initiated:
             return _('Update request initiated')
 
@@ -218,7 +221,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_in_dispute(self):
-        return self.delivered
+        return self.delivered or self.update_delivered or self.update_refused
 
     @property
     def cannot_be_in_dispute(self):
@@ -464,7 +467,7 @@ class ChatMessageMarked(models.Model):
 class Litigation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
-    description = models.TextField()
+    content = models.TextField()
     DECISION_APPROVED = 'APPROVED'
     DECISION_CANCELED = 'CANCELED'
     decisions = (
@@ -472,7 +475,9 @@ class Litigation(models.Model):
         (DECISION_CANCELED, DECISION_CANCELED),
     )
     decision = models.CharField(max_length=255, choices=decisions, blank=True, null=True)
-    handled = models.BooleanField(default=False)
+    STATUS_OPENED = "OPENED"
+    STATUS_HANDLED = "HANDLED"
+    status = models.CharField(max_length=255, default=STATUS_OPENED)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
@@ -483,12 +488,42 @@ class Litigation(models.Model):
         return self.title
 
     @property
+    def status_display(self):
+        if self.handled:
+            return _('Handled')
+
+        return _("Opened")
+
+    @property
+    def decision_display(self):
+        if self.approved:
+            return _('Purchase approved')
+
+        return _("Purchase canceled")
+
+    @property
     def approved(self):
         return self.decision == self.DECISION_APPROVED
 
     @property
     def canceled(self):
         return self.decision == self.DECISION_CANCELED
+
+    @property
+    def opened(self):
+        return self.status == self.STATUS_OPENED
+
+    @property
+    def handled(self):
+        return self.status == self.STATUS_HANDLED
+
+    @property
+    def can_be_handled(self):
+        return self.opened
+
+    @property
+    def cannot_be_handled(self):
+        return not self.can_be_handled
 
 
 class Deliverable(models.Model):

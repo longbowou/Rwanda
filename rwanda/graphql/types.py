@@ -446,7 +446,7 @@ class ServicePurchaseType(DjangoObjectType):
                     status=_('Request for update accepted'),
                     color='primary',
                     description=_(
-                        'The update request <strong>{}</strong> have been accepted. Deadline set to <strong>{}</strong>')
+                        'The update request <strong>{}</strong> have been accepted. New deadline set to <strong>{}</strong>')
                         .format(update_request.title, date_filter(update_request.deadline_at)),
                 ))
 
@@ -490,8 +490,10 @@ class ServicePurchaseType(DjangoObjectType):
 
             timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
-                status=_('Canceled'),
-                color='info'
+                status=_('In dispute'),
+                color='info',
+                description=_('The buyer open a litigation <strong>{}</strong>')
+                    .format(self.litigation.title),
             ))
 
             last_happen_at = self.in_dispute_at
@@ -624,6 +626,14 @@ class ChatMessageType(DjangoObjectType):
 
 
 class LitigationType(DjangoObjectType):
+    status = graphene.String(source="status_display", required=True)
+    decision = graphene.String(source="decision_display")
+
+    opened = graphene.Boolean(source="opened", required=True)
+    handled = graphene.Boolean(source="handled", required=True)
+    approved = graphene.Boolean(source="approved", required=True)
+    canceled = graphene.Boolean(source="canceled", required=True)
+
     class Meta:
         model = Litigation
         filter_fields = {
