@@ -245,6 +245,10 @@ class ServicePurchase(models.Model):
     def canceled_for_delay(self):
         return self.accepted and self.canceled and self.canceled_at > self.deadline_at
 
+    @property
+    def can_be_commented(self):
+        return self.has_been_approved or self.has_been_accepted and self.has_been_canceled
+
     def set_as_accepted(self):
         self.status = self.STATUS_ACCEPTED
         today = timezone.now()

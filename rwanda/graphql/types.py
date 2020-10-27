@@ -227,6 +227,7 @@ class ServicePurchaseType(DjangoObjectType):
     can_be_in_dispute = graphene.Boolean(required=True)
     can_add_deliverable = graphene.Boolean(required=True)
     can_ask_for_update = graphene.Boolean(required=True)
+    can_be_commented = graphene.Boolean(required=True)
 
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
@@ -323,6 +324,15 @@ class ServicePurchaseType(DjangoObjectType):
             return False
 
         return self.can_be_in_dispute and self.is_buyer(user.account)
+
+    def resolve_can_be_commented(self, info):
+        self: ServicePurchase
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_commented and self.is_buyer(user.account)
 
     def resolve_timelines(self, info):
         self: ServicePurchase
