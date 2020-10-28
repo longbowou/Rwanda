@@ -7,7 +7,7 @@ from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_service_purchase, init_service_purchase
-from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
+from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription, ServicePurchaseSubscription
 from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType, \
     ServicePurchaseUpdateRequestType
 from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked, \
@@ -74,6 +74,10 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
 
         service_purchase.set_as_accepted()
 
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
+
 
 class DeliverServicePurchase(AccountDjangoModelMutation):
     class Meta:
@@ -94,6 +98,10 @@ class DeliverServicePurchase(AccountDjangoModelMutation):
                 servicePurchase=service_purchase)
 
         service_purchase.set_as_delivered()
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
 
 
 class ApproveServicePurchase(AccountDjangoModelMutation):
@@ -120,6 +128,8 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
         service_purchase.set_as_approved()
         form.save()
         service_purchase.refresh_from_db()
+
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(servicePurchase=service_purchase, errors=[])
 
@@ -148,6 +158,8 @@ class CancelServicePurchase(AccountDjangoModelMutation):
         service_purchase.set_as_canceled()
         form.save()
         service_purchase.refresh_from_db()
+
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(servicePurchase=service_purchase, errors=[])
 
@@ -257,7 +269,7 @@ class CreateChatMessage(AccountDjangoModelMutation):
     def post_save(cls, info, old_obj, form, obj, input):
         obj: ChatMessage
         ChatMessageSubscription.broadcast(group=ChatMessageSubscription.name.format(obj.service_purchase_id),
-                                          payload=obj.id.urn[9:])
+                                          payload=str(obj.id))
 
 
 class MarkUnmarkChatMessage(graphene.Mutation):
@@ -302,6 +314,9 @@ class InitiateServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 
         update_request.save()
 
+        ServicePurchaseSubscription.broadcast(
+            group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
 
@@ -326,6 +341,9 @@ class AcceptServicePurchaseUpdateRequest(AccountDjangoModelMutation):
         update_request.set_as_accepted()
         update_request.deadline_at = service_purchase.deadline_at
         update_request.save()
+
+        ServicePurchaseSubscription.broadcast(
+            group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
@@ -354,6 +372,12 @@ class RefuseServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        obj: ServicePurchaseUpdateRequest
+        ServicePurchaseSubscription.broadcast(
+            group=ServicePurchaseSubscription.name.format(str(obj.service_purchase_id)))
+
 
 class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
     class Meta:
@@ -375,6 +399,9 @@ class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 
         update_request.set_as_delivered()
         update_request.save()
+
+        ServicePurchaseSubscription.broadcast(
+            group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 

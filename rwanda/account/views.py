@@ -310,7 +310,7 @@ class ChatMessageUploadView(View):
             chat_message.save()
 
             ChatMessageSubscription.broadcast(group=ChatMessageSubscription.name.format(kwargs['pk']),
-                                              payload=chat_message.id.urn[9:])
+                                              payload=str(chat_message.id))
 
         return JsonResponse({"response_code": 200}, safe=False)
 
