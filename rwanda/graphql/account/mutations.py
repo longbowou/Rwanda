@@ -1,6 +1,4 @@
 import graphene
-from asgiref.sync import async_to_sync
-from channels.auth import login
 from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -45,9 +43,6 @@ class LoginAccount(graphene.Mutation):
         if not user.is_active:
             return LoginAccount(
                 errors=[ErrorType(field="login", messages=[_("Your account has been disabled.")])])
-
-        async_to_sync(login)(info.context.__dict__, user)
-        info.context.session.save()
 
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
@@ -226,13 +221,13 @@ class UpdateAccount(graphene.Mutation):
             try:
                 username_validator(input.username)
                 if User.objects.filter(username=input.username).exclude(pk=user.id).exists():
-                    return CreateAccount(
+                    return UpdateAccount(
                         errors=[
                             ErrorType(field='username', messages=[_("An account with that username already exists.")])]
                     )
                 user.username = input.username
             except ValidationError as e:
-                return CreateAccount(
+                return UpdateAccount(
                     errors=[
                         ErrorType(field='username', messages=[_(e.message)])])
 
@@ -241,12 +236,12 @@ class UpdateAccount(graphene.Mutation):
             try:
                 email_validator(input.email)
                 if User.objects.filter(email=input.email).exclude(pk=user.id).exists():
-                    return CreateAccount(
+                    return UpdateAccount(
                         errors=[ErrorType(field='email', messages=[_("An account with that email already exists.")])]
                     )
                 user.email = input.email
             except ValidationError as e:
-                return CreateAccount(
+                return UpdateAccount(
                     errors=[ErrorType(field='email', messages=[_(e.message)])])
 
         for field, value in input.items():
@@ -255,7 +250,7 @@ class UpdateAccount(graphene.Mutation):
 
         user.save()
 
-        return CreateAccount(account=user.account, errors=[])
+        return UpdateAccount(account=user.account, errors=[])
 
 
 # MUTATION LITIGATION

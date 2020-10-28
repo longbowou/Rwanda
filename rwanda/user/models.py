@@ -47,6 +47,16 @@ class User(AbstractUser):
     def is_not_account(self):
         return not self.is_account
 
+    @property
+    def is_admin(self):
+        try:
+            return self.admin is not None
+        except Exception:
+            return False
+
+    @property
+    def is_not_admin(self):
+        return not self.is_admin
 
 class Admin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
