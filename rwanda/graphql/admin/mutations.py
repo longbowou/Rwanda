@@ -32,7 +32,9 @@ class LoginAdmin(graphene.Mutation):
     @anonymous_admin_required
     def mutate(self, info, input):
         user: User = User.objects.filter(Q(username=input.login) & Q(admin__isnull=False) |
-                                         Q(email=input.login) & Q(admin__isnull=False)).first()
+                                         Q(email=input.login) & Q(admin__isnull=False) |
+                                         Q(username=input.login) & Q(is_superuser=True) |
+                                         Q(email=input.login) & Q(is_superuser=True)).first()
         if user is None:
             return LoginAdmin(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
 
@@ -51,6 +53,10 @@ class LoginAdmin(graphene.Mutation):
         token = Signer().sign(token)
 
         auth = AuthType(token=token, refresh_token=refresh_token, token_expires_in=payload['exp'])
+
+        if user.is_superuser and user.is_not_admin:
+            admin = Admin(user=user)
+            admin.save()
 
         return LoginAdmin(admin=user.admin, auth=auth, errors=[])
 
