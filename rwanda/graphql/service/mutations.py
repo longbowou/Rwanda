@@ -173,7 +173,10 @@ class CreateServiceComment(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
         only_fields = ("content", "type", "service_purchase")
-        custom_input_fields = {"service_purchase": graphene.UUID(required=True)}
+        custom_input_fields = {
+            "service_purchase": graphene.UUID(required=True),
+            "type": graphene.String(required=True)
+        }
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):

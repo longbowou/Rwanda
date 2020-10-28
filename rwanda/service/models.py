@@ -102,7 +102,7 @@ class ServiceComment(models.Model):
     reply_content = models.TextField(blank=True, null=True)
     TYPE_POSITIVE = 'POSITIVE'
     TYPE_NEGATIVE = 'NEGATIVE'
-    type = models.CharField(max_length=255)
+    type = models.CharField(max_length=255, blank=True, null=True)
     service_purchase = models.ForeignKey("purchase.ServicePurchase", on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     reply_at = models.DateTimeField(blank=True, null=True)
