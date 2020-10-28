@@ -130,6 +130,11 @@ class ServiceCommentType(DjangoObjectType):
         }
 
 
+class ServiceCommentTypeType(graphene.ObjectType):
+    name = graphene.String(required=True)
+    value = graphene.String(required=True)
+
+
 class ServicePurchaseTimeLineType(ObjectType):
     happen_at = graphene.String(required=True)
     status = graphene.String(required=True)

@@ -100,10 +100,13 @@ class ServiceComment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     content = models.TextField()
     reply_content = models.TextField(blank=True, null=True)
-    positive = models.BooleanField()
-    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    TYPE_POSITIVE = 'POSITIVE'
+    TYPE_NEGATIVE = 'NEGATIVE'
+    type = models.CharField(max_length=255)
+    service_purchase = models.ForeignKey("purchase.ServicePurchase", on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     reply_at = models.DateTimeField(blank=True, null=True)
+    published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

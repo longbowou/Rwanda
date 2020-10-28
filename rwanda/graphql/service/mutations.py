@@ -10,7 +10,7 @@ from graphene_django.types import ErrorType
 
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, ServiceMediaType, ServiceCommentType, ServiceOptionType
-from rwanda.service.models import ServiceOption, ServiceMedia
+from rwanda.service.models import ServiceOption, ServiceMedia, ServiceComment
 
 
 # INPUTS
@@ -172,36 +172,13 @@ class DeleteServiceOption(AccountDjangoModelDeleteMutation):
 class CreateServiceComment(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceCommentType
-        only_fields = ("content", "service", "positive")
+        only_fields = ("content", "type", "service_purchase")
+        custom_input_fields = {"service_purchase": graphene.UUID(required=True)}
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        if form.cleaned_data["service"].account_id == info.context.user.account.id:
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
-
-        form.instance.account = info.context.user.account
-
-
-class UpdateServiceComment(AccountDjangoModelMutation):
-    class Meta:
-        model_type = ServiceCommentType
-        for_update = True
-        only_fields = ("content", "positive")
-
-    @classmethod
-    def pre_save(cls, info, old_obj, form, input):
-        if form.instance.account_id != info.context.user.account.id:
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
-
-
-class DeleteServiceComment(AccountDjangoModelDeleteMutation):
-    class Meta:
-        model_type = ServiceCommentType
-
-    @classmethod
-    def pre_delete(cls, info, obj):
-        if obj.account_id != info.context.user.account.id:
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+        comment: ServiceComment = form.instance
+        comment.account = info.context.user.account
 
 
 class ReplyServiceComment(AccountDjangoModelMutation):
@@ -228,8 +205,6 @@ class ServiceMutations(graphene.ObjectType):
     delete_service_media = DeleteServiceMedia.Field()
 
     create_service_comment = CreateServiceComment.Field()
-    update_service_comment = UpdateServiceComment.Field()
-    delete_service_comment = DeleteServiceComment.Field()
     reply_service_comment = ReplyServiceComment.Field()
 
     create_service_option = CreateServiceOption.Field()

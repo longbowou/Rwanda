@@ -1,8 +1,10 @@
 import graphene
 from django.utils.translation import gettext_lazy as _
 
-from rwanda.graphql.types import ServicePurchaseType, LitigationType, DeliverableType, DeliverableVersionType
+from rwanda.graphql.types import ServicePurchaseType, LitigationType, DeliverableType, DeliverableVersionType, \
+    ServiceCommentTypeType
 from rwanda.purchase.models import ServicePurchase, Litigation, Deliverable
+from rwanda.service.models import ServiceComment
 
 
 class PurchaseQueries(graphene.ObjectType):
@@ -10,9 +12,16 @@ class PurchaseQueries(graphene.ObjectType):
     service_purchase = graphene.Field(ServicePurchaseType, required=True, id=graphene.UUID(required=True))
     deliverable = graphene.Field(DeliverableType, required=True, id=graphene.UUID(required=True))
     deliverable_versions = graphene.List(graphene.NonNull(DeliverableVersionType), required=True)
+    service_comment_types = graphene.List(ServiceCommentTypeType)
 
     def resolve_litigation(self, info, id):
         return Litigation.objects.get(pk=id)
+
+    def resolve_service_comment_types(self, info):
+        return [
+            ServiceCommentTypeType(name=_("Positive"), value=ServiceComment.TYPE_POSITIVE),
+            ServiceCommentTypeType(name=_("Negative"), value=ServiceComment.TYPE_NEGATIVE),
+        ]
 
     def resolve_service_purchase(self, info, id):
         return ServicePurchase.objects.get(pk=id)

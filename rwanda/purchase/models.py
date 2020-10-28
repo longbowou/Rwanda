@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_service_purchase_cancellation_delay
-from rwanda.service.models import Service, ServiceOption
+from rwanda.service.models import ServiceOption, Service
 from rwanda.user.models import Account, Admin
 
 
