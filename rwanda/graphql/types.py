@@ -648,6 +648,7 @@ class LitigationType(DjangoObjectType):
     handled = graphene.Boolean(source="handled", required=True)
     approved = graphene.Boolean(source="approved", required=True)
     canceled = graphene.Boolean(source="canceled", required=True)
+    can_be_handled = graphene.Boolean(source="can_be_handled", required=True)
 
     class Meta:
         model = Litigation
