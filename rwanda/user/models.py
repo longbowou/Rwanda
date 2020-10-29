@@ -58,6 +58,7 @@ class User(AbstractUser):
     def is_not_admin(self):
         return not self.is_admin
 
+
 class Admin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, related_name="admin", on_delete=models.CASCADE)
