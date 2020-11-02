@@ -16,6 +16,7 @@ from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutatio
 from rwanda.graphql.decorators import anonymous_account_required, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
 from rwanda.graphql.purchase.operations import credit_account, debit_account
+from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
@@ -277,6 +278,8 @@ class CreateLitigation(AccountDjangoModelMutation):
 
         form.instance.account = account
         form.save()
+
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(litigation=form.instance, errors=[])
 

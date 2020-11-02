@@ -196,7 +196,7 @@ class ServicePurchase(models.Model):
 
     @property
     def can_be_delivered(self):
-        return self.accepted and self.has_final_deliverable
+        return self.accepted
 
     @property
     def cannot_be_delivered(self):

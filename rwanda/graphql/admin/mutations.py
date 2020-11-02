@@ -16,6 +16,7 @@ from rwanda.graphql.decorators import anonymous_admin_required, admin_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
+from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.user.models import User, Admin
@@ -327,6 +328,8 @@ class HandleLitigation(AdminDjangoModelMutation):
         litigation.set_as_handled()
         litigation.save()
         litigation.refresh_from_db()
+
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
         return cls(litigation=litigation, errors=[])
 
