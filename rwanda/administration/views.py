@@ -22,7 +22,7 @@ class DisputesDatatableView(BaseDatatableView):
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "status":
             class_name = 'dark'
-            if row.approved:
+            if row.handled:
                 class_name = 'success'
 
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \

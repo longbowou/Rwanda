@@ -302,8 +302,8 @@ class HandleLitigation(AdminDjangoModelMutation):
     class Meta:
         model_type = LitigationType
         for_update = True
-        only_fields = ('admin', 'decision')
-        custom_input_fields = {"admin": graphene.UUID(required=True)}
+        only_fields = ('decision', 'reason')
+        custom_input_fields = {"decision": graphene.String(required=True), "reason": graphene.String(required=True)}
 
     @classmethod
     @transaction.atomic
@@ -324,6 +324,7 @@ class HandleLitigation(AdminDjangoModelMutation):
 
         service_purchase.save()
 
+        litigation.set_as_handled()
         litigation.save()
         litigation.refresh_from_db()
 

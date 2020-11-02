@@ -484,17 +484,15 @@ class Litigation(models.Model):
     content = models.TextField()
     DECISION_APPROVED = 'APPROVED'
     DECISION_CANCELED = 'CANCELED'
-    decisions = (
-        (DECISION_APPROVED, DECISION_APPROVED),
-        (DECISION_CANCELED, DECISION_CANCELED),
-    )
-    decision = models.CharField(max_length=255, choices=decisions, blank=True, null=True)
+    decision = models.CharField(max_length=255, blank=True, null=True)
     STATUS_OPENED = "OPENED"
     STATUS_HANDLED = "HANDLED"
     status = models.CharField(max_length=255, default=STATUS_OPENED)
+    reason = models.TextField(null=True, blank=True)
     admin = models.ForeignKey(Admin, on_delete=models.CASCADE, blank=True, null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
+    handled_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -538,6 +536,10 @@ class Litigation(models.Model):
     @property
     def cannot_be_handled(self):
         return not self.can_be_handled
+
+    def set_as_handled(self):
+        self.status = self.STATUS_HANDLED
+        self.handled_at = timezone.now()
 
 
 class Deliverable(models.Model):
