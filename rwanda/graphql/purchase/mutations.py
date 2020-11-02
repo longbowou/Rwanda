@@ -25,12 +25,14 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
 
-        price = int(param_base_price())
+        base_price = int(param_base_price())
         commission = int(param_commission())
 
-        service = form.instance.service
+        service_purchase: ServicePurchase = form.instance
+        service = service_purchase.service
         delay = service.delay
 
+        price = base_price
         for service_option in form.cleaned_data['service_options']:
             price += service_option.price
             delay += service_option.delay
@@ -41,12 +43,13 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
             return cls(
                 errors=[ErrorType(field="service", messages=[_("Insufficient amount to purchase service.")])])
 
-        form.instance.account = account
-        form.instance.price = price
-        form.instance.delay = delay
-        form.instance.commission = commission
+        service_purchase.account = account
+        service_purchase.base_price = base_price
+        service_purchase.price = price
+        service_purchase.delay = delay
+        service_purchase.commission = commission
 
-        init_service_purchase(form.instance)
+        init_service_purchase(service_purchase)
 
         form.save()
         form.instance.refresh_from_db()

@@ -13,7 +13,7 @@ from rwanda.account.models import Deposit, Refund
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_base_price
-from rwanda.graphql.decorators import account_required
+from rwanda.graphql.decorators import account_required, admin_required
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
     DeliverableFile, ServicePurchaseUpdateRequest
@@ -146,6 +146,7 @@ class ServicePurchaseChatMessageType(ObjectType):
     id = graphene.UUID(required=True)
     is_file = graphene.Boolean(required=True)
     from_current_account = graphene.Boolean(required=True)
+    from_buyer = graphene.Boolean(required=True)
     marked = graphene.Boolean(required=True)
     show_date = graphene.Boolean(required=True)
     time = graphene.String(required=True)
@@ -206,6 +207,7 @@ class ServicePurchaseUpdateRequestType(DjangoObjectType):
 
 class ServicePurchaseType(DjangoObjectType):
     price = graphene.String(source="price_display", required=True)
+    base_price = graphene.String(source="base_price_display", required=True)
     delay = graphene.String(source="delay_display", required=True)
     status = graphene.String(source="status_display", required=True)
     deadline_at = graphene.String(source="deadline_at_display")
@@ -236,6 +238,7 @@ class ServicePurchaseType(DjangoObjectType):
 
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
+    chat_history = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_files = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_marked = graphene.List(ServicePurchaseChatMessageType, required=True)
 
@@ -550,6 +553,17 @@ class ServicePurchaseType(DjangoObjectType):
 
         return get_chat_messages(messages, info.context.user.account)
 
+    @admin_required
+    def resolve_chat_history(self, info):
+        self: ServicePurchase
+
+        messages = ChatMessage.objects \
+            .filter(service_purchase=self) \
+            .prefetch_related("service_purchase") \
+            .order_by('created_at')
+
+        return get_chat_messages(messages)
+
     @account_required
     def resolve_chat_files(self, info):
         self: ServicePurchase
@@ -577,7 +591,7 @@ class ServicePurchaseType(DjangoObjectType):
         return get_chat_messages(messages, info.context.user.account)
 
 
-def get_chat_messages(messages, account):
+def get_chat_messages(messages, account=None):
     chat_messages = []
 
     last_created_at = None

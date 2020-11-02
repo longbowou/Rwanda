@@ -20,6 +20,7 @@ class ServicePurchase(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     delay = models.PositiveBigIntegerField()
     price = models.PositiveBigIntegerField()
+    base_price = models.PositiveBigIntegerField(default=0)
     commission = models.PositiveBigIntegerField()
     STATUS_INITIATED = 'INITIATED'
     STATUS_ACCEPTED = 'ACCEPTED'
@@ -65,6 +66,10 @@ class ServicePurchase(models.Model):
     @property
     def price_display(self):
         return intcomma(self.price)
+
+    @property
+    def base_price_display(self):
+        return intcomma(self.base_price)
 
     @property
     def delay_display(self):
@@ -451,8 +456,13 @@ class ChatMessage(models.Model):
             chat_message.file_url = settings.BASE_URL + self.file.url
 
         chat_message.from_current_account = False
-        if self.account_id == account.id:
-            chat_message.from_current_account = True
+        chat_message.from_buyer = False
+        if account is not None:
+            if self.account_id == account.id:
+                chat_message.from_current_account = True
+        else:
+            if self.service_purchase.is_buyer(self.account):
+                chat_message.from_buyer = True
 
         chat_message.show_date = False
         if last_created_at is None or last_created_at is not None and last_created_at.date() != self.created_at.date():
