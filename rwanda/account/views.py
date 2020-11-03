@@ -260,6 +260,28 @@ class DeliverableFilesDatatableView(BaseDatatableView):
         return DeliverableFile.objects.filter(deliverable=self.kwargs['pk'])
 
 
+class ServiceUploadView(View):
+    def post(self, request, *args, **kwargs):
+        f: UploadedFile = request.FILES['file']
+        if f is not None:
+            file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
+
+            folder = "services"
+            create_folder_if_not_exits(folder)
+
+            file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
+
+            with open(file_path, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            service = Service.objects.get(pk=self.kwargs['pk'])
+            service.file = folder + "/" + file_name
+            service.save()
+
+        return JsonResponse({"response_code": 200}, safe=False)
+
+
 class DeliverableUploadView(View):
     def post(self, request, *args, **kwargs):
         f: UploadedFile = request.FILES['file']

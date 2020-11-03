@@ -77,6 +77,7 @@ class ServiceType(DjangoObjectType):
     created_at = graphene.String(source="created_at_display", required=True)
     options = graphene.List(ServiceOptionType, required=True)
     base_price = graphene.Int(required=True)
+    file_url = graphene.String(source="file_url")
 
     class Meta:
         model = Service

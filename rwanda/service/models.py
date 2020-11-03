@@ -27,6 +27,7 @@ class Service(models.Model):
     keywords = models.TextField(blank=True, null=True)
     stars = models.IntegerField(default=0)
     delay = models.PositiveBigIntegerField(default=0)
+    file = models.FileField(blank=True, null=True, upload_to="services/")
     service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     activated = models.BooleanField(default=False)
@@ -48,6 +49,13 @@ class Service(models.Model):
     @property
     def delay_display(self):
         return str(self.delay) + " delivery {}".format(_('days'))
+
+    @property
+    def file_url(self):
+        try:
+            return settings.BASE_URL + self.file.url
+        except Exception:
+            return None
 
     @property
     def options_count(self):

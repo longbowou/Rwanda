@@ -2,7 +2,7 @@ from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
 from rwanda.account.views import DepositsDatatableView, RefundsDatatableView, ServicesDatatableView, \
-    ServiceOptionsDatatableView, ChatMessageUploadView
+    ServiceOptionsDatatableView, ChatMessageUploadView, ServiceUploadView
 from rwanda.account.views import PurchasesDatatableView, OrdersDatatableView, PurchaseDeliverablesDatatableView, \
     DeliverableUploadView, \
     DeliverableFilesDatatableView, OrderDeliverablesDatatableView
@@ -12,6 +12,7 @@ urlpatterns = [
     path('refunds.json', RefundsDatatableView.as_view()),
     path('services.json', ServicesDatatableView.as_view()),
     path('service/<uuid:pk>/options.json', ServiceOptionsDatatableView.as_view()),
+    path('service/<uuid:pk>/upload', csrf_exempt(ServiceUploadView.as_view())),
 
     path('orders.json', OrdersDatatableView.as_view()),
     path('orders/<uuid:pk>/deliverables.json', OrderDeliverablesDatatableView.as_view()),
