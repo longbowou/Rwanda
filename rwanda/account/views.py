@@ -137,16 +137,16 @@ class PurchasesDatatableView(BaseDatatableView):
             return row.service.title
         elif column == "status":
             class_name = 'dark'
-            if row.accepted:
+            if row.accepted or row.update_initiated:
                 class_name = 'primary'
 
-            if row.delivered:
+            if row.delivered or row.update_delivered:
                 class_name = 'warning'
 
             if row.approved:
                 class_name = 'success'
 
-            if row.canceled:
+            if row.canceled or row.update_refused:
                 class_name = 'danger'
 
             if row.in_dispute:

@@ -226,6 +226,7 @@ class ServicePurchaseType(DjangoObjectType):
     canceled = graphene.Boolean(source="canceled", required=True)
     in_dispute = graphene.Boolean(source="in_dispute", required=True)
     has_been_accepted = graphene.Boolean(source="has_been_accepted", required=True)
+    can_chat = graphene.Boolean(source="can_chat", required=True)
 
     can_be_accepted = graphene.Boolean(required=True)
     can_be_delivered = graphene.Boolean(required=True)
@@ -413,17 +414,6 @@ class ServicePurchaseType(DjangoObjectType):
 
             last_happen_at = deliverable.created_at
 
-        if self.has_been_accepted and self.has_been_canceled:
-            happen_at = str(t_filter(self.canceled_at))
-            if last_happen_at.date() != self.canceled_at.date():
-                happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
-
-            timelines.append(ServicePurchaseTimeLineType(
-                happen_at=happen_at.title(),
-                status=_('Canceled'),
-                color='danger'
-            ))
-
         if self.has_been_delivered:
             happen_at = str(t_filter(self.delivered_at))
             if last_happen_at.date() != self.delivered_at.date():
@@ -524,7 +514,20 @@ class ServicePurchaseType(DjangoObjectType):
             timelines.append(ServicePurchaseTimeLineType(
                 happen_at=happen_at.title(),
                 status=_('Canceled'),
-                color='danger'
+                color='danger',
+                description=_('Has been canceled by <strong>Administrators</strong>'),
+            ))
+
+        if self.has_been_in_dispute and self.has_been_approved:
+            happen_at = str(t_filter(self.approved_at))
+            if last_happen_at.date() != self.approved_at.date():
+                happen_at = str(d_filter(self.approved_at)) + " " + happen_at
+
+            timelines.append(ServicePurchaseTimeLineType(
+                happen_at=happen_at.title(),
+                status=_('Approved'),
+                color='success',
+                description=_('Has been approved by <strong>Administrators</strong>'),
             ))
 
         if self.has_been_approved:

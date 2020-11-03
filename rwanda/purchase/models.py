@@ -254,6 +254,14 @@ class ServicePurchase(models.Model):
     def can_be_commented(self):
         return self.has_been_approved or self.has_been_accepted and self.has_been_canceled
 
+    @property
+    def can_chat(self):
+        return not self.approved and not self.canceled and not self.in_dispute
+
+    @property
+    def can_not_chat(self):
+        return not self.can_chat
+
     def set_as_accepted(self):
         self.status = self.STATUS_ACCEPTED
         today = timezone.now()
