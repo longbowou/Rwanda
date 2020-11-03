@@ -36,6 +36,8 @@ CORS_ORIGIN_WHITELIST = [
     'http://127.0.0.1:4000',
     'https://mdtaf.com',
     'https://www.mdtaf.com',
+    'https://admin.mdtaf.com',
+    'https://www.admin.mdtaf.com',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
