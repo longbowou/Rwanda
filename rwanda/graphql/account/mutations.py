@@ -115,7 +115,7 @@ class InitiateDeposit(graphene.Mutation):
             return InitiateDeposit(
                 errors=[ErrorType(field='amount', messages=[_("Your amount must be a multiple of 5")])])
 
-        if amount < 100:
+        if amount < 150:
             return InitiateDeposit(
                 errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 100")])])
 
