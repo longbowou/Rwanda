@@ -20,7 +20,7 @@ class PaymentView(View):
         logger = logging.getLogger('rwanda.payments')
         logger.info("#{} Request: ".format(prefix) + json.dumps(request.POST))
 
-        payment = Payment.objects.get(pk=kwargs['pk'])
+        payment = Payment.objects.get(pk=request.POST['cpm_trans_id'])
         if payment.initiated:
             result = check_status(payment)
 

@@ -9,7 +9,6 @@ from django.core.signing import Signer
 from django.core.validators import EmailValidator
 from django.db import transaction
 from django.db.models import Q
-from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
@@ -136,7 +135,6 @@ class InitiateDeposit(graphene.Mutation):
             "cpm_language": "fr",
             "apikey": str(settings.CINETPAY_API_KEY),
             "signature": str(signature),
-            "notify_url": str(settings.BASE_URL + reverse("payments-confirmation", args=(payment.id,))),
         }
 
         payment_url = settings.CINETPAY_PAYMENT_URL
