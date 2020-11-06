@@ -115,6 +115,10 @@ class InitiateDeposit(graphene.Mutation):
             return InitiateDeposit(
                 errors=[ErrorType(field='amount', messages=[_("Your amount must be a multiple of 5")])])
 
+        if amount < 100:
+            return InitiateDeposit(
+                errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 100")])])
+
         payment = Payment(amount=amount, account=info.context.user.account)
         payment.save()
 
