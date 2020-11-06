@@ -121,7 +121,8 @@ class InitiateDeposit(graphene.Mutation):
         payment = Payment(amount=amount, account=info.context.user.account)
         payment.save()
 
-        signature = get_signature(payment)
+        payment.signature = get_signature(payment)
+        payment.save()
 
         data = {
             "cpm_amount": payment.amount,
@@ -134,7 +135,7 @@ class InitiateDeposit(graphene.Mutation):
             "cpm_version": "V1",
             "cpm_language": "fr",
             "apikey": str(settings.CINETPAY_API_KEY),
-            "signature": str(signature),
+            "signature": str(payment.signature),
         }
 
         payment_url = settings.CINETPAY_PAYMENT_URL
