@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from rwanda.payments.models import Payment
 from rwanda.user.models import Account
@@ -17,6 +18,24 @@ class Deposit(models.Model):
 class Refund(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.PositiveBigIntegerField()
+    STATUS_INITIATED = "INITIATED"
+    STATUS_APPROVED = "APPROVED"
+    status = models.CharField(max_length=255, default=STATUS_INITIATED)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def initiated(self):
+        return self.status == self.STATUS_INITIATED
+
+    @property
+    def approved(self):
+        return self.status == self.STATUS_APPROVED
+
+    @property
+    def status_display(self):
+        if self.approved:
+            return _('Approved')
+
+        return _("Initiated")

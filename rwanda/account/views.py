@@ -50,6 +50,7 @@ class RefundsDatatableView(BaseDatatableView):
     currency = None
     columns = [
         'amount',
+        'status',
         'phone_number',
         'created_at',
     ]
@@ -63,6 +64,13 @@ class RefundsDatatableView(BaseDatatableView):
 
         if column == "amount":
             return intcomma(row.amount) + " " + self.currency
+        elif column == "status":
+            class_name = 'dark'
+            if row.approved:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.status_display)
         elif column == "created_at":
             return date(row.created_at) + ' ' + time_filter(row.created_at)
         else:

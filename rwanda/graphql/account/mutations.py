@@ -14,13 +14,11 @@ from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
-from rwanda.accounting.models import Operation
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account_required, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
-from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
-from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
+from rwanda.graphql.types import AccountType, RefundType, LitigationType, AuthType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_signature
 from rwanda.purchase.models import ServicePurchase
@@ -149,29 +147,8 @@ class InitiateDeposit(graphene.Mutation):
         )
 
 
-# MUTATION DEPOSIT
-class CreateDeposit(AccountDjangoModelMutation):
-    class Meta:
-        model_type = DepositType
-        only_fields = ('amount',)
-
-    @classmethod
-    @transaction.atomic
-    def pre_save(cls, info, old_obj, form, input):
-        instance = form.instance
-        account = info.context.user.account
-        instance.account = account
-
-        credit_account(account, instance.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
-
-        form.save()
-        instance.refresh_from_db()
-
-        return cls(deposit=instance, errors=[])
-
-
 # MUTATION REFUND
-class CreateRefund(AccountDjangoModelMutation):
+class InitiateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
         only_fields = ('amount', "phone_number")
@@ -187,8 +164,6 @@ class CreateRefund(AccountDjangoModelMutation):
         if input.amount > account.balance:
             return cls(
                 errors=[ErrorType(field='amount', messages=[_("Insufficient amount to process the refund.")])])
-
-        debit_account(account, instance.amount, Operation.DESC_DEBIT_FOR_REFUND)
 
         form.save()
         instance.refresh_from_db()
@@ -343,8 +318,7 @@ class AccountMutations(graphene.ObjectType):
     login = LoginAccount.Field()
 
     initiate_deposit = InitiateDeposit.Field()
-    create_deposit = CreateDeposit.Field()
-    create_refund = CreateRefund.Field()
+    initiate_refund = InitiateRefund.Field()
 
     create_account = CreateAccount.Field()
     update_account = UpdateAccount.Field()
