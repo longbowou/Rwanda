@@ -14,7 +14,6 @@ class ServiceCategory(models.Model):
     label = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.label
@@ -33,7 +32,6 @@ class Service(models.Model):
     activated = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     service_options_count = None
 
@@ -97,7 +95,6 @@ class ServiceMedia(models.Model):
     is_main = models.BooleanField(default=False)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def file_url(self):
@@ -116,7 +113,6 @@ class ServiceComment(models.Model):
     reply_at = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class ServiceOption(models.Model):
@@ -128,7 +124,6 @@ class ServiceOption(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     published = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.label

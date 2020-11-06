@@ -15,6 +15,7 @@ from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_base_price
 from rwanda.graphql.decorators import account_required, admin_required
 from rwanda.graphql.interfaces import UserInterface
+from rwanda.payments.models import Payment
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
     DeliverableFile, ServicePurchaseUpdateRequest
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
@@ -35,6 +36,17 @@ class ParametersType(ObjectType):
 class DepositType(DjangoObjectType):
     class Meta:
         model = Deposit
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class PaymentType(DjangoObjectType):
+    confirmed = graphene.Boolean(source="confirmed", required=True)
+    canceled = graphene.Boolean(source="canceled", required=True)
+
+    class Meta:
+        model = Payment
         filter_fields = {
             "id": ("exact",),
         }

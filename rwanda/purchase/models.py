@@ -46,7 +46,6 @@ class ServicePurchase(models.Model):
     deadline_at = models.DateTimeField(null=True, blank=True)
     has_final_deliverable = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def number(self):
@@ -417,7 +416,6 @@ class ServicePurchaseServiceOption(models.Model):
     service_option = models.ForeignKey(ServiceOption, on_delete=models.CASCADE)
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
 
 class ChatMessage(models.Model):
@@ -430,7 +428,6 @@ class ChatMessage(models.Model):
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     @property
     def file_size_display(self):
@@ -502,7 +499,6 @@ class Litigation(models.Model):
     service_purchase = models.OneToOneField(ServicePurchase, on_delete=models.CASCADE)
     handled_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.title
@@ -561,7 +557,6 @@ class Deliverable(models.Model):
     published = models.BooleanField(default=False)
     service_purchase = models.ForeignKey(ServicePurchase, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     deliverable_files_count = None
 
@@ -615,7 +610,6 @@ class DeliverableFile(models.Model):
     size = models.BigIntegerField(default=0)
     deliverable = models.ForeignKey(Deliverable, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name

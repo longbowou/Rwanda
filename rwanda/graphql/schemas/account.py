@@ -13,16 +13,21 @@ from rwanda.graphql.purchase.queries import PurchaseQueries
 from rwanda.graphql.purchase.subscriptions import PurchaseSubscriptions
 from rwanda.graphql.service.mutations import ServiceMutations
 from rwanda.graphql.service.queries import ServiceQueries
-from rwanda.graphql.types import ServiceCategoryType, ParametersType
+from rwanda.graphql.types import ServiceCategoryType, ParametersType, PaymentType
+from rwanda.payments.models import Payment
 
 
 class AccountQuery(ServiceQueries, PurchaseQueries, AccountQueries):
     service_categories = DjangoFilterListField(ServiceCategoryType)
     parameters = graphene.Field(ParametersType, required=True)
+    payment = graphene.Field(PaymentType, required=True, id=graphene.UUID(required=True))
 
     def resolve_parameters(root, info, **kwargs):
         return ParametersType(currency=param_currency(),
                               base_price=intcomma(int(param_base_price())))
+
+    def resolve_payment(self, info, id):
+        return Payment.objects.get(pk=id)
 
 
 class AccountMutation(AccountMutations, ServiceMutations, PurchaseMutations, AdminMutations):

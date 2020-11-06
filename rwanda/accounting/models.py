@@ -11,7 +11,6 @@ class Fund(models.Model):
     label = models.CharField(max_length=255, unique=True)
     balance = models.PositiveBigIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     MAIN = "MAIN"
     COMMISSIONS = "COMMISSIONS"
@@ -30,7 +29,6 @@ class Operation(models.Model):
     service_purchase = models.ForeignKey(ServicePurchase, null=True, blank=True, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, null=True, blank=True, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     TYPE_CREDIT = "CREDIT"
     TYPE_DEBIT = "DEBIT"

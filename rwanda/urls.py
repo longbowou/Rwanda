@@ -17,6 +17,7 @@ urlpatterns = [
     path("graphql-admin/", csrf_exempt(GraphQLView.as_view(schema=admin_schema, graphiql=True))),
     path('account/', decorator_include(account_required, include("rwanda.account.urls"))),
     path('admin/', decorator_include(admin_required, include("rwanda.administration.urls"))),
+    path('payments/', include("rwanda.payments.urls")),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

@@ -1,4 +1,7 @@
+import json
+
 import graphene
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
@@ -6,6 +9,7 @@ from django.core.signing import Signer
 from django.core.validators import EmailValidator
 from django.db import transaction
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
@@ -18,6 +22,8 @@ from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, Change
 from rwanda.graphql.purchase.operations import credit_account, debit_account
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import AccountType, DepositType, RefundType, LitigationType, AuthType
+from rwanda.payments.models import Payment
+from rwanda.payments.utils import get_signature
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import User, Account
 
@@ -92,6 +98,52 @@ class ChangeAccountPassword(graphene.Mutation):
         user.save()
 
         return ChangeAccountPassword(account=user.account, errors=[])
+
+
+class InitiateDeposit(graphene.Mutation):
+    class Arguments:
+        amount = graphene.Int(required=True)
+
+    errors = graphene.List(ErrorType)
+    payment_url = graphene.String()
+    form_data = graphene.String()
+    payment_id = graphene.UUID()
+
+    @account_required
+    def mutate(self, info, amount):
+        if (amount % 5) != 0:
+            return InitiateDeposit(
+                errors=[ErrorType(field='amount', messages=[_("Your amount must be a multiple of 5")])])
+
+        payment = Payment(amount=amount, account=info.context.user.account)
+        payment.save()
+
+        signature = get_signature(payment)
+
+        data = {
+            "cpm_amount": payment.amount,
+            "cpm_currency": str(settings.CINETPAY_CURRENCY),
+            "cpm_site_id": str(settings.CINETPAY_SITE_ID),
+            "cpm_trans_id": str(payment.id),
+            "cpm_trans_date": str(payment.created_at.strftime("%Y-%m-%d %H:%M:%S")),
+            "cpm_payment_config": "SINGLE",
+            "cpm_page_action": "PAYMENT",
+            "cpm_version": "V1",
+            "cpm_language": "fr",
+            "apikey": str(settings.CINETPAY_API_KEY),
+            "signature": str(signature),
+            "notify_url": str(settings.BASE_URL + reverse("payments-confirmation", args=(payment.id,))),
+        }
+
+        payment_url = settings.CINETPAY_PAYMENT_URL
+        form_data = json.dumps(data)
+
+        return InitiateDeposit(
+            payment_url=payment_url,
+            form_data=form_data,
+            payment_id=payment.id,
+            errors=[]
+        )
 
 
 # MUTATION DEPOSIT
@@ -287,6 +339,7 @@ class CreateLitigation(AccountDjangoModelMutation):
 class AccountMutations(graphene.ObjectType):
     login = LoginAccount.Field()
 
+    initiate_deposit = InitiateDeposit.Field()
     create_deposit = CreateDeposit.Field()
     create_refund = CreateRefund.Field()
 

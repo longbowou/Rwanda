@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rwanda.account',
     'rwanda.accounting',
     'rwanda.purchase',
+    'rwanda.payments',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -218,6 +219,13 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'when': 'midnight',
             'interval': 1,
+        },
+        'rwanda.payments': {
+            'formatter': 'verbose',
+            'filename': os.path.join(BASE_DIR, "logs", "payments.log"),
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'when': 'midnight',
+            'interval': 1,
         }
     },
     'loggers': {
@@ -235,6 +243,18 @@ LOGGING = {
             'handlers': ['rwanda'],
             'level': 'WARNING',
             'propagate': True,
-        }
+        },
+        'rwanda.payments': {
+            'handlers': ['rwanda.payments'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
 }
+
+CINETPAY_SIGNATURE_URL = "https://api.cinetpay.com/v1/?method=getSignatureByPost"
+CINETPAY_PAYMENT_URL = "https://secure.cinetpay.com"
+CINETPAY_CHECK_STATUS_URL = "https://api.cinetpay.com/v1/?method=checkPayStatus"
+CINETPAY_API_KEY = "3281856345e6c13a1a91b61.98428115"
+CINETPAY_SITE_ID = 414425
+CINETPAY_CURRENCY = "CFA"
