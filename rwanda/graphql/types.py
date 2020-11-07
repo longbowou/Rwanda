@@ -252,9 +252,11 @@ class ServicePurchaseType(DjangoObjectType):
 
     timelines = graphene.List(ServicePurchaseTimeLineType, required=True)
     chat = graphene.List(ServicePurchaseChatMessageType, required=True)
-    chat_history = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_files = graphene.List(ServicePurchaseChatMessageType, required=True)
     chat_marked = graphene.List(ServicePurchaseChatMessageType, required=True)
+
+    chat_history = graphene.List(ServicePurchaseChatMessageType, required=True)
+    chat_files_history = graphene.List(ServicePurchaseChatMessageType, required=True)
 
     update_request = graphene.Field(ServicePurchaseUpdateRequestType)
 
@@ -569,17 +571,6 @@ class ServicePurchaseType(DjangoObjectType):
 
         return get_chat_messages(messages, info.context.user.account)
 
-    @admin_required
-    def resolve_chat_history(self, info):
-        self: ServicePurchase
-
-        messages = ChatMessage.objects \
-            .filter(service_purchase=self) \
-            .prefetch_related("service_purchase") \
-            .order_by('created_at')
-
-        return get_chat_messages(messages)
-
     @account_required
     def resolve_chat_files(self, info):
         self: ServicePurchase
@@ -605,6 +596,28 @@ class ServicePurchaseType(DjangoObjectType):
             .order_by('created_at')
 
         return get_chat_messages(messages, info.context.user.account)
+
+    @admin_required
+    def resolve_chat_history(self, info):
+        self: ServicePurchase
+
+        messages = ChatMessage.objects \
+            .filter(service_purchase=self) \
+            .prefetch_related("service_purchase") \
+            .order_by('created_at')
+
+        return get_chat_messages(messages)
+
+    @admin_required
+    def resolve_chat_files_history(self, info):
+        self: ServicePurchase
+
+        messages = ChatMessage.objects \
+            .filter(service_purchase=self, is_file=True) \
+            .prefetch_related("service_purchase") \
+            .order_by('created_at')
+
+        return get_chat_messages(messages)
 
 
 def get_chat_messages(messages, account=None):
