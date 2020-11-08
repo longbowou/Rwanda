@@ -545,7 +545,7 @@ class ServicePurchaseType(DjangoObjectType):
                 description=_('Has been approved by <strong>Administrators</strong>'),
             ))
 
-        if self.has_been_approved:
+        if self.has_not_been_in_dispute and self.has_been_approved:
             happen_at = str(t_filter(self.approved_at))
             if last_happen_at.date() != self.approved_at.date():
                 happen_at = str(d_filter(self.approved_at)) + " " + happen_at
