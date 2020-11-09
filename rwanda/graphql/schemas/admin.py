@@ -5,6 +5,7 @@ from graphene_django_extras import DjangoFilterListField
 from rwanda.administration.utils import param_currency, param_base_price
 from rwanda.graphql.admin.mutations import AdminMutations
 from rwanda.graphql.admin.queries import AdminQueries
+from rwanda.graphql.decorators import admin_required
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, FundType, LitigationType, \
     ParametersType
 from rwanda.purchase.models import Litigation
@@ -17,12 +18,15 @@ class AdminQuery(AdminQueries):
     parameters = graphene.Field(ParametersType, required=True)
     litigation = graphene.Field(LitigationType, required=True, id=graphene.UUID(required=True))
 
+    @admin_required
     def resolve_litigation(self, info, id):
         return Litigation.objects.get(pk=id)
 
-    def resolve_parameters(root, info, **kwargs):
+    @staticmethod
+    def resolve_parameters(self, info):
         return ParametersType(currency=param_currency(),
                               base_price=intcomma(int(param_base_price())))
+
 
 class AdminMutation(AdminMutations):
     pass

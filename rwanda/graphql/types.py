@@ -521,40 +521,52 @@ class ServicePurchaseType(DjangoObjectType):
 
             last_happen_at = self.in_dispute_at
 
-        if self.has_been_in_dispute and self.has_been_canceled:
-            happen_at = str(t_filter(self.canceled_at))
-            if last_happen_at.date() != self.canceled_at.date():
-                happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
+            if self.has_been_canceled:
+                happen_at = str(t_filter(self.canceled_at))
+                if last_happen_at.date() != self.canceled_at.date():
+                    happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLineType(
-                happen_at=happen_at.title(),
-                status=_('Canceled'),
-                color='danger',
-                description=_('Has been canceled by <strong>Administrators</strong>'),
-            ))
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Canceled'),
+                    color='danger',
+                    description=_('Has been canceled by <strong>Administrators</strong>'),
+                ))
 
-        if self.has_been_in_dispute and self.has_been_approved:
-            happen_at = str(t_filter(self.approved_at))
-            if last_happen_at.date() != self.approved_at.date():
-                happen_at = str(d_filter(self.approved_at)) + " " + happen_at
+            if self.has_been_approved:
+                happen_at = str(t_filter(self.approved_at))
+                if last_happen_at.date() != self.approved_at.date():
+                    happen_at = str(d_filter(self.approved_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLineType(
-                happen_at=happen_at.title(),
-                status=_('Approved'),
-                color='success',
-                description=_('Has been approved by <strong>Administrators</strong>'),
-            ))
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Approved'),
+                    color='success',
+                    description=_('Has been approved by <strong>Administrators</strong>'),
+                ))
 
-        if self.has_not_been_in_dispute and self.has_been_approved:
-            happen_at = str(t_filter(self.approved_at))
-            if last_happen_at.date() != self.approved_at.date():
-                happen_at = str(d_filter(self.approved_at)) + " " + happen_at
+        if self.has_not_been_in_dispute:
+            if self.has_been_canceled:
+                happen_at = str(t_filter(self.canceled_at))
+                if last_happen_at.date() != self.canceled_at.date():
+                    happen_at = str(d_filter(self.canceled_at)) + " " + happen_at
 
-            timelines.append(ServicePurchaseTimeLineType(
-                happen_at=happen_at.title(),
-                status=_('Approved'),
-                color='success'
-            ))
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Canceled'),
+                    color='danger',
+                ))
+
+            if self.has_been_approved:
+                happen_at = str(t_filter(self.approved_at))
+                if last_happen_at.date() != self.approved_at.date():
+                    happen_at = str(d_filter(self.approved_at)) + " " + happen_at
+
+                timelines.append(ServicePurchaseTimeLineType(
+                    happen_at=happen_at.title(),
+                    status=_('Approved'),
+                    color='success'
+                ))
 
         return timelines
 

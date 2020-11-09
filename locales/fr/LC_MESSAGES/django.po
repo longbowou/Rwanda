@@ -1,0 +1,315 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-11-09 22:40+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: rwanda/account/models.py:39 rwanda/graphql/types.py:543
+#: rwanda/graphql/types.py:567 rwanda/purchase/models.py:86
+msgid "Approved"
+msgstr "Approuvé"
+
+#: rwanda/account/models.py:41 rwanda/graphql/types.py:381
+#: rwanda/purchase/models.py:106 rwanda/purchase/models.py:347
+msgid "Initiated"
+msgstr "Initié"
+
+#: rwanda/graphql/account/mutations.py:41
+msgid "Incorrect username or email."
+msgstr "Nom d'utilisateur ou e-mail incorrect."
+
+#: rwanda/graphql/account/mutations.py:45
+msgid "Incorrect password."
+msgstr "Mot de passe incorrect."
+
+#: rwanda/graphql/account/mutations.py:49
+msgid "Your account has been disabled."
+msgstr "Votre compte a été désactivé."
+
+#: rwanda/graphql/account/mutations.py:79 rwanda/graphql/admin/mutations.py:82
+msgid "Bad current password."
+msgstr "Mot de passe actuel incorrect."
+
+#: rwanda/graphql/account/mutations.py:85 rwanda/graphql/admin/mutations.py:88
+msgid "The new password must different from the current password."
+msgstr "Le nouveau mot de passe doit être différent du mot de passe actuel."
+
+#: rwanda/graphql/account/mutations.py:91
+#: rwanda/graphql/account/mutations.py:214 rwanda/graphql/admin/mutations.py:94
+#: rwanda/graphql/admin/mutations.py:218
+msgid "Password does not match password confirmation."
+msgstr "Le mot de passe ne correspond pas à la confirmation du mot de passe."
+
+#: rwanda/graphql/account/mutations.py:113
+msgid "Your amount must be a multiple of 5"
+msgstr "Votre montant doit être un multiple de 5"
+
+#: rwanda/graphql/account/mutations.py:117
+msgid "Your amount must be a greater than 100"
+msgstr "Votre montant doit être supérieur à 100"
+
+#: rwanda/graphql/account/mutations.py:166
+msgid "Insufficient amount to process the refund."
+msgstr "Montant insuffisant pour traiter le remboursement."
+
+#: rwanda/graphql/account/mutations.py:194
+#: rwanda/graphql/account/mutations.py:257
+#: rwanda/graphql/admin/mutations.py:126
+msgid "An account with that username already exists."
+msgstr "Un compte avec ce nom d'utilisateur existe déjà."
+
+#: rwanda/graphql/account/mutations.py:204
+#: rwanda/graphql/account/mutations.py:271
+#: rwanda/graphql/admin/mutations.py:140
+msgid "An account with that email already exists."
+msgstr "Un compte avec cette adresse e-mail existe déjà."
+
+#: rwanda/graphql/account/mutations.py:299
+#: rwanda/graphql/account/mutations.py:304
+#: rwanda/graphql/purchase/mutations.py:71
+#: rwanda/graphql/purchase/mutations.py:75
+#: rwanda/graphql/purchase/mutations.py:96
+#: rwanda/graphql/purchase/mutations.py:100
+#: rwanda/graphql/purchase/mutations.py:122
+#: rwanda/graphql/purchase/mutations.py:126
+#: rwanda/graphql/purchase/mutations.py:152
+#: rwanda/graphql/purchase/mutations.py:156
+#: rwanda/graphql/purchase/mutations.py:180
+#: rwanda/graphql/purchase/mutations.py:203
+#: rwanda/graphql/purchase/mutations.py:235
+#: rwanda/graphql/purchase/mutations.py:259
+#: rwanda/graphql/purchase/mutations.py:313
+#: rwanda/graphql/purchase/mutations.py:339
+#: rwanda/graphql/purchase/mutations.py:368
+#: rwanda/graphql/purchase/mutations.py:398
+#: rwanda/graphql/service/mutations.py:82
+#: rwanda/graphql/service/mutations.py:92
+#: rwanda/graphql/service/mutations.py:103
+#: rwanda/graphql/service/mutations.py:120
+#: rwanda/graphql/service/mutations.py:135
+#: rwanda/graphql/service/mutations.py:146
+#: rwanda/graphql/service/mutations.py:158
+#: rwanda/graphql/service/mutations.py:168
+#: rwanda/graphql/service/mutations.py:196
+msgid "You cannot perform this action."
+msgstr "Vous ne pouvez pas effectuer cette action."
+
+#: rwanda/graphql/admin/mutations.py:40
+msgid "Incorrect login"
+msgstr "Login incorrect"
+
+#: rwanda/graphql/admin/mutations.py:44
+msgid "Incorrect password"
+msgstr "Mot de passe incorrect"
+
+#: rwanda/graphql/admin/mutations.py:48
+msgid "Your account has been disabled"
+msgstr "Votre compte a été désactivé"
+
+#: rwanda/graphql/admin/mutations.py:199 rwanda/graphql/admin/mutations.py:267
+msgid "An admin with that username already exists."
+msgstr "Un administrateur avec ce nom d'utilisateur existe déjà."
+
+#: rwanda/graphql/admin/mutations.py:209 rwanda/graphql/admin/mutations.py:281
+msgid "An admin with that email already exists."
+msgstr "Un administrateur avec cette adresse e-mail existe déjà."
+
+#: rwanda/graphql/admin/mutations.py:257
+msgid "Admin instance not found for id {}"
+msgstr "Instance d'administration introuvable pour l'ID {}"
+
+#: rwanda/graphql/admin/mutations.py:313
+msgid "Litigation already handled."
+msgstr "Litige déjà traité."
+
+#: rwanda/graphql/purchase/mutations.py:44
+msgid "Insufficient amount to purchase service."
+msgstr "Montant insuffisant pour acheter le service."
+
+#: rwanda/graphql/purchase/queries.py:22
+msgid "Positive"
+msgstr "Positive"
+
+#: rwanda/graphql/purchase/queries.py:23
+msgid "Negative"
+msgstr "Négative"
+
+#: rwanda/graphql/purchase/queries.py:34 rwanda/purchase/models.py:591
+msgid "Alpha"
+msgstr ""
+
+#: rwanda/graphql/purchase/queries.py:35 rwanda/purchase/models.py:594
+msgid "Beta"
+msgstr ""
+
+#: rwanda/graphql/purchase/queries.py:36 rwanda/purchase/models.py:596
+msgid "Final"
+msgstr ""
+
+#: rwanda/graphql/types.py:394 rwanda/graphql/types.py:531
+#: rwanda/graphql/types.py:556 rwanda/purchase/models.py:89
+msgid "Canceled"
+msgstr "Annulé"
+
+#: rwanda/graphql/types.py:407 rwanda/purchase/models.py:80
+#: rwanda/purchase/models.py:339
+msgid "Accepted"
+msgstr "Accepté"
+
+#: rwanda/graphql/types.py:409
+msgid "Deadline set to <strong>{}</strong>"
+msgstr "Date limite fixée le <strong>{}</strong>"
+
+#: rwanda/graphql/types.py:424
+msgid "Deliverable Published"
+msgstr ""
+
+#: rwanda/graphql/types.py:426
+msgid ""
+"Deliverable <strong>{}</strong> published in version <strong>{}</strong>."
+msgstr ""
+
+#: rwanda/graphql/types.py:439 rwanda/purchase/models.py:83
+#: rwanda/purchase/models.py:345
+msgid "Delivered"
+msgstr "Livré"
+
+#: rwanda/graphql/types.py:454
+msgid "Request for update initiated"
+msgstr "Demande de modification initié"
+
+#: rwanda/graphql/types.py:456
+msgid "The buyer make an update request <strong>{}</strong>"
+msgstr "L'acheteur fait une demande de modification <strong>{}</strong>"
+
+#: rwanda/graphql/types.py:469
+msgid "Request for update accepted"
+msgstr "Demande de modification acceptée"
+
+#: rwanda/graphql/types.py:472
+msgid ""
+"The update request <strong>{}</strong> have been accepted. New deadline set "
+"to <strong>{}</strong>"
+msgstr ""
+"La demande de mise à jour <strong> {} </strong> a été acceptée. Nouvelle "
+"date limite fixée le <strong>{}</strong>"
+
+#: rwanda/graphql/types.py:485
+msgid "Request for update refused"
+msgstr "Demande de modification refusée"
+
+#: rwanda/graphql/types.py:488
+msgid ""
+"The update request <strong>{}</strong> have been refused. <strong>Reason:</"
+"strong> {}"
+msgstr ""
+"La demande de modification <strong>{}</strong> a été refusée. <strong>Raison:"
+"</strong> {}"
+
+#: rwanda/graphql/types.py:501
+msgid "Request for update delivered"
+msgstr "Demande de modification livrée"
+
+#: rwanda/graphql/types.py:503
+msgid "The update request <strong>{}</strong> have been delivered."
+msgstr "La demande de modification <strong>{}</strong> a été livrée."
+
+#: rwanda/graphql/types.py:516 rwanda/purchase/models.py:92
+msgid "In dispute"
+msgstr "En conflit"
+
+#: rwanda/graphql/types.py:518
+msgid "The buyer open a litigation <strong>{}</strong>"
+msgstr "L'acheteur ouvre un litige <strong>{}</strong>"
+
+#: rwanda/graphql/types.py:533
+msgid "Has been canceled by <strong>Administrators</strong>"
+msgstr "A été annulé par les <strong>administrateurs</strong>"
+
+#: rwanda/graphql/types.py:545
+msgid "Has been approved by <strong>Administrators</strong>"
+msgstr "A été approuvé par les <strong>administrateurs</strong>"
+
+#: rwanda/purchase/models.py:75
+msgid "total delivery days"
+msgstr "jours de livraison total"
+
+#: rwanda/purchase/models.py:95
+msgid "Update request initiated"
+msgstr "Demande de modification initié"
+
+#: rwanda/purchase/models.py:98
+msgid "Update request accepted"
+msgstr "Demande de modification accepté"
+
+#: rwanda/purchase/models.py:101
+msgid "Update request refused"
+msgstr "Demande de modification refusé"
+
+#: rwanda/purchase/models.py:104
+msgid "Update request delivered"
+msgstr "Demande de modification livée"
+
+#: rwanda/purchase/models.py:342
+msgid "Refused"
+msgstr "Refusé"
+
+#: rwanda/purchase/models.py:509
+msgid "Handled"
+msgstr "Traiter"
+
+#: rwanda/purchase/models.py:511
+msgid "Opened"
+msgstr "Ouvert"
+
+#: rwanda/purchase/models.py:516
+msgid "Purchase approved"
+msgstr "Achat approuvé"
+
+#: rwanda/purchase/models.py:518
+msgid "Purchase canceled"
+msgstr "Achat annulé"
+
+#: rwanda/purchase/models.py:601 rwanda/service/models.py:79
+#: rwanda/service/models.py:86 rwanda/service/models.py:134
+msgid "Yes"
+msgstr "Oui"
+
+#: rwanda/purchase/models.py:603 rwanda/service/models.py:81
+#: rwanda/service/models.py:88 rwanda/service/models.py:136
+msgid "No"
+msgstr "Non"
+
+#: rwanda/service/models.py:49 rwanda/service/models.py:146
+msgid "delivery days"
+msgstr "jours de livraison"
+
+#: rwanda/service/models.py:145 rwanda/service/models.py:151
+msgid "No additional delivery delay"
+msgstr "Aucun délai de livraison supplémentaire"
+
+#: rwanda/service/models.py:152
+msgid "{} additional delivery days"
+msgstr "{} jours de livraison supplémentaires"
+
+#: rwanda/settings.py:178
+msgid "French"
+msgstr "Français"
+
+#: rwanda/settings.py:179
+msgid "English"
+msgstr "Anglais"

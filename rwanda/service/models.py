@@ -46,7 +46,7 @@ class Service(models.Model):
 
     @property
     def delay_display(self):
-        return str(self.delay) + " delivery {}".format(_('days'))
+        return str(self.delay) + " " + str(_("delivery days"))
 
     @property
     def file_url(self):
@@ -143,10 +143,10 @@ class ServiceOption(models.Model):
     def delay_display(self):
         if self.delay == 0:
             return _("No additional delivery delay")
-        return str(self.delay) + " delivery {}".format(_('days'))
+        return str(self.delay) + " " + str(_('delivery days'))
 
     @property
     def delay_preview_display(self):
         if self.delay == 0:
             return _("No additional delivery delay")
-        return "{} additional delivery {}".format(str(self.delay), _('days'))
+        return _("{} additional delivery days").format(str(self.delay))

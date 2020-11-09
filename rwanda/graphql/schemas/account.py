@@ -8,6 +8,7 @@ from rwanda.graphql.account.mutations import AccountMutations
 from rwanda.graphql.account.queries import AccountQueries
 from rwanda.graphql.account.subscriptions import AccountSubscriptions
 from rwanda.graphql.admin.mutations import AdminMutations
+from rwanda.graphql.decorators import account_required
 from rwanda.graphql.purchase.mutations import PurchaseMutations
 from rwanda.graphql.purchase.queries import PurchaseQueries
 from rwanda.graphql.purchase.subscriptions import PurchaseSubscriptions
@@ -22,10 +23,12 @@ class AccountQuery(ServiceQueries, PurchaseQueries, AccountQueries):
     parameters = graphene.Field(ParametersType, required=True)
     payment = graphene.Field(PaymentType, required=True, id=graphene.UUID(required=True))
 
-    def resolve_parameters(root, info, **kwargs):
+    @staticmethod
+    def resolve_parameters(self, info):
         return ParametersType(currency=param_currency(),
                               base_price=intcomma(int(param_base_price())))
 
+    @account_required
     def resolve_payment(self, info, id):
         return Payment.objects.get(pk=id)
 

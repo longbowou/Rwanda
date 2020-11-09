@@ -72,7 +72,7 @@ class ServicePurchase(models.Model):
 
     @property
     def delay_display(self):
-        return str(self.delay) + " total delivery {}".format(_('days'))
+        return str(self.delay) + " " + str(_('total delivery days'))
 
     @property
     def status_display(self):
