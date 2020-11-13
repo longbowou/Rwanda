@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import graphene
-from django.contrib.humanize.templatetags.humanize import naturalday, naturaltime
+from django.contrib.humanize.templatetags.humanize import naturalday, naturaltime, intcomma
 from django.db.models import Case, When, BooleanField, Q
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils import timezone
@@ -81,15 +81,31 @@ class ServiceOptionType(DjangoObjectType):
         }
 
 
+class ServiceCommentType(DjangoObjectType):
+    created_at = graphene.String(source="created_at_display", required=True)
+    positive = graphene.Boolean(source="positive", required=True)
+    negative = graphene.Boolean(source="negative", required=True)
+
+    class Meta:
+        model = ServiceComment
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
 class ServiceType(DjangoObjectType):
     delay_display = graphene.String(source="delay_display", required=True)
     published_display = graphene.String(source="published_display", required=True)
     options_count = graphene.Int(source="options_count", required=True)
     options_count_display = graphene.String(source="options_count_display", required=True)
     created_at = graphene.String(source="created_at_display", required=True)
-    options = graphene.List(ServiceOptionType, required=True)
     base_price = graphene.Int(required=True)
     file_url = graphene.String(source="file_url")
+
+    options = graphene.List(ServiceOptionType, required=True)
+    comments = graphene.List(ServiceCommentType)
+    positive_comments_count = graphene.String(required=True)
+    negative_comments_count = graphene.String(required=True)
 
     class Meta:
         model = Service
@@ -101,6 +117,25 @@ class ServiceType(DjangoObjectType):
     def resolve_options(cls, info):
         cls: Service
         return cls.serviceoption_set.filter(published=True)
+
+    @staticmethod
+    def resolve_comments(cls, info):
+        cls: Service
+        return ServiceComment.objects.order_by("-created_at").filter(service_purchase__service=cls).all()
+
+    @staticmethod
+    def resolve_positive_comments_count(cls, info):
+        cls: Service
+        return intcomma(ServiceComment.objects
+                        .filter(service_purchase__service=cls, type=ServiceComment.TYPE_POSITIVE)
+                        .count())
+
+    @staticmethod
+    def resolve_negative_comments_count(cls, info):
+        cls: Service
+        return intcomma(ServiceComment.objects
+                        .filter(service_purchase__service=cls, type=ServiceComment.TYPE_NEGATIVE)
+                        .count())
 
     @staticmethod
     def resolve_base_price(cls, info):
@@ -130,14 +165,6 @@ class ServiceMediaType(DjangoObjectType):
     class Meta:
         model = ServiceMedia
         exclude = ('file',)
-        filter_fields = {
-            "id": ("exact",),
-        }
-
-
-class ServiceCommentType(DjangoObjectType):
-    class Meta:
-        model = ServiceComment
         filter_fields = {
             "id": ("exact",),
         }

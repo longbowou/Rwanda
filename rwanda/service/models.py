@@ -3,7 +3,7 @@ import uuid
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
-from django.template.defaultfilters import date as date_filter
+from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils.translation import gettext_lazy as _
 
 from rwanda.user.models import Account
@@ -67,7 +67,7 @@ class Service(models.Model):
 
     @property
     def created_at_display(self):
-        return date_filter(self.created_at)
+        return date_filter(self.created_at) + ' ' + time_filter(self.created_at)
 
     @property
     def not_activated(self):
@@ -113,6 +113,18 @@ class ServiceComment(models.Model):
     reply_at = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def created_at_display(self):
+        return date_filter(self.created_at) + ' ' + time_filter(self.created_at)
+
+    @property
+    def positive(self):
+        return self.type == self.TYPE_POSITIVE
+
+    @property
+    def negative(self):
+        return self.type == self.TYPE_NEGATIVE
 
 
 class ServiceOption(models.Model):
