@@ -146,7 +146,7 @@ class ServiceCategoryType(DjangoObjectType):
     def resolve_services(self, info):
         self: ServiceCategory
 
-        return self.service_set.all()
+        return self.service_set.filter(published=True, activated=True).all()
 
 
 class AccountType(DjangoObjectType):
