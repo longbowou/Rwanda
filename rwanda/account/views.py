@@ -83,7 +83,7 @@ class RefundsDatatableView(BaseDatatableView):
 class ServicesDatatableView(BaseDatatableView):
     columns = [
         'title',
-        'delay',
+        'category',
         'activated',
         'published',
         'created_at',
@@ -95,8 +95,8 @@ class ServicesDatatableView(BaseDatatableView):
 
         if column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
-        elif column == "delay":
-            return row.delay_display
+        elif column == "category":
+            return row.service_category.label
         elif column == "activated":
             class_name = 'warning'
             if row.activated:
@@ -117,7 +117,7 @@ class ServicesDatatableView(BaseDatatableView):
             return super(ServicesDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Service.objects.filter(account__user=self.request.user)
+        return Service.objects.prefetch_related('service_category').filter(account__user=self.request.user)
 
 
 class PurchasesDatatableView(BaseDatatableView):

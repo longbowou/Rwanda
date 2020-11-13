@@ -9,11 +9,14 @@ from rwanda.graphql.decorators import admin_required
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, FundType, LitigationType, \
     ParametersType
 from rwanda.purchase.models import Litigation
+from rwanda.service.models import Service, ServiceCategory
 
 
 class AdminQuery(AdminQueries):
     service_categories = DjangoFilterListField(ServiceCategoryType)
     services = DjangoFilterListField(ServiceType)
+    service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
+    service_category = graphene.Field(ServiceCategoryType, required=True, id=graphene.UUID(required=True))
     funds = DjangoFilterListField(FundType)
     parameters = graphene.Field(ParametersType, required=True)
     litigation = graphene.Field(LitigationType, required=True, id=graphene.UUID(required=True))
@@ -21,6 +24,14 @@ class AdminQuery(AdminQueries):
     @admin_required
     def resolve_litigation(self, info, id):
         return Litigation.objects.get(pk=id)
+
+    @admin_required
+    def resolve_service(self, info, id):
+        return Service.objects.get(pk=id)
+
+    @admin_required
+    def resolve_service_category(self, info, id):
+        return ServiceCategory.objects.get(pk=id)
 
     @staticmethod
     def resolve_parameters(self, info):
