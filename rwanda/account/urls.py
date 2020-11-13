@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rwanda.account.views import PurchasesDatatableView, OrdersDatatableView, PurchaseDeliverablesDatatableView, \
     DeliverableUploadView, DepositsDatatableView, RefundsDatatableView, ServicesDatatableView, \
     ServiceOptionsDatatableView, ChatMessageUploadView, ServiceUploadView, \
-    DeliverableFilesDatatableView, OrderDeliverablesDatatableView
+    DeliverableFilesDatatableView, OrderDeliverablesDatatableView, ServicePreSaveUploadView
 
 urlpatterns = [
     path('deposits.json', DepositsDatatableView.as_view()),
@@ -12,6 +12,7 @@ urlpatterns = [
     path('services.json', ServicesDatatableView.as_view()),
     path('service/<uuid:pk>/options.json', ServiceOptionsDatatableView.as_view()),
     path('service/<uuid:pk>/upload', csrf_exempt(ServiceUploadView.as_view())),
+    path('service/pre-save/upload', csrf_exempt(ServicePreSaveUploadView.as_view())),
 
     path('orders.json', OrdersDatatableView.as_view()),
     path('orders/<uuid:pk>/deliverables.json', OrderDeliverablesDatatableView.as_view()),

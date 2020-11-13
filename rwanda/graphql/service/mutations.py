@@ -1,16 +1,12 @@
-import os
-import uuid
 from datetime import datetime
 
 import graphene
-from django.conf import settings
-from django.core.files.uploadedfile import UploadedFile
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, ServiceMediaType, ServiceCommentType, ServiceOptionType
-from rwanda.service.models import ServiceOption, ServiceMedia, ServiceComment
+from rwanda.service.models import ServiceMedia, ServiceComment, Service
 
 
 # INPUTS
@@ -31,43 +27,20 @@ class CreateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
         exclude_fields = ("activated", "stars", "account")
-        extra_input_fields = {
-            "service_options": graphene.List(ServiceOptionInput),
-            "service_medias": graphene.List(ServiceMediaInput)
-        }
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
-        form.instance.account = info.context.user.account
+        service: Service = form.instance
+        service.account = info.context.user.account
 
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        if input.service_options is not None:
-            for item in input.service_options:
-                ServiceOption(service=obj, **item).save()
+        if input.file != None:
+            service.file = input.file
 
-        if input.service_medias is not None:
-            for item in input.service_medias:
-                if item.file is None and item.url is None:
-                    continue
+        service.save()
 
-                if item.file is not None:
-                    f: UploadedFile = info.context.FILES[item.file]
-                    if f is not None:
-                        file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
-                        folder = "service-medias"
-                        file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
+        service.refresh_from_db()
 
-                        with open(file_path, 'wb+') as destination:
-                            for chunk in f.chunks():
-                                destination.write(chunk)
-
-                        ServiceMedia(service=obj, file=folder + "/" + file_name).save()
-                        continue
-
-                if item.url is not None:
-                    ServiceMedia(service=obj, url=item.url).save()
-                    continue
+        return cls(service=service, errors=[])
 
 
 class UpdateService(AccountDjangoModelMutation):
@@ -203,12 +176,7 @@ class ServiceMutations(graphene.ObjectType):
     update_service = UpdateService.Field()
     delete_service = DeleteService.Field()
 
-    create_service_media = CreateServiceMedia.Field()
-    update_service_media = UpdateServiceMedia.Field()
-    delete_service_media = DeleteServiceMedia.Field()
-
     create_service_comment = CreateServiceComment.Field()
-    reply_service_comment = ReplyServiceComment.Field()
 
     create_service_option = CreateServiceOption.Field()
     update_service_option = UpdateServiceOption.Field()

@@ -290,6 +290,24 @@ class ServiceUploadView(View):
         return JsonResponse({"response_code": 200}, safe=False)
 
 
+class ServicePreSaveUploadView(View):
+    def post(self, request, *args, **kwargs):
+        f: UploadedFile = request.FILES['file']
+        if f is not None:
+            file_name = uuid.uuid4().urn[9:] + '.' + f.name.split('.')[-1]
+
+            folder = "services"
+            create_folder_if_not_exits(folder)
+
+            file_path = os.path.join(settings.BASE_DIR, "media", folder, file_name)
+
+            with open(file_path, 'wb+') as destination:
+                for chunk in f.chunks():
+                    destination.write(chunk)
+
+            return JsonResponse({"response_code": 200, "file": folder + "/" + file_name}, safe=False)
+
+
 class DeliverableUploadView(View):
     def post(self, request, *args, **kwargs):
         f: UploadedFile = request.FILES['file']

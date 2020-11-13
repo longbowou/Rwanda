@@ -21,6 +21,7 @@ class ServiceQueries(graphene.ObjectType):
     services = ServiceFilterPaginateListField(ServiceType,
                                               pagination=LimitOffsetGraphqlPagination(default_limit=5,
                                                                                       ordering="-created_at"))
+    service_categories = DjangoFilterListField(ServiceCategoryType)
     service_category = graphene.Field(ServiceCategoryType, required=True, id=graphene.UUID(required=True))
     service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
