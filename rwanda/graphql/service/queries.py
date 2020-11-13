@@ -7,8 +7,8 @@ from graphene_django_extras import DjangoFilterPaginateListField, LimitOffsetGra
 
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.decorators import account_required
-from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceOptionType
-from rwanda.service.models import Service, ServiceOption
+from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceOptionType, ServiceCategoryType
+from rwanda.service.models import Service, ServiceOption, ServiceCategory
 
 
 class ServiceFilterPaginateListField(DjangoFilterPaginateListField):
@@ -21,6 +21,7 @@ class ServiceQueries(graphene.ObjectType):
     services = ServiceFilterPaginateListField(ServiceType,
                                               pagination=LimitOffsetGraphqlPagination(default_limit=5,
                                                                                       ordering="-created_at"))
+    service_category = graphene.Field(ServiceCategoryType, required=True, id=graphene.UUID(required=True))
     service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
@@ -32,6 +33,9 @@ class ServiceQueries(graphene.ObjectType):
 
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)
+
+    def resolve_service_category(self, info, id):
+        return ServiceCategory.objects.get(pk=id)
 
     @account_required
     def resolve_service_order_preview(self, info, service, service_options):

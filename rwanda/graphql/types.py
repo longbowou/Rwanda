@@ -60,14 +60,6 @@ class RefundType(DjangoObjectType):
         }
 
 
-class ServiceCategoryType(DjangoObjectType):
-    class Meta:
-        model = ServiceCategory
-        filter_fields = {
-            "id": ("exact",),
-        }
-
-
 class ServiceOptionType(DjangoObjectType):
     price_display = graphene.String(source="price_display", required=True)
     delay_preview_display = graphene.String(source="delay_preview_display", required=True)
@@ -140,6 +132,21 @@ class ServiceType(DjangoObjectType):
     @staticmethod
     def resolve_base_price(cls, info):
         return param_base_price()
+
+
+class ServiceCategoryType(DjangoObjectType):
+    services = graphene.List(ServiceType, required=True)
+
+    class Meta:
+        model = ServiceCategory
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+    def resolve_services(self, info):
+        self: ServiceCategory
+
+        return self.service_set.all()
 
 
 class AccountType(DjangoObjectType):
