@@ -52,13 +52,22 @@ class ServicesDatatableView(AccountServicesDatatableView):
     columns = [
         'title',
         'category',
-        'published',
+        'activated',
+        'account',
         'created_at',
         'data'
     ]
 
+    def render_column(self, row, column):
+        row: Service
+
+        if column == "account":
+            return row.account.user.first_name
+        else:
+            return super(ServicesDatatableView, self).render_column(row, column)
+
     def get_initial_queryset(self):
-        return Service.objects.prefetch_related('service_category').all()
+        return Service.objects.prefetch_related('service_category', 'account__user').all()
 
 
 class ServiceCategoriesDatatableView(BaseDatatableView):
