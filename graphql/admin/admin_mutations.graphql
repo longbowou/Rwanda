@@ -20,7 +20,7 @@ mutation{
         serviceCategory{
             id
             label
-            description
+            descriptioneb
         }
     }
 

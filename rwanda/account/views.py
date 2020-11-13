@@ -13,12 +13,12 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from rwanda.account.models import Deposit, Refund
 from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
-    DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer
+    DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer, ServiceCategorySerializer
 from rwanda.account.utils import create_folder_if_not_exits
 from rwanda.administration.utils import param_currency
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile, ChatMessage
-from rwanda.service.models import Service, ServiceOption
+from rwanda.service.models import Service, ServiceOption, ServiceCategory
 
 
 class DepositsDatatableView(BaseDatatableView):
@@ -118,6 +118,68 @@ class ServicesDatatableView(BaseDatatableView):
 
     def get_initial_queryset(self):
         return Service.objects.filter(account__user=self.request.user)
+
+
+class AllServicesDatatableView(BaseDatatableView):
+    columns = [
+        'title',
+        'delay',
+        'activated',
+        'published',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        row: Service
+
+        if column == "created_at":
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        elif column == "delay":
+            return row.delay_display
+        elif column == "activated":
+            class_name = 'warning'
+            if row.activated:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.activated_display)
+        elif column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
+        elif column == "data":
+            return ServiceSerializer(row).data
+        else:
+            return super(ServicesDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return Service.objects.all()
+
+
+class ServiceCategoriesDatatableView(BaseDatatableView):
+    columns = [
+        'label',
+        'description',
+        'created_at',
+        'data'
+    ]
+
+    def render_column(self, row, column):
+        row: ServiceCategory
+
+        if column == "created_at":
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        elif column == "data":
+            return ServiceCategorySerializer(row).data
+        else:
+            return super(ServiceCategoriesDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return ServiceCategory.objects.all()
 
 
 class PurchasesDatatableView(BaseDatatableView):
