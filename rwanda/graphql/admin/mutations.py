@@ -19,6 +19,7 @@ from rwanda.graphql.purchase.operations import cancel_service_purchase, \
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType
 from rwanda.purchase.models import ServicePurchase, Litigation
+from rwanda.service.models import Service
 from rwanda.user.models import User, Admin
 
 
@@ -169,11 +170,34 @@ class DeleteServiceCategory(AdminDjangoModelDeleteMutation):
         model_type = ServiceCategoryType
 
 
-class UpdateService(AdminDjangoModelMutation):
+class AcceptService(AdminDjangoModelMutation):
     class Meta:
         model_type = ServiceType
-        only_fields = ('activated',)
         for_update = True
+        only_fields = ("",)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        service: Service = form.instance
+        if service.cannot_be_accepted:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service.set_as_accepted()
+
+
+class RejectService(AdminDjangoModelMutation):
+    class Meta:
+        model_type = ServiceType
+        for_update = True
+        only_fields = ("rejected_reason",)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        service: Service = form.instance
+        if service.cannot_be_rejected:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service.set_as_rejected()
 
 
 class AdminInput(UserInput):
@@ -347,5 +371,6 @@ class AdminMutations(graphene.ObjectType):
     update_service_category = UpdateServiceCategory.Field()
     delete_service_category = DeleteServiceCategory.Field()
 
-    update_service = UpdateService.Field()
+    accept_service = AcceptService.Field()
+    reject_service = RejectService.Field()
     handle_litigation = HandleLitigation.Field()

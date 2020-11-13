@@ -87,12 +87,19 @@ class ServiceCommentType(DjangoObjectType):
 
 class ServiceType(DjangoObjectType):
     delay_display = graphene.String(source="delay_display", required=True)
-    published_display = graphene.String(source="published_display", required=True)
+    status = graphene.String(source="status_display", required=True)
     options_count = graphene.Int(source="options_count", required=True)
     options_count_display = graphene.String(source="options_count_display", required=True)
     created_at = graphene.String(source="created_at_display", required=True)
     base_price = graphene.Int(required=True)
     file_url = graphene.String(source="file_url")
+
+    accepted = graphene.Boolean(source="accepted", required=True)
+    rejected = graphene.Boolean(source="rejected", required=True)
+    submitted_for_approval = graphene.Boolean(source="submitted_for_approval", required=True)
+    can_be_accepted = graphene.Boolean(source="can_be_accepted", required=True)
+    can_be_rejected = graphene.Boolean(source="can_be_rejected", required=True)
+    can_be_submitted_for_approval = graphene.Boolean(source="can_be_submitted_for_approval", required=True)
 
     options = graphene.List(ServiceOptionType, required=True)
     comments = graphene.List(ServiceCommentType)
@@ -146,7 +153,7 @@ class ServiceCategoryType(DjangoObjectType):
     def resolve_services(self, info):
         self: ServiceCategory
 
-        return self.service_set.filter(published=True, activated=True).all()
+        return self.service_set.filter(published=True, status=Service.STATUS_ACCEPTED).all()
 
 
 class AccountType(DjangoObjectType):

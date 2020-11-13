@@ -52,7 +52,7 @@ class ServicesDatatableView(AccountServicesDatatableView):
     columns = [
         'title',
         'category',
-        'activated',
+        'status',
         'account',
         'created_at',
         'data'

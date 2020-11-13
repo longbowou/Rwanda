@@ -14,7 +14,7 @@ from rwanda.service.models import Service, ServiceOption, ServiceCategory
 class ServiceFilterPaginateListField(DjangoFilterPaginateListField):
     def get_queryset(self, manager, info, **kwargs):
         query_set = super().get_queryset(manager, info, **kwargs)
-        return query_set.filter(published=True, activated=True)
+        return query_set.filter(published=True, status=Service.STATUS_ACCEPTED)
 
 
 class ServiceQueries(graphene.ObjectType):

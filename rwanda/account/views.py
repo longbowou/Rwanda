@@ -84,7 +84,7 @@ class ServicesDatatableView(BaseDatatableView):
     columns = [
         'title',
         'category',
-        'activated',
+        'status',
         'published',
         'created_at',
         'data'
@@ -97,13 +97,16 @@ class ServicesDatatableView(BaseDatatableView):
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "category":
             return row.service_category.label
-        elif column == "activated":
-            class_name = 'warning'
-            if row.activated:
+        elif column == "status":
+            class_name = 'dark'
+            if row.accepted:
                 class_name = 'success'
 
+            if row.rejected:
+                class_name = 'warning'
+
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
-                .format(class_name, row.activated_display)
+                .format(class_name, row.status_display)
         elif column == "published":
             class_name = 'warning'
             if row.published:

@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
-from rwanda.graphql.types import ServiceType, ServiceMediaType, ServiceCommentType, ServiceOptionType
-from rwanda.service.models import ServiceMedia, ServiceComment, Service
+from rwanda.graphql.types import ServiceType, ServiceCommentType, ServiceOptionType
+from rwanda.service.models import ServiceComment, Service
 
 
 # INPUTS
@@ -55,6 +55,21 @@ class UpdateService(AccountDjangoModelMutation):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
+class SubmitServiceForApproval(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServiceType
+        for_update = True
+        only_fields = ("",)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        service: Service = form.instance
+        if service.cannot_be_submitted_for_approval:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        service.set_as_submitted_for_approval()
+
+
 class DeleteService(AccountDjangoModelDeleteMutation):
     class Meta:
         model_type = ServiceType
@@ -62,49 +77,6 @@ class DeleteService(AccountDjangoModelDeleteMutation):
     @classmethod
     def pre_delete(cls, info, obj):
         if obj.is_not_owner(info.context.user.account):
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
-
-
-# SERVICE MEDIA MUTATIONS
-class CreateServiceMedia(AccountDjangoModelMutation):
-    class Meta:
-        model_type = ServiceMediaType
-
-    @classmethod
-    def pre_save(cls, info, old_obj, form, input):
-        if form.cleaned_data["service"].account_id != info.context.user.account.id:
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
-
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        if input.is_main is not None and obj.is_main:
-            ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
-
-
-class UpdateServiceMedia(AccountDjangoModelMutation):
-    class Meta:
-        model_type = ServiceMediaType
-        for_update = True
-        exclude_fields = ('service',)
-
-    @classmethod
-    def pre_save(cls, info, old_obj, form, input):
-        if form.instance.service.account_id != info.context.user.account.id:
-            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
-
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        if input.is_main is not None and obj.is_main:
-            ServiceMedia.objects.exclude(pk=input.id).update(is_main=False)
-
-
-class DeleteServiceMedia(AccountDjangoModelDeleteMutation):
-    class Meta:
-        model_type = ServiceMediaType
-
-    @classmethod
-    def pre_delete(cls, info, obj):
-        if obj.service.account_id != info.context.user.account.id:
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
 
@@ -177,6 +149,7 @@ class ServiceMutations(graphene.ObjectType):
     delete_service = DeleteService.Field()
 
     create_service_comment = CreateServiceComment.Field()
+    submit_service_for_approval = SubmitServiceForApproval.Field()
 
     create_service_option = CreateServiceOption.Field()
     update_service_option = UpdateServiceOption.Field()
