@@ -26,7 +26,7 @@ class ServiceMediaInput(graphene.InputObjectType):
 class CreateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
-        exclude_fields = ("activated", "stars", "account")
+        only_fields = ("title", "content", "keywords", "delay", "file", "published", "service_category")
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
@@ -47,7 +47,7 @@ class UpdateService(AccountDjangoModelMutation):
     class Meta:
         model_type = ServiceType
         for_update = True
-        exclude_fields = ("activated", 'account')
+        only_fields = ("title", "content", "keywords", "delay", "file", "published", "service_category")
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
