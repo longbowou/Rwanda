@@ -11,7 +11,6 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
-    has_been_accepted = serializers.BooleanField()
     service_title = serializers.CharField()
     number = serializers.CharField()
 
@@ -21,15 +20,11 @@ class ServicePurchaseBaseSerializer(serializers.ModelSerializer):
 
 
 class PurchaseSerializer(ServicePurchaseBaseSerializer):
-    can_be_approved = serializers.BooleanField()
-    can_be_canceled = serializers.BooleanField()
-    can_be_in_dispute = serializers.BooleanField()
+    pass
 
 
 class OrderSerializer(ServicePurchaseBaseSerializer):
-    can_be_accepted = serializers.BooleanField()
-    can_be_delivered = serializers.BooleanField()
-
+    pass
 
 class DeliverableSerializer(serializers.ModelSerializer):
     class Meta:

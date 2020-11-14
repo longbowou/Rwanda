@@ -39,12 +39,14 @@ class ServicePurchase(models.Model):
     service_options = models.ManyToManyField(ServiceOption, blank=True,
                                              through='ServicePurchaseServiceOption')
     accepted_at = models.DateTimeField(null=True, blank=True)
+    refused_at = models.DateTimeField(null=True, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     approved_at = models.DateTimeField(null=True, blank=True)
     canceled_at = models.DateTimeField(null=True, blank=True)
     in_dispute_at = models.DateTimeField(null=True, blank=True)
     deadline_at = models.DateTimeField(null=True, blank=True)
     has_final_deliverable = models.BooleanField(default=False)
+    refused_reason = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -78,6 +80,9 @@ class ServicePurchase(models.Model):
     def status_display(self):
         if self.accepted:
             return _('Accepted')
+
+        if self.refused:
+            return _('Refused')
 
         if self.delivered:
             return _('Delivered')
@@ -162,6 +167,14 @@ class ServicePurchase(models.Model):
         return not self.has_been_accepted
 
     @property
+    def has_been_refused(self):
+        return self.refused_at is not None
+
+    @property
+    def has_not_been_refused(self):
+        return not self.has_been_refused
+
+    @property
     def has_been_delivered(self):
         return self.delivered_at is not None
 
@@ -194,6 +207,14 @@ class ServicePurchase(models.Model):
         return not self.can_be_accepted
 
     @property
+    def can_be_refused(self):
+        return self.initiated
+
+    @property
+    def cannot_be_refused(self):
+        return not self.can_be_refused
+
+    @property
     def can_be_delivered(self):
         return self.accepted
 
@@ -214,7 +235,7 @@ class ServicePurchase(models.Model):
         if self.initiated:
             return True
 
-        if self.canceled:
+        if self.canceled or self.refused:
             return False
 
         return self.can_be_canceled_for_delay
@@ -266,6 +287,10 @@ class ServicePurchase(models.Model):
         today = timezone.now()
         self.accepted_at = today
         self.deadline_at = today + timedelta(days=self.delay)
+
+    def set_as_refused(self):
+        self.status = self.STATUS_REFUSED
+        self.refused_at = timezone.now()
 
     def set_as_delivered(self):
         self.status = self.STATUS_DELIVERED

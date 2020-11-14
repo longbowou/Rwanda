@@ -283,6 +283,7 @@ class ServicePurchaseType(DjangoObjectType):
     can_chat = graphene.Boolean(source="can_chat", required=True)
 
     can_be_accepted = graphene.Boolean(required=True)
+    can_be_refused = graphene.Boolean(required=True)
     can_be_delivered = graphene.Boolean(required=True)
     can_be_approved = graphene.Boolean(required=True)
     can_be_canceled = graphene.Boolean(required=True)
@@ -335,6 +336,15 @@ class ServicePurchaseType(DjangoObjectType):
             return False
 
         return self.can_be_accepted and self.is_seller(user.account)
+
+    def resolve_can_be_refused(self, info):
+        self: ServicePurchase
+
+        user = info.context.user
+        if user.is_anonymous or user.is_authenticated and user.is_not_account:
+            return False
+
+        return self.can_be_refused and self.is_seller(user.account)
 
     def resolve_can_be_delivered(self, info):
         self: ServicePurchase
@@ -449,6 +459,19 @@ class ServicePurchaseType(DjangoObjectType):
                 color='primary',
                 description=_('Deadline set to <strong>{}</strong>')
                     .format(date_filter(self.deadline_at)),
+            ))
+
+            last_happen_at = self.accepted_at
+
+        if self.has_been_refused:
+            happen_at = str(t_filter(self.refused_at))
+            if last_happen_at.date() != self.refused_at.date():
+                happen_at = str(d_filter(self.refused_at)) + " " + happen_at
+
+            timelines.append(ServicePurchaseTimeLineType(
+                happen_at=happen_at.title(),
+                status=_('Refused'),
+                color='danger'
             ))
 
             last_happen_at = self.accepted_at

@@ -190,6 +190,7 @@ class RejectService(AdminDjangoModelMutation):
         model_type = ServiceType
         for_update = True
         only_fields = ("rejected_reason",)
+        extra_input_fields = {"rejected_reason": graphene.String(required=True)}
 
     @classmethod
     def pre_save(cls, info, old_obj, form, input):

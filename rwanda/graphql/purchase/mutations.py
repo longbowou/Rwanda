@@ -82,6 +82,32 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
 
 
+class RefuseServicePurchase(AccountDjangoModelMutation):
+    class Meta:
+        model_type = ServicePurchaseType
+        for_update = True
+        only_fields = ("refused_reason",)
+        custom_input_fields = {"refused_reason": graphene.String(required=True)}
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        service_purchase: ServicePurchase = form.instance
+
+        if service_purchase.is_not_seller(info.context.user.account):
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        if service_purchase.cannot_be_refused:
+            return cls(
+                errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])],
+                servicePurchase=service_purchase)
+
+        service_purchase.set_as_refused()
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
+
+
 class DeliverServicePurchase(AccountDjangoModelMutation):
     class Meta:
         model_type = ServicePurchaseType
@@ -412,6 +438,7 @@ class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 class PurchaseMutations(graphene.ObjectType):
     initiate_service_purchase = InitiateServicePurchase.Field()
     accept_service_purchase = AcceptServicePurchase.Field()
+    refuse_service_purchase = RefuseServicePurchase.Field()
     approve_service_purchase = ApproveServicePurchase.Field()
     deliver_service_purchase = DeliverServicePurchase.Field()
     cancel_service_purchase = CancelServicePurchase.Field()

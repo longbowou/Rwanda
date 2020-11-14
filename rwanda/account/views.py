@@ -157,7 +157,7 @@ class PurchasesDatatableView(BaseDatatableView):
             if row.approved:
                 class_name = 'success'
 
-            if row.canceled or row.update_refused:
+            if row.canceled or row.refused or row.update_refused:
                 class_name = 'danger'
 
             if row.in_dispute:
