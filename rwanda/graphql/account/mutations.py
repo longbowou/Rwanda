@@ -151,24 +151,20 @@ class InitiateDeposit(graphene.Mutation):
 class InitiateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
-        only_fields = ('amount', "phone_number")
-        custom_input_fields = {'phone_number': graphene.String(required=True)}
+        only_fields = ('amount', "phone_number", 'refund_way')
+        custom_input_fields = {
+            'phone_number': graphene.String(required=True),
+            'refund_way': graphene.UUID(required=True),
+        }
 
     @classmethod
-    @transaction.atomic
     def pre_save(cls, info, old_obj, form, input):
-        account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
-        instance = form.instance
-        instance.account = account
-
+        account = info.context.user.account
         if input.amount > account.balance:
             return cls(
                 errors=[ErrorType(field='amount', messages=[_("Insufficient amount to process the refund.")])])
 
-        form.save()
-        instance.refresh_from_db()
-
-        return cls(refund=instance, errors=[])
+        form.instance.account = account
 
 
 # ACCOUNT MUTATIONS

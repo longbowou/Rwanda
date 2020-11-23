@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from graphene import ObjectType
 from graphene_django import DjangoObjectType
 
-from rwanda.account.models import Deposit, Refund
+from rwanda.account.models import Deposit, Refund, RefundWay
 from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_base_price
@@ -55,6 +55,14 @@ class PaymentType(DjangoObjectType):
 class RefundType(DjangoObjectType):
     class Meta:
         model = Refund
+        filter_fields = {
+            "id": ("exact",),
+        }
+
+
+class RefundWayType(DjangoObjectType):
+    class Meta:
+        model = RefundWay
         filter_fields = {
             "id": ("exact",),
         }

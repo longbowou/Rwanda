@@ -17,7 +17,7 @@ from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, Change
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
-from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType
 from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.service.models import Service
 from rwanda.user.models import User, Admin
@@ -359,6 +359,22 @@ class HandleLitigation(AdminDjangoModelMutation):
         return cls(litigation=litigation, errors=[])
 
 
+class CreateRefundWay(AdminDjangoModelMutation):
+    class Meta:
+        model_type = RefundWayType
+
+
+class UpdateRefundWay(AdminDjangoModelMutation):
+    class Meta:
+        model_type = RefundWayType
+        for_update = True
+
+
+class DeleteRefundWay(AdminDjangoModelDeleteMutation):
+    class Meta:
+        model_type = RefundWayType
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -375,3 +391,7 @@ class AdminMutations(graphene.ObjectType):
     accept_service = AcceptService.Field()
     reject_service = RejectService.Field()
     handle_litigation = HandleLitigation.Field()
+
+    create_refund_way = CreateRefundWay.Field()
+    update_refund_way = UpdateRefundWay.Field()
+    delete_refund_way = DeleteRefundWay.Field()

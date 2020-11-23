@@ -51,6 +51,7 @@ class RefundsDatatableView(BaseDatatableView):
     columns = [
         'amount',
         'status',
+        'refund_way',
         'phone_number',
         'created_at',
     ]
@@ -77,7 +78,7 @@ class RefundsDatatableView(BaseDatatableView):
             return super(RefundsDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Refund.objects.filter(account__user=self.request.user)
+        return Refund.objects.prefetch_related("refund_way").filter(account__user=self.request.user)
 
 
 class ServicesDatatableView(BaseDatatableView):

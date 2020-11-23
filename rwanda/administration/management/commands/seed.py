@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+from rwanda.account.models import RefundWay
 from rwanda.accounting.models import Fund
 from rwanda.administration.models import Parameter
 from rwanda.service.models import ServiceCategory
@@ -20,6 +21,16 @@ class Command(BaseCommand):
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():
                 Parameter(**item).save()
+
+        for item in [
+            {"name": "ORANGE MONEY CÔTE D’IVOIRE", "country_code": "+225"},
+            {"name": "ORANGE MONEY SÉNÉGAL", "country_code": "+221"},
+            {"name": "ORANGE MONEY CAMEROUN", "country_code": "+237"},
+            {"name": "ORANGE MONEY BURKINA", "country_code": "+226"},
+            {"name": "FLOOZ TOGO", "country_code": "+228"},
+        ]:
+            if not RefundWay.objects.filter(name=item['name']).exists():
+                RefundWay(**item).save()
 
         for item in [Fund.MAIN, Fund.COMMISSIONS, Fund.ACCOUNTS]:
             if not Fund.objects.filter(label=item).exists():
