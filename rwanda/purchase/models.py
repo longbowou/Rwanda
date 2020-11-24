@@ -11,7 +11,6 @@ from django.utils.translation import gettext_lazy as _
 
 from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
-from rwanda.administration.utils import param_service_purchase_cancellation_delay
 from rwanda.service.models import ServiceOption, Service
 from rwanda.user.models import Account, Admin
 
@@ -235,10 +234,7 @@ class ServicePurchase(models.Model):
         if self.initiated:
             return True
 
-        if self.canceled or self.refused:
-            return False
-
-        return self.can_be_canceled_for_delay
+        return self.canceled or self.refused
 
     @property
     def cannot_be_canceled(self):
@@ -259,12 +255,6 @@ class ServicePurchase(models.Model):
     @property
     def cannot_ask_for_update(self):
         return not self.can_ask_for_update
-
-    @property
-    def can_be_canceled_for_delay(self):
-        in_between_days = (timezone.now() - self.deadline_at).days
-        cancellation_delay_days = int(param_service_purchase_cancellation_delay())
-        return not self.approved and in_between_days > cancellation_delay_days
 
     @property
     def canceled_for_delay(self):

@@ -17,7 +17,6 @@ class Command(BaseCommand):
             {"label": Parameter.BASE_PRICE, "value": 1000},
             {"label": Parameter.CURRENCY, "value": "XOF"},
             {"label": Parameter.COMMISSION, "value": 500},
-            {"label": Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY, "value": 5},
             {"label": Parameter.CINETPAY_PASSWORD, "value": 'M@dchanger@2020'},
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():

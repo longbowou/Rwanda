@@ -18,7 +18,8 @@ from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, Change
 from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
-from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType
+from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType, \
+    ParameterType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_auth_token, get_available_balance, process_refund
 from rwanda.purchase.models import ServicePurchase, Litigation
@@ -415,6 +416,13 @@ class ProcessRefund(graphene.Mutation):
             result=_('Refund has been initiated by CINETPAY side. Please waite for the their confirmation.'))
 
 
+class UpdateParameter(AdminDjangoModelMutation):
+    class Meta:
+        model_type = ParameterType
+        for_update = True
+        only_fields = ("value",)
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -437,3 +445,5 @@ class AdminMutations(graphene.ObjectType):
     create_refund_way = CreateRefundWay.Field()
     update_refund_way = UpdateRefundWay.Field()
     delete_refund_way = DeleteRefundWay.Field()
+
+    update_parameter = UpdateParameter.Field()
