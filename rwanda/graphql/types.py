@@ -830,3 +830,15 @@ class ServiceOrderType(ObjectType):
     total_delay = graphene.String(required=True)
     service = graphene.Field(ServiceType)
     service_options = graphene.List(ServiceOptionType)
+
+
+class StatsType(ObjectType):
+    services_count = graphene.String(required=True)
+    services_accepted_count = graphene.String(required=True)
+    disputes_count = graphene.String(required=True)
+    disputes_not_handled_count = graphene.String(required=True)
+    refunds_count = graphene.String(required=True)
+    refunds_not_processed_count = graphene.String(required=True)
+    service_purchases_count = graphene.String(required=True)
+    service_purchases_not_approved_count = graphene.String(required=True)
+    accounts_count = graphene.String(required=True)
