@@ -1,8 +1,8 @@
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
-from rwanda.account.models import Refund
-from rwanda.account.serializers import RefundSerializer
+from rwanda.account.models import Refund, RefundWay
+from rwanda.account.serializers import RefundSerializer, RefundWaySerializer
 from rwanda.account.views import ServicesDatatableView as AccountServicesDatatableView, \
     RefundsDatatableView as AccountRefundsDatatableView
 from rwanda.administration.serializers import LitigationSerializer, ServiceCategorySerializer
@@ -114,3 +114,33 @@ class RefundsDatatableView(AccountRefundsDatatableView):
 
     def get_initial_queryset(self):
         return Refund.objects.prefetch_related("refund_way")
+
+
+class RefundWaysDatatableView(BaseDatatableView):
+    columns = [
+        'name',
+        'country_code',
+        'published',
+        'created_at',
+        'data',
+    ]
+
+    def render_column(self, row, column):
+        row: RefundWay
+
+        if column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
+        elif column == "created_at":
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        elif column == "data":
+            return RefundWaySerializer(row).data
+        else:
+            return super(RefundWaysDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return RefundWay.objects.all()

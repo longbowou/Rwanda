@@ -8,6 +8,7 @@ from rwanda.graphql.types import AccountType, RefundWayType
 class AccountQueries(graphene.ObjectType):
     account = graphene.Field(AccountType)
     refund_ways = graphene.List(RefundWayType)
+    refund_way = graphene.Field(RefundWayType)
 
     @account_required
     def resolve_account(root, info, **kwargs):

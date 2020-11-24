@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from rwanda.account.models import Refund
+from rwanda.account.models import Refund, RefundWay
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service, ServiceOption
 
@@ -51,4 +51,10 @@ class RefundSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Refund
+        fields = "__all__"
+
+
+class RefundWaySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RefundWay
         fields = "__all__"

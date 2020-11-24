@@ -17,8 +17,8 @@ from rwanda.payments.models import Payment
 
 
 class AccountQuery(ServiceQueries, PurchaseQueries, AccountQueries):
-    parameters = graphene.Field(ParametersType, required=True)
-    payment = graphene.Field(PaymentType, required=True, id=graphene.UUID(required=True))
+    parameters = graphene.Field(ParametersType)
+    payment = graphene.Field(PaymentType, id=graphene.UUID(required=True))
 
     @staticmethod
     def resolve_parameters(self, info):
