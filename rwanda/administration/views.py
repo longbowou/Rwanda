@@ -1,7 +1,10 @@
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
-from rwanda.account.views import ServicesDatatableView as AccountServicesDatatableView
+from rwanda.account.models import Refund
+from rwanda.account.serializers import RefundSerializer
+from rwanda.account.views import ServicesDatatableView as AccountServicesDatatableView, \
+    RefundsDatatableView as AccountRefundsDatatableView
 from rwanda.administration.serializers import LitigationSerializer, ServiceCategorySerializer
 from rwanda.purchase.models import Litigation
 from rwanda.service.models import Service, ServiceCategory
@@ -89,3 +92,25 @@ class ServiceCategoriesDatatableView(BaseDatatableView):
 
     def get_initial_queryset(self):
         return ServiceCategory.objects.all()
+
+
+class RefundsDatatableView(AccountRefundsDatatableView):
+    columns = [
+        'amount',
+        'status',
+        'refund_way',
+        'phone_number',
+        'created_at',
+        'data',
+    ]
+
+    def render_column(self, row, column):
+        row: Refund
+
+        if column == "data":
+            return RefundSerializer(row).data
+        else:
+            return super(RefundsDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return Refund.objects.prefetch_related("refund_way")

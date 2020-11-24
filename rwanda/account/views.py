@@ -13,7 +13,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from rwanda.account.models import Deposit, Refund
 from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, OrderSerializer, \
-    DeliverableSerializer, DeliverableFileSerializer, ServiceOptionsSerializer
+    DeliverableSerializer, DeliverableFileSerializer, ServiceOptionSerializer
 from rwanda.account.utils import create_folder_if_not_exits
 from rwanda.administration.utils import param_currency
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
@@ -67,7 +67,7 @@ class RefundsDatatableView(BaseDatatableView):
             return intcomma(row.amount) + " " + self.currency
         elif column == "status":
             class_name = 'dark'
-            if row.approved:
+            if row.processed:
                 class_name = 'success'
 
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
@@ -398,7 +398,7 @@ class ServiceOptionsDatatableView(BaseDatatableView):
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-square label-inline label-light-{}">{}</span>' \
                 .format(class_name, row.published_display)
         elif column == "data":
-            return ServiceOptionsSerializer(row).data
+            return ServiceOptionSerializer(row).data
         else:
             return super(ServiceOptionsDatatableView, self).render_column(row, column)
 

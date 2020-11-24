@@ -33,7 +33,8 @@ class Refund(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.PositiveBigIntegerField()
     STATUS_INITIATED = "INITIATED"
-    STATUS_APPROVED = "APPROVED"
+    STATUS_IN_PROGRESS = "IN_PROGRESS"
+    STATUS_PROCESSED = "PROCESSED"
     status = models.CharField(max_length=255, default=STATUS_INITIATED)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
@@ -45,15 +46,29 @@ class Refund(models.Model):
         return self.status == self.STATUS_INITIATED
 
     @property
-    def approved(self):
-        return self.status == self.STATUS_APPROVED
+    def processed(self):
+        return self.status == self.STATUS_PROCESSED
+
+    @property
+    def in_progress(self):
+        return self.status == self.STATUS_IN_PROGRESS
 
     @property
     def status_display(self):
-        if self.approved:
-            return _('Approved')
+        if self.processed:
+            return _('Processed')
+
+        if self.in_progress:
+            return _('In Progress')
 
         return _("Initiated")
 
     def __str__(self):
         return self.amount
+
+    @property
+    def can_be_processed(self):
+        return self.initiated
+
+    def set_as_in_progress(self):
+        self.status = self.STATUS_IN_PROGRESS

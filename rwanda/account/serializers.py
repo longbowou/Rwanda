@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from rwanda.account.models import Refund
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service, ServiceOption
 
@@ -26,6 +27,7 @@ class PurchaseSerializer(ServicePurchaseBaseSerializer):
 class OrderSerializer(ServicePurchaseBaseSerializer):
     pass
 
+
 class DeliverableSerializer(serializers.ModelSerializer):
     class Meta:
         model = Deliverable
@@ -38,7 +40,15 @@ class DeliverableFileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ServiceOptionsSerializer(serializers.ModelSerializer):
+class ServiceOptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceOption
+        fields = "__all__"
+
+
+class RefundSerializer(serializers.ModelSerializer):
+    can_be_processed = serializers.BooleanField()
+
+    class Meta:
+        model = Refund
         fields = "__all__"

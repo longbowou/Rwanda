@@ -18,16 +18,17 @@ class Command(BaseCommand):
             {"label": Parameter.CURRENCY, "value": "XOF"},
             {"label": Parameter.COMMISSION, "value": 500},
             {"label": Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY, "value": 5},
+            {"label": Parameter.CINETPAY_PASSWORD, "value": 'M@dchanger@2020'},
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():
                 Parameter(**item).save()
 
         for item in [
-            {"name": "ORANGE MONEY CÔTE D’IVOIRE", "country_code": "+225"},
-            {"name": "ORANGE MONEY SÉNÉGAL", "country_code": "+221"},
-            {"name": "ORANGE MONEY CAMEROUN", "country_code": "+237"},
-            {"name": "ORANGE MONEY BURKINA", "country_code": "+226"},
-            {"name": "FLOOZ TOGO", "country_code": "+228"},
+            {"name": "ORANGE MONEY CÔTE D’IVOIRE", "country_code": 225},
+            {"name": "ORANGE MONEY SÉNÉGAL", "country_code": 221},
+            {"name": "ORANGE MONEY CAMEROUN", "country_code": 237},
+            {"name": "ORANGE MONEY BURKINA", "country_code": 226},
+            {"name": "FLOOZ TOGO", "country_code": 228},
         ]:
             if not RefundWay.objects.filter(name=item['name']).exists():
                 RefundWay(**item).save()

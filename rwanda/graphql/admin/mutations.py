@@ -11,6 +11,7 @@ from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
+from rwanda.account.models import Refund
 from rwanda.graphql.auth_base_mutations.admin import AdminDjangoModelDeleteMutation, AdminDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_admin_required, admin_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
@@ -18,6 +19,8 @@ from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType
+from rwanda.payments.models import Payment
+from rwanda.payments.utils import get_auth_token, get_available_balance, process_refund
 from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.service.models import Service
 from rwanda.user.models import User, Admin
@@ -375,6 +378,43 @@ class DeleteRefundWay(AdminDjangoModelDeleteMutation):
         model_type = RefundWayType
 
 
+class ProcessRefund(graphene.Mutation):
+    class Arguments:
+        id = graphene.UUID(required=True)
+
+    result = graphene.String()
+    error = graphene.String()
+
+    @admin_required
+    @transaction.atomic
+    def mutate(self, info, id):
+        refund = Refund.objects.get(pk=id)
+
+        token = get_auth_token()
+        if token is None:
+            return ProcessRefund(error=_('Authentication error. Please check CINETPAY password parameter.'))
+
+        balance = get_available_balance(token)
+        if token is None:
+            return ProcessRefund(error=_('Internal error. Please try again later.'))
+
+        if balance < refund.amount:
+            return ProcessRefund(error=_('Insufficient balance to process the refund.'))
+
+        payment = Payment(amount=refund.amount, account=refund.account, type=Payment.TYPE_OUTGOING, refund=refund)
+        payment.save()
+
+        succeed, message = process_refund(token, refund, payment)
+        if not succeed:
+            return ProcessRefund(error=message)
+
+        refund.set_as_in_progress()
+        refund.save()
+
+        return ProcessRefund(
+            result=_('Refund has been initiated by CINETPAY side. Please waite for the their confirmation.'))
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -391,6 +431,8 @@ class AdminMutations(graphene.ObjectType):
     accept_service = AcceptService.Field()
     reject_service = RejectService.Field()
     handle_litigation = HandleLitigation.Field()
+
+    process_refund = ProcessRefund.Field()
 
     create_refund_way = CreateRefundWay.Field()
     update_refund_way = UpdateRefundWay.Field()
