@@ -315,7 +315,7 @@ class UpdateAdmin(graphene.Mutation):
                     errors=[ErrorType(field='email', messages=[_(e.message)])])
 
         for field, value in input.items():
-            if field in ('first_name', 'last_name', 'is_active', 'is_superuser') and value is not None:
+            if field in ('first_name', 'last_name', 'phone_number') and value is not None:
                 setattr(user, field, value)
 
         user.save()

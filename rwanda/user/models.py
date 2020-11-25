@@ -1,6 +1,7 @@
 import uuid
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.contrib.humanize.templatetags.humanize import naturalday
@@ -14,6 +15,7 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_online = models.BooleanField(default=False)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
+    image = models.FileField(blank=True, null=True, upload_to="accounts/")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def disconnect(self):
@@ -57,6 +59,13 @@ class User(AbstractUser):
     @property
     def is_not_admin(self):
         return not self.is_admin
+
+    @property
+    def image_url(self):
+        try:
+            return settings.BASE_URL + self.image.url
+        except Exception:
+            return None
 
 
 class Admin(models.Model):

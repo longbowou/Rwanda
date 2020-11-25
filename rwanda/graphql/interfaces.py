@@ -12,6 +12,7 @@ class UserInterface(graphene.Interface):
     last_name = graphene.String()
     full_name = graphene.String()
     phone_number = graphene.String()
+    image_url = graphene.String()
 
     @staticmethod
     def resolve_username(cls, info):
@@ -52,3 +53,8 @@ class UserInterface(graphene.Interface):
     def resolve_phone_number(cls, info):
         cls: Account
         return cls.user.phone_number
+
+    @staticmethod
+    def resolve_image_url(cls, info):
+        cls: Account
+        return cls.user.image_url
