@@ -1,14 +1,19 @@
+from django.contrib.humanize.templatetags.humanize import intcomma
+from django.db.models import Q
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
 from rwanda.account.models import Refund, RefundWay
-from rwanda.account.serializers import RefundSerializer, RefundWaySerializer, ParameterSerializer
+from rwanda.account.serializers import RefundSerializer, RefundWaySerializer, ParameterSerializer, UserSerializer
 from rwanda.account.views import ServicesDatatableView as AccountServicesDatatableView, \
     RefundsDatatableView as AccountRefundsDatatableView
+from rwanda.accounting.models import Operation
 from rwanda.administration.models import Parameter
 from rwanda.administration.serializers import LitigationSerializer, ServiceCategorySerializer
+from rwanda.administration.utils import param_currency
 from rwanda.purchase.models import Litigation
 from rwanda.service.models import Service, ServiceCategory
+from rwanda.user.models import User
 
 
 class DisputesDatatableView(BaseDatatableView):
@@ -72,6 +77,12 @@ class ServicesDatatableView(AccountServicesDatatableView):
 
     def get_initial_queryset(self):
         return Service.objects.prefetch_related('service_category', 'account__user').all()
+
+
+class AccountServicesDatatableView(ServicesDatatableView):
+    def get_initial_queryset(self):
+        return Service.objects.prefetch_related('service_category', 'account__user').filter(
+            account__user_id=self.kwargs['pk'])
 
 
 class ServiceCategoriesDatatableView(BaseDatatableView):
@@ -167,3 +178,62 @@ class ParametersDatatableView(BaseDatatableView):
 
     def get_initial_queryset(self):
         return Parameter.objects.all()
+
+
+class AccountDatatableView(BaseDatatableView):
+    columns = [
+        'first_name',
+        'last_name',
+        'username',
+        'email',
+        'phone_number',
+        'created_at',
+        'data',
+    ]
+
+    def render_column(self, row, column):
+        row: User
+
+        if column == "created_at":
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        elif column == "data":
+            return UserSerializer(row).data
+        else:
+            return super(AccountDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return User.objects.filter(~Q(account__isnull=True))
+
+
+class AccountOperationsDatatableView(BaseDatatableView):
+    currency = None
+    columns = [
+        'type',
+        'amount',
+        'description',
+        'created_at',
+    ]
+
+    def initialize(self, *args, **kwargs):
+        super().initialize(*args, **kwargs)
+        self.currency = param_currency()
+
+    def render_column(self, row, column):
+        row: Operation
+
+        if column == "type":
+            class_name = 'primary'
+            if row.credit:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.type_display)
+        elif column == "amount":
+            return intcomma(row.amount) + " " + self.currency
+        elif column == "created_at":
+            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        else:
+            return super(AccountOperationsDatatableView, self).render_column(row, column)
+
+    def get_initial_queryset(self):
+        return Operation.objects.filter(account__user_id=self.kwargs['pk'])

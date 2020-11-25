@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from rwanda.purchase.models import ServicePurchase
 from rwanda.user.models import Account
@@ -47,3 +48,18 @@ class Operation(models.Model):
 
     def __str__(self):
         return self.type
+
+    @property
+    def type_display(self):
+        if self.debit:
+            return _('Debit')
+
+        return _('Credit')
+
+    @property
+    def debit(self):
+        return self.type == self.TYPE_DEBIT
+
+    @property
+    def credit(self):
+        return self.type == self.TYPE_CREDIT

@@ -13,6 +13,7 @@ from django.utils import timezone
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_online = models.BooleanField(default=False)
+    phone_number = models.CharField(max_length=255, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def disconnect(self):
@@ -75,6 +76,10 @@ class Account(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    @property
+    def created_at_display(self):
+        return date_filter(self.created_at) + ' ' + time_filter(self.created_at)
 
     @property
     def balance_display(self):

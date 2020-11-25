@@ -4,6 +4,7 @@ from rwanda.account.models import Refund, RefundWay
 from rwanda.administration.models import Parameter
 from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
 from rwanda.service.models import Service, ServiceOption
+from rwanda.user.models import User
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -64,4 +65,10 @@ class RefundWaySerializer(serializers.ModelSerializer):
 class ParameterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Parameter
+        fields = "__all__"
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = "__all__"

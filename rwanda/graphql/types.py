@@ -166,6 +166,7 @@ class ServiceCategoryType(DjangoObjectType):
 
 class AccountType(DjangoObjectType):
     balance = graphene.String(required=True, source="balance_display")
+    created_at = graphene.String(required=True, source="created_at_display")
     services_count = graphene.String(required=True, source="services_count_display")
     purchases_count = graphene.String(required=True, source="purchases_count_display")
     orders_count = graphene.String(required=True, source="orders_count_display")
@@ -842,3 +843,4 @@ class StatsType(ObjectType):
     service_purchases_count = graphene.String(required=True)
     service_purchases_not_approved_count = graphene.String(required=True)
     accounts_count = graphene.String(required=True)
+    commissions_sum = graphene.String(required=True)

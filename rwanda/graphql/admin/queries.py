@@ -3,19 +3,22 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Q
 
 from rwanda.account.models import RefundWay, Refund
+from rwanda.accounting.models import Fund
 from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_currency
 from rwanda.graphql.decorators import admin_required
-from rwanda.graphql.types import AdminType, RefundWayType, ParameterType, StatsType
+from rwanda.graphql.types import AdminType, RefundWayType, ParameterType, StatsType, AccountType
 from rwanda.purchase.models import Litigation, ServicePurchase
 from rwanda.service.models import Service
-from rwanda.user.models import Account
+from rwanda.user.models import Account, User
 
 
 class AdminQueries(graphene.ObjectType):
-    admin = graphene.Field(AdminType, required=True)
+    admin = graphene.Field(AdminType)
+    stats = graphene.Field(StatsType)
     refund_way = graphene.Field(RefundWayType, id=graphene.UUID(required=True))
     parameter = graphene.Field(ParameterType, id=graphene.UUID(required=True))
-    stats = graphene.Field(StatsType)
+    account = graphene.Field(AccountType, id=graphene.UUID(required=True))
 
     @admin_required
     def resolve_admin(root, info, **kwargs):
@@ -31,6 +34,8 @@ class AdminQueries(graphene.ObjectType):
 
     @admin_required
     def resolve_stats(root, info, **kwargs):
+        currency = param_currency()
+
         return StatsType(
             services_count=intcomma(Service.objects.count()),
             services_accepted_count=intcomma(Service.objects.filter(status=Service.STATUS_ACCEPTED).count()),
@@ -43,4 +48,9 @@ class AdminQueries(graphene.ObjectType):
             service_purchases_not_approved_count=intcomma(
                 ServicePurchase.objects.filter(~Q(status=ServicePurchase.STATUS_APPROVED)).count()),
             accounts_count=intcomma(Account.objects.count()),
+            commissions_sum=intcomma(Fund.objects.get(label=Fund.COMMISSIONS).balance) + ' ' + currency,
         )
+
+    @admin_required
+    def resolve_account(root, info, id, **kwargs):
+        return User.objects.get(pk=id).account

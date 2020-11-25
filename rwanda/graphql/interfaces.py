@@ -11,6 +11,7 @@ class UserInterface(graphene.Interface):
     first_name = graphene.String()
     last_name = graphene.String()
     full_name = graphene.String()
+    phone_number = graphene.String()
 
     @staticmethod
     def resolve_username(cls, info):
@@ -46,3 +47,8 @@ class UserInterface(graphene.Interface):
     def resolve_last_login(cls, info):
         cls: Account
         return cls.user.last_login_display
+
+    @staticmethod
+    def resolve_phone_number(cls, info):
+        cls: Account
+        return cls.user.phone_number
