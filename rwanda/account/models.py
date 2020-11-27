@@ -73,9 +73,6 @@ class Refund(models.Model):
 
         return _("Initiated")
 
-    def __str__(self):
-        return self.amount
-
     @property
     def can_be_processed(self):
         return self.initiated
