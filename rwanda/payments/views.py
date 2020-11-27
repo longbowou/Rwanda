@@ -2,6 +2,7 @@ import json
 import logging
 
 from django.db import transaction
+from django.http import JsonResponse
 from django.utils.crypto import get_random_string
 from django.views import View
 
@@ -14,10 +15,10 @@ from rwanda.payments.utils import check_status
 
 class PaymentView(View):
     def post(self, request, *args, **kwargs):
-        self.handle_confirmation(request, args, kwargs)
+        return self.handle_confirmation(request, args, kwargs)
 
     def get(self, request, *args, **kwargs):
-        self.handle_confirmation(request, args, kwargs)
+        return self.handle_confirmation(request, args, kwargs)
 
     @transaction.atomic
     def handle_confirmation(self, request, *args, **kwargs):
@@ -74,3 +75,5 @@ class PaymentView(View):
                 payment.cpm_payid = request.POST['transaction_id']
                 payment.payment_method = request.POST['operator']
                 payment.cpm_result = request.POST['treatment_status']
+
+        return JsonResponse({"message": "Ok"}, safe=False)
