@@ -147,7 +147,6 @@ class InitiateDeposit(graphene.Mutation):
         )
 
 
-# MUTATION REFUND
 class InitiateRefund(AccountDjangoModelMutation):
     class Meta:
         model_type = RefundType
@@ -175,7 +174,6 @@ class InitiateRefund(AccountDjangoModelMutation):
         form.instance.account = account
 
 
-# ACCOUNT MUTATIONS
 class AccountInput(UserInput):
     pass
 
@@ -288,7 +286,6 @@ class UpdateAccount(graphene.Mutation):
         return UpdateAccount(account=user.account, errors=[])
 
 
-# MUTATION LITIGATION
 class CreateLitigation(AccountDjangoModelMutation):
     class Meta:
         model_type = LitigationType
