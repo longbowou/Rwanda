@@ -13,8 +13,14 @@ from rwanda.payments.utils import check_status
 
 
 class PaymentView(View):
-    @transaction.atomic
     def post(self, request, *args, **kwargs):
+        self.handle_confirmation(request, args, kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.handle_confirmation(request, args, kwargs)
+
+    @transaction.atomic
+    def handle_confirmation(self, request, *args, **kwargs):
         prefix = get_random_string(5)
 
         logger = logging.getLogger('rwanda.payments')
