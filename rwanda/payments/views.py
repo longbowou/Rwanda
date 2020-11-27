@@ -14,20 +14,14 @@ from rwanda.payments.utils import check_status
 
 
 class PaymentView(View):
-    def post(self, request, *args, **kwargs):
-        return self.handle_confirmation(request, args, kwargs)
-
-    def get(self, request, *args, **kwargs):
-        return self.handle_confirmation(request, args, kwargs)
-
     @transaction.atomic
-    def handle_confirmation(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         prefix = get_random_string(5)
 
         logger = logging.getLogger('rwanda.payments')
         logger.info("#{} Request: ".format(prefix) + json.dumps(request.POST))
 
-        if request.POST.__contains__('cpm_trans_id'):
+        if 'cpm_trans_id' in request.POST:
             payment = Payment.objects.get(pk=request.POST['cpm_trans_id'])
             if payment.initiated:
                 result = check_status(payment)
@@ -58,7 +52,7 @@ class PaymentView(View):
                     payment.cpm_trans_status = result['transaction']['cpm_trans_status']
                     payment.save()
 
-        if request.POST.__contains__('client_transaction_id'):
+        if 'client_transaction_id' in request.POST:
             payment = Payment.objects.get(pk=request.POST['client_transaction_id'])
             if payment.initiated:
                 if int(request.POST['amount']) != payment.amount:
