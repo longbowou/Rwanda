@@ -48,6 +48,9 @@ class Refund(models.Model):
     refund_way = models.ForeignKey(RefundWay, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.amount
+
     @property
     def initiated(self):
         return self.status == self.STATUS_INITIATED

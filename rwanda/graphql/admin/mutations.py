@@ -21,7 +21,7 @@ from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType, \
     ParameterType
 from rwanda.payments.models import Payment
-from rwanda.payments.utils import get_auth_token, get_available_balance, process_refund
+from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money
 from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.service.models import Service
 from rwanda.user.models import User, Admin
@@ -405,7 +405,7 @@ class ProcessRefund(graphene.Mutation):
         payment = Payment(amount=refund.amount, account=refund.account, type=Payment.TYPE_OUTGOING, refund=refund)
         payment.save()
 
-        succeed, message = process_refund(token, refund, payment)
+        succeed, message = transfer_money(token, refund, payment)
         if not succeed:
             return ProcessRefund(error=message)
 

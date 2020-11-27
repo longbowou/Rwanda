@@ -112,9 +112,9 @@ class InitiateDeposit(graphene.Mutation):
             return InitiateDeposit(
                 errors=[ErrorType(field='amount', messages=[_("Your amount must be a multiple of 5")])])
 
-        if amount < 150:
+        if amount < 200:
             return InitiateDeposit(
-                errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 100")])])
+                errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 200")])])
 
         payment = Payment(amount=amount, account=info.context.user.account)
         payment.save()
@@ -160,6 +160,14 @@ class InitiateRefund(AccountDjangoModelMutation):
     @classmethod
     def pre_save(cls, info, old_obj, form, input):
         account = info.context.user.account
+        if (input.amount % 5) != 0:
+            return cls(
+                errors=[ErrorType(field='amount', messages=[_("Your amount must be a multiple of 5")])])
+
+        if input.amount < 200:
+            return cls(
+                errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 200")])])
+
         if input.amount > account.balance:
             return cls(
                 errors=[ErrorType(field='amount', messages=[_("Insufficient amount to process the refund.")])])

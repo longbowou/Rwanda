@@ -1,3 +1,5 @@
+import json
+
 import requests
 from django.conf import settings
 from django.urls import reverse
@@ -38,19 +40,11 @@ def get_auth_token():
         "apikey": settings.CINETPAY_API_KEY,
     }
 
-    def fetch_auth_token():
-        return requests.post(settings.CINETPAY_AUTH_URL, data).json()
+    result = requests.post(settings.CINETPAY_AUTH_URL, data).json()
+    if "code" in result and result['code'] == 0:
+        return result['data']['token']
 
-    try_times = 3
-    result = fetch_auth_token()
-    while "code" in result and result['code'] != 0:
-        result = fetch_auth_token()
-        try_times -= 1
-
-        if try_times == 0:
-            return None
-
-    return result['data']['token']
+    return None
 
 
 def get_available_balance(token):
@@ -66,26 +60,32 @@ def get_available_balance(token):
     return None
 
 
-def process_refund(token, refund: Refund, payment: Payment):
+def transfer_money(token, refund: Refund, payment: Payment):
     params = {
         "token": token,
     }
 
     data = {
-        'data': [
-            {
-                "prefix": refund.refund_way.country_code,
-                "phone": refund.phone_number,
-                "amount": refund.amount,
-                "notify_url": settings.BASE_URL + reverse('payments-confirmation'),
-                "client_transaction_id": str(payment.id),
-            }
-        ]
+        'data': json.dumps(
+            [
+                {
+                    "prefix": refund.refund_way.country_code,
+                    "phone": refund.phone_number,
+                    "amount": refund.amount,
+                    # "notify_url": "https://backend.mdtaf.com/payments/confirmation",
+                    "notify_url": settings.BASE_URL + reverse('payments-confirmation'),
+                    "client_transaction_id": str(payment.id),
+                }
+            ]
+        )
     }
 
-    result = requests.post(settings.CINETPAY_CHECK_BALANCE_URL, data, params=params).json()
+    result = requests.post(settings.CINETPAY_TRANSFER_MONEY_URL, data, params=params).json()
 
     if 'code' in result and result['code'] == 0:
-        return True
+        return True, None
 
-    return False, result['description'] if 'description' in result else None
+    if 'data' in result and len(result['data']):
+        return False, result['data'][0]['message'] + ' ' + result['data'][0]['description']
+
+    return False, result['message'] + ' ' + result['description']
