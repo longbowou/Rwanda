@@ -60,6 +60,33 @@ def get_available_balance(token):
     return None
 
 
+def add_contact(token, refund: Refund):
+    params = {
+        "token": token,
+    }
+
+    data = {
+        'data': json.dumps(
+            [
+                {
+                    "prefix": refund.refund_way.country_code,
+                    "phone": refund.phone_number,
+                    "name": refund.account.user.first_name,
+                    "surname": refund.account.user.last_name,
+                    "email": refund.account.user.email,
+                }
+            ]
+        )
+    }
+
+    result = requests.post(settings.CINETPAY_ADD_CONTACT_URL, data, params=params).json()
+
+    if 'code' in result and result['code'] == 0:
+        return True
+
+    return False
+
+
 def transfer_money(token, refund: Refund, payment: Payment):
     params = {
         "token": token,

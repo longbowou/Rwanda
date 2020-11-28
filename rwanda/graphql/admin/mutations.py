@@ -21,7 +21,7 @@ from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType, \
     ParameterType
 from rwanda.payments.models import Payment
-from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money
+from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money, add_contact
 from rwanda.purchase.models import ServicePurchase, Litigation
 from rwanda.service.models import Service
 from rwanda.user.models import User, Admin
@@ -401,6 +401,9 @@ class ProcessRefund(graphene.Mutation):
 
         if balance < refund.amount:
             return ProcessRefund(error=_('Insufficient balance to process the refund.'))
+
+        if not add_contact(token, refund):
+            return ProcessRefund(error=_('Internal error. Please try again later.'))
 
         payment = Payment(amount=refund.amount, account=refund.account, type=Payment.TYPE_OUTGOING, refund=refund)
         payment.save()

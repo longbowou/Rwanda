@@ -258,6 +258,7 @@ CINETPAY_CHECK_STATUS_URL = "https://api.cinetpay.com/v1/?method=checkPayStatus"
 CINETPAY_AUTH_URL = "https://client.cinetpay.com/v1/auth/login"
 CINETPAY_CHECK_BALANCE_URL = "https://client.cinetpay.com/v1/transfer/check/balance"
 CINETPAY_TRANSFER_MONEY_URL = "https://client.cinetpay.com/v1/transfer/money/send/contact"
+CINETPAY_ADD_CONTACT_URL = "https://client.cinetpay.com/v1/transfer/contact"
 CINETPAY_API_KEY = "3281856345e6c13a1a91b61.98428115"
 CINETPAY_SITE_ID = 414425
 CINETPAY_CURRENCY = "CFA"
