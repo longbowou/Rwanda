@@ -19,7 +19,7 @@ from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType, \
-    ParameterType
+    ParameterType, UserType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money, add_contact
 from rwanda.purchase.models import ServicePurchase, Litigation
@@ -42,15 +42,15 @@ class LoginAdmin(graphene.Mutation):
                                          Q(username=input.login) & Q(is_superuser=True) |
                                          Q(email=input.login) & Q(is_superuser=True)).first()
         if user is None:
-            return LoginAdmin(errors=[ErrorType(field="login", messages=[_("Incorrect login")])])
-
-        user = authenticate(username=user.username, password=input.password)
-        if user is None:
-            return LoginAdmin(errors=[ErrorType(field="password", messages=[_("Incorrect password")])])
+            return LoginAdmin(errors=[ErrorType(field="login", messages=[_("Incorrect username or email.")])])
 
         if not user.is_active:
             return LoginAdmin(
-                errors=[ErrorType(field="login", messages=[_("Your account has been disabled")])])
+                errors=[ErrorType(field="login", messages=[_("Your account has been disabled.")])])
+
+        user = authenticate(username=user.username, password=input.password)
+        if user is None:
+            return LoginAdmin(errors=[ErrorType(field="password", messages=[_("Incorrect password.")])])
 
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)
@@ -426,6 +426,13 @@ class UpdateParameter(AdminDjangoModelMutation):
         only_fields = ("value",)
 
 
+class UpdateAccount(AdminDjangoModelMutation):
+    class Meta:
+        model_type = UserType
+        for_update = True
+        only_fields = ('is_active',)
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -450,3 +457,5 @@ class AdminMutations(graphene.ObjectType):
     delete_refund_way = DeleteRefundWay.Field()
 
     update_parameter = UpdateParameter.Field()
+
+    update_account = UpdateAccount.Field()

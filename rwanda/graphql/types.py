@@ -19,7 +19,7 @@ from rwanda.payments.models import Payment
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
     DeliverableFile, ServicePurchaseUpdateRequest
 from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
-from rwanda.user.models import Admin, Account
+from rwanda.user.models import Admin, Account, User
 
 
 class AuthType(ObjectType):
@@ -162,6 +162,14 @@ class ServiceCategoryType(DjangoObjectType):
         self: ServiceCategory
 
         return self.service_set.filter(published=True, status=Service.STATUS_ACCEPTED).all()
+
+
+class UserType(DjangoObjectType):
+    class Meta:
+        model = User
+        filter_fields = {
+            "id": ("exact",),
+        }
 
 
 class AccountType(DjangoObjectType):

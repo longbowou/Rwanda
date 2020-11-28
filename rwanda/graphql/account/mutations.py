@@ -40,13 +40,13 @@ class LoginAccount(graphene.Mutation):
         if user is None:
             return LoginAccount(errors=[ErrorType(field="login", messages=[_("Incorrect username or email.")])])
 
-        user = authenticate(username=user.username, password=input.password)
-        if user is None:
-            return LoginAccount(errors=[ErrorType(field="password", messages=[_("Incorrect password.")])])
-
         if not user.is_active:
             return LoginAccount(
                 errors=[ErrorType(field="login", messages=[_("Your account has been disabled.")])])
+
+        user = authenticate(username=user.username, password=input.password)
+        if user is None:
+            return LoginAccount(errors=[ErrorType(field="password", messages=[_("Incorrect password.")])])
 
         payload = jwt_settings.JWT_PAYLOAD_HANDLER(user, info.context)
         token = jwt_settings.JWT_ENCODE_HANDLER(payload, info.context)

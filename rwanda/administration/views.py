@@ -187,6 +187,7 @@ class AccountDatatableView(BaseDatatableView):
         'username',
         'email',
         'phone_number',
+        'is_active',
         'created_at',
         'data',
     ]
@@ -194,7 +195,14 @@ class AccountDatatableView(BaseDatatableView):
     def render_column(self, row, column):
         row: User
 
-        if column == "created_at":
+        if column == "is_active":
+            class_name = 'warning'
+            if row.is_active:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.is_active_display)
+        elif column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
         elif column == "data":
             return UserSerializer(row).data

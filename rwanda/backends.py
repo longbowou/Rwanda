@@ -1,4 +1,3 @@
-from django.core import signing
 from django.core.signing import Signer
 from graphql_jwt.shortcuts import get_user_by_token
 from graphql_jwt.utils import get_credentials
@@ -16,7 +15,7 @@ class JSONWebTokenBackend:
             token = Signer().unsign(token)
             if token is not None:
                 return get_user_by_token(token, request)
-        except signing.BadSignature:
+        except Exception:
             pass
 
         return None

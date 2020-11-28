@@ -7,6 +7,8 @@ class UserInterface(graphene.Interface):
     username = graphene.String(required=True)
     email = graphene.String(required=True)
     is_online = graphene.Boolean(required=True)
+    is_active = graphene.Boolean(required=True)
+    is_active_display = graphene.String(required=True)
     last_login = graphene.String()
     first_name = graphene.String()
     last_name = graphene.String()
@@ -58,3 +60,13 @@ class UserInterface(graphene.Interface):
     def resolve_image_url(cls, info):
         cls: Account
         return cls.user.image_url
+
+    @staticmethod
+    def resolve_is_active(cls, info):
+        cls: Account
+        return cls.user.is_active
+
+    @staticmethod
+    def resolve_is_active_display(cls, info):
+        cls: Account
+        return cls.user.is_active_display

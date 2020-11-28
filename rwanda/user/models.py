@@ -9,6 +9,7 @@ from django.db import models
 from django.db.models import Sum
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
@@ -19,6 +20,7 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def disconnect(self):
+        self.refresh_from_db()
         self.is_online = False
         self.last_login = timezone.now()
         self.save()
@@ -66,6 +68,13 @@ class User(AbstractUser):
             return settings.BASE_URL + self.image.url
         except Exception:
             return None
+
+    @property
+    def is_active_display(self):
+        if self.is_active:
+            return _('Yes')
+
+        return _('No')
 
 
 class Admin(models.Model):
