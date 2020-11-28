@@ -416,7 +416,7 @@ class ProcessRefund(graphene.Mutation):
         refund.save()
 
         return ProcessRefund(
-            result=_('Refund has been initiated by CINETPAY side. Please waite for the their confirmation.'))
+            result=_('Refund has been initiated at CINETPAY side. Please wait for the their confirmation.'))
 
 
 class UpdateParameter(AdminDjangoModelMutation):
