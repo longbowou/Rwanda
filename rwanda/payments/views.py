@@ -14,6 +14,9 @@ from rwanda.payments.utils import check_status
 
 
 class PaymentView(View):
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({"message": "Ok"}, safe=False)
+
     @transaction.atomic
     def post(self, request, *args, **kwargs):
         prefix = get_random_string(5)
