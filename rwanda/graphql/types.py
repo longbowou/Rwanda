@@ -95,6 +95,7 @@ class ServiceCommentType(DjangoObjectType):
 
 class ServiceType(DjangoObjectType):
     delay_display = graphene.String(source="delay_display", required=True)
+    published_display = graphene.String(source="published_display", required=True)
     status = graphene.String(source="status_display", required=True)
     options_count = graphene.Int(source="options_count", required=True)
     options_count_display = graphene.String(source="options_count_display", required=True)
