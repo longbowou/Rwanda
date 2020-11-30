@@ -19,7 +19,7 @@ from rwanda.graphql.purchase.operations import cancel_service_purchase, \
     approve_service_purchase
 from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, LitigationType, AuthType, RefundWayType, \
-    ParameterType, UserType
+    ParameterType, UserType, RefundType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money, add_contact
 from rwanda.purchase.models import ServicePurchase, Litigation
@@ -434,6 +434,22 @@ class UpdateAccount(AdminDjangoModelMutation):
         only_fields = ('is_active',)
 
 
+class RefuseRefund(AdminDjangoModelMutation):
+    class Meta:
+        model_type = RefundType
+        for_update = True
+        only_fields = ('refused_reason',)
+        custom_input_fields = {"refused_reason": graphene.String(required=True)}
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        if form.instance.cannot_be_refused:
+            return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
+
+        refund: Refund = form.instance
+        refund.set_as_refused()
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -452,6 +468,7 @@ class AdminMutations(graphene.ObjectType):
     handle_litigation = HandleLitigation.Field()
 
     process_refund = ProcessRefund.Field()
+    refuse_refund = RefuseRefund.Field()
 
     create_refund_way = CreateRefundWay.Field()
     update_refund_way = UpdateRefundWay.Field()

@@ -50,6 +50,8 @@ class ServiceOptionSerializer(serializers.ModelSerializer):
 
 class RefundSerializer(serializers.ModelSerializer):
     can_be_processed = serializers.BooleanField()
+    can_be_refused = serializers.BooleanField()
+    amount_display = serializers.CharField()
 
     class Meta:
         model = Refund

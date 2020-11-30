@@ -1,5 +1,6 @@
 import uuid
 
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -42,10 +43,10 @@ class Refund(models.Model):
     STATUS_INITIATED = "INITIATED"
     STATUS_IN_PROGRESS = "IN_PROGRESS"
     STATUS_PROCESSED = "PROCESSED"
-    STATUS_CANCELED = "CANCELED"
+    STATUS_REFUSED = "REFUSED"
     status = models.CharField(max_length=255, default=STATUS_INITIATED)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
-    canceled_reason = models.TextField(null=True, blank=True)
+    refused_reason = models.TextField(null=True, blank=True)
     payment = models.OneToOneField(Payment, on_delete=models.CASCADE, null=True, blank=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     refund_way = models.ForeignKey(RefundWay, on_delete=models.CASCADE, null=True, blank=True)
@@ -63,8 +64,8 @@ class Refund(models.Model):
         return self.status == self.STATUS_PROCESSED
 
     @property
-    def canceled(self):
-        return self.status == self.STATUS_CANCELED
+    def refused(self):
+        return self.status == self.STATUS_REFUSED
 
     @property
     def in_progress(self):
@@ -78,15 +79,26 @@ class Refund(models.Model):
         if self.in_progress:
             return _('In Progress')
 
+        if self.refused:
+            return _('Refused')
+
         return _("Initiated")
 
     @property
-    def can_be_processed(self):
-        return self.initiated
+    def amount_display(self):
+        return intcomma(self.amount)
 
     @property
-    def can_be_canceled(self):
-        return self.initiated or self.in_progress
+    def can_be_processed(self):
+        return self.initiated or self.payment is not None and self.payment.canceled
+
+    @property
+    def can_be_refused(self):
+        return self.initiated or self.payment is not None and self.payment.canceled
+
+    @property
+    def cannot_be_refused(self):
+        return not self.can_be_refused
 
     def set_as_in_progress(self):
         self.status = self.STATUS_IN_PROGRESS
@@ -94,6 +106,5 @@ class Refund(models.Model):
     def set_as_processed(self):
         self.status = self.STATUS_PROCESSED
 
-    def set_as_canceled(self, canceled_reason):
-        self.canceled_reason = canceled_reason
-        self.status = self.STATUS_CANCELED
+    def set_as_refused(self):
+        self.status = self.STATUS_REFUSED

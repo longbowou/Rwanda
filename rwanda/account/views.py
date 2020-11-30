@@ -71,11 +71,16 @@ class RefundsDatatableView(BaseDatatableView):
             if row.processed:
                 class_name = 'success'
 
-            if row.canceled:
+            if row.refused:
                 class_name = 'danger'
 
-            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+            html = '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                 .format(class_name, row.status_display)
+
+            if row.refused:
+                html += '<br> <span class="text-muted">{}</span>'.format(row.refused_reason)
+
+            return html
         elif column == "created_at":
             return date(row.created_at) + ' ' + time_filter(row.created_at)
         else:
