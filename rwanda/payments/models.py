@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from rwanda.user.models import Account
 
@@ -23,8 +24,18 @@ class Payment(models.Model):
     cel_phone_num = models.TextField(null=True, blank=True)
     cpm_result = models.TextField(null=True, blank=True)
     cpm_trans_status = models.TextField(null=True, blank=True)
-    refund = models.ForeignKey("account.Refund", on_delete=models.CASCADE, null=True, blank=True)
+    comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def status_display(self):
+        if self.confirmed:
+            return _('Confirmed')
+
+        if self.canceled:
+            return _('Canceled')
+
+        return _("Initiated")
 
     @property
     def initiated(self):

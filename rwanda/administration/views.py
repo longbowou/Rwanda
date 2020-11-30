@@ -110,6 +110,7 @@ class RefundsDatatableView(AccountRefundsDatatableView):
     columns = [
         'amount',
         'status',
+        'payment__status',
         'refund_way',
         'phone_number',
         'created_at',
@@ -121,6 +122,17 @@ class RefundsDatatableView(AccountRefundsDatatableView):
 
         if column == "data":
             return RefundSerializer(row).data
+        elif column == "payment__status":
+            if row.payment is not None:
+                class_name = 'dark'
+                if row.payment.confirmed:
+                    class_name = 'success'
+
+                if row.payment.canceled:
+                    class_name = 'danger'
+
+                return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                    .format(class_name, row.payment.status_display)
         else:
             return super(RefundsDatatableView, self).render_column(row, column)
 

@@ -405,13 +405,14 @@ class ProcessRefund(graphene.Mutation):
         if not add_contact(token, refund):
             return ProcessRefund(error=_('Internal error. Please try again later.'))
 
-        payment = Payment(amount=refund.amount, account=refund.account, type=Payment.TYPE_OUTGOING, refund=refund)
+        payment = Payment(amount=refund.amount, account=refund.account, type=Payment.TYPE_OUTGOING)
         payment.save()
 
         succeed, message = transfer_money(token, refund, payment)
         if not succeed:
             return ProcessRefund(error=message)
 
+        refund.payment = payment
         refund.set_as_in_progress()
         refund.save()
 

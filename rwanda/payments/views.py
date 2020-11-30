@@ -63,15 +63,20 @@ class PaymentView(View):
                     return
 
                 if request.POST['treatment_status'] == 'VAL':
-                    payment.payment_method = request.POST['operator']
                     payment.set_as_confirmed()
 
                     debit_account(payment.account, payment.amount, Operation.DESC_DEBIT_FOR_REFUND)
+
+                    refund = payment.refund
+                    refund.set_as_processed()
+                    refund.save()
                 else:
                     payment.set_as_canceled()
 
                 payment.cpm_payid = request.POST['transaction_id']
                 payment.cpm_result = request.POST['treatment_status']
+                payment.payment_method = request.POST['operator'] if 'operator' in request.POST['operator'] else None
+                payment.comment = request.POST['comment'] if 'comment' in request.POST['comment'] else None
                 payment.save()
 
         return JsonResponse({"message": "Ok"}, safe=False)

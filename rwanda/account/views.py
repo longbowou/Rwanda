@@ -71,6 +71,9 @@ class RefundsDatatableView(BaseDatatableView):
             if row.processed:
                 class_name = 'success'
 
+            if row.canceled:
+                class_name = 'danger'
+
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                 .format(class_name, row.status_display)
         elif column == "created_at":
