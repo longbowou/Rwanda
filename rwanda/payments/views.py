@@ -75,8 +75,8 @@ class PaymentView(View):
 
                 payment.cpm_payid = request.POST['transaction_id']
                 payment.cpm_result = request.POST['treatment_status']
-                payment.payment_method = request.POST['operator'] if 'operator' in request.POST['operator'] else None
-                payment.comment = request.POST['comment'] if 'comment' in request.POST['comment'] else None
+                payment.payment_method = request.POST['operator'] if 'operator' in request.POST else None
+                payment.comment = request.POST['comment'] if 'comment' in request.POST else None
                 payment.save()
 
         return JsonResponse({"message": "Ok"}, safe=False)
