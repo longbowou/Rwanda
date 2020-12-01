@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
@@ -35,6 +36,7 @@ class Service(models.Model):
     published = models.BooleanField(default=False)
     service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    accepted_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     service_options_count = None
@@ -131,6 +133,7 @@ class Service(models.Model):
 
     def set_as_accepted(self):
         self.status = self.STATUS_ACCEPTED
+        self.accepted_at = datetime.today()
 
     def set_as_submitted_for_approval(self):
         self.status = self.STATUS_SUBMITTED_FOR_APPROVAL

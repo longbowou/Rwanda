@@ -13,8 +13,8 @@ def param_commission():
     return Parameter.objects.filter(label=Parameter.COMMISSION).first().value
 
 
-def param_service_purchase_cancellation_delay():
-    return Parameter.objects.filter(label=Parameter.SERVICE_PURCHASE_CANCELLATION_DELAY).first().value
+def param_home_max_page_size():
+    return int(Parameter.objects.filter(label=Parameter.HOME_PAGE_MAX_SIZE).first().value)
 
 
 def param_cinetpay_password():

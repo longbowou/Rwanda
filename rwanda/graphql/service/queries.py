@@ -3,28 +3,20 @@ from datetime import datetime, timedelta
 import graphene
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
-from graphene_django_extras import DjangoFilterPaginateListField, LimitOffsetGraphqlPagination, DjangoFilterListField
+from graphene_django_extras import DjangoFilterListField
 
-from rwanda.administration.utils import param_base_price, param_commission
+from rwanda.administration.utils import param_base_price, param_commission, param_home_max_page_size
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceOptionType, ServiceCategoryType
 from rwanda.service.models import Service, ServiceOption, ServiceCategory
 
 
-class ServiceFilterPaginateListField(DjangoFilterPaginateListField):
-    def get_queryset(self, manager, info, **kwargs):
-        query_set = super().get_queryset(manager, info, **kwargs)
-        return query_set.filter(published=True, status=Service.STATUS_ACCEPTED)
-
-
 class ServiceQueries(graphene.ObjectType):
-    services = ServiceFilterPaginateListField(ServiceType,
-                                              pagination=LimitOffsetGraphqlPagination(default_limit=5,
-                                                                                      ordering="-created_at"))
+    services = graphene.List(ServiceType)
     service_categories = DjangoFilterListField(ServiceCategoryType)
-    service_category = graphene.Field(ServiceCategoryType, required=True, id=graphene.UUID(required=True))
-    service = graphene.Field(ServiceType, required=True, id=graphene.UUID(required=True))
-    service_order_preview = graphene.Field(ServiceOrderType, required=True, service=graphene.UUID(required=True),
+    service_category = graphene.Field(ServiceCategoryType, id=graphene.UUID(required=True))
+    service = graphene.Field(ServiceType, id=graphene.UUID(required=True))
+    service_order_preview = graphene.Field(ServiceOrderType, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
     service_options = DjangoFilterListField(ServiceOptionType)
     service_option = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
@@ -34,6 +26,10 @@ class ServiceQueries(graphene.ObjectType):
 
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)
+
+    def resolve_services(self, info, *args, **kwargs):
+        return Service.objects.filter(published=True, status=Service.STATUS_ACCEPTED) \
+                   .order_by("-accepted_at")[: param_home_max_page_size()]
 
     def resolve_service_category(self, info, id):
         return ServiceCategory.objects.get(pk=id)
