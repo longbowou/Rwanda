@@ -23,7 +23,7 @@ from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, Li
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money, add_contact
 from rwanda.purchase.models import ServicePurchase, Litigation
-from rwanda.service.models import Service
+from rwanda.service.models import Service, ServiceCategory
 from rwanda.user.models import User, Admin
 
 
@@ -161,12 +161,30 @@ class UpdateAdminProfile(graphene.Mutation):
 class CreateServiceCategory(AdminDjangoModelMutation):
     class Meta:
         model_type = ServiceCategoryType
+        exclude_fields = ('index',)
+
+    @classmethod
+    def pre_save(cls, info, old_obj, form, input):
+        index = 0
+        category = ServiceCategory.objects.order_by('-index').first()
+        if category is not None:
+            index = category.index + 1
+
+        form.instance.index = index
 
 
 class UpdateServiceCategory(AdminDjangoModelMutation):
     class Meta:
         model_type = ServiceCategoryType
+        exclude_fields = ('index',)
         for_update = True
+
+
+class PublishUnPublishService(AdminDjangoModelMutation):
+    class Meta:
+        model_type = ServiceType
+        for_update = True
+        only_fields = ("published_by_admin",)
 
 
 class DeleteServiceCategory(AdminDjangoModelDeleteMutation):
@@ -450,6 +468,27 @@ class RefuseRefund(AdminDjangoModelMutation):
         refund.set_as_refused()
 
 
+class SortedServiceCategoryInputType(graphene.InputObjectType):
+    id = graphene.UUID(required=True)
+    index = graphene.Int(required=True)
+
+
+class SortServiceCategories(graphene.Mutation):
+    class Arguments:
+        sorted = graphene.List(SortedServiceCategoryInputType, required=True)
+
+    is_sorted = graphene.Boolean()
+
+    @admin_required
+    def mutate(self, info, sorted):
+        for sorted_service_category in sorted:
+            category = ServiceCategory.objects.get(pk=sorted_service_category.id)
+            category.index = sorted_service_category.index
+            category.save()
+
+        return SortServiceCategories(is_sorted=True)
+
+
 class AdminMutations(graphene.ObjectType):
     login = LoginAdmin.Field()
     update_admin_profile = UpdateAdminProfile.Field()
@@ -477,3 +516,7 @@ class AdminMutations(graphene.ObjectType):
     update_parameter = UpdateParameter.Field()
 
     update_account = UpdateAccount.Field()
+
+    publish_un_publish_service = PublishUnPublishService.Field()
+
+    sort_service_categories = SortServiceCategories.Field()

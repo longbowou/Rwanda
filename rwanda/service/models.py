@@ -14,10 +14,19 @@ class ServiceCategory(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     label = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True, null=True)
+    index = models.IntegerField(default=0)
+    published = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.label
+
+    @property
+    def published_display(self):
+        if self.published:
+            return _('Yes')
+
+        return _('No')
 
 
 class Service(models.Model):
@@ -34,6 +43,7 @@ class Service(models.Model):
     delay = models.PositiveBigIntegerField(default=0)
     file = models.FileField(blank=True, null=True, upload_to="services/")
     published = models.BooleanField(default=False)
+    published_by_admin = models.BooleanField(default=True)
     service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     accepted_at = models.DateTimeField(blank=True, null=True)

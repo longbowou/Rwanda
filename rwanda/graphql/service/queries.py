@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import graphene
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.template.defaultfilters import date as date_filter
-from graphene_django_extras import DjangoFilterListField
 
 from rwanda.administration.utils import param_base_price, param_commission, param_home_max_page_size
 from rwanda.graphql.decorators import account_required
@@ -13,26 +12,31 @@ from rwanda.service.models import Service, ServiceOption, ServiceCategory
 
 class ServiceQueries(graphene.ObjectType):
     services = graphene.List(ServiceType)
-    service_categories = DjangoFilterListField(ServiceCategoryType)
-    service_category = graphene.Field(ServiceCategoryType, id=graphene.UUID(required=True))
     service = graphene.Field(ServiceType, id=graphene.UUID(required=True))
+    service_categories = graphene.List(ServiceCategoryType)
+    service_category = graphene.Field(ServiceCategoryType, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
-    service_options = DjangoFilterListField(ServiceOptionType)
     service_option = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
 
     def resolve_service_option(self, info, id):
         return ServiceOption.objects.filter(pk=id).first()
 
+    def resolve_service_categories(self, info):
+        return ServiceCategory.objects.order_by("index").filter(published=True)
+
+    def resolve_service_category(self, info, id):
+        return ServiceCategory.objects.get(pk=id)
+
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)
 
     def resolve_services(self, info, *args, **kwargs):
-        return Service.objects.filter(published=True, status=Service.STATUS_ACCEPTED) \
+        return Service.objects.filter(
+            published=True,
+            published_by_admin=True,
+            status=Service.STATUS_ACCEPTED) \
                    .order_by("-accepted_at")[: param_home_max_page_size()]
-
-    def resolve_service_category(self, info, id):
-        return ServiceCategory.objects.get(pk=id)
 
     @account_required
     def resolve_service_order_preview(self, info, service, service_options):

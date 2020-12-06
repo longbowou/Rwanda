@@ -88,6 +88,8 @@ class AccountServicesDatatableView(ServicesDatatableView):
 class ServiceCategoriesDatatableView(BaseDatatableView):
     columns = [
         'label',
+        'published',
+        'index',
         'created_at',
         'data'
     ]
@@ -97,6 +99,13 @@ class ServiceCategoriesDatatableView(BaseDatatableView):
 
         if column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+        elif column == "published":
+            class_name = 'warning'
+            if row.published:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.published_display)
         elif column == "data":
             return ServiceCategorySerializer(row).data
         else:
