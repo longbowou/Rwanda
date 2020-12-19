@@ -122,6 +122,7 @@ class RefundsDatatableView(AccountRefundsDatatableView):
         'payment__status',
         'refund_way',
         'phone_number',
+        'account',
         'created_at',
         'data',
     ]
@@ -129,8 +130,8 @@ class RefundsDatatableView(AccountRefundsDatatableView):
     def render_column(self, row, column):
         row: Refund
 
-        if column == "data":
-            return RefundSerializer(row).data
+        if column == "account":
+            return str(row.account)
         elif column == "payment__status":
             if row.payment is not None:
                 class_name = 'dark'
@@ -142,11 +143,13 @@ class RefundsDatatableView(AccountRefundsDatatableView):
 
                 return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                     .format(class_name, row.payment.status_display)
+        elif column == "data":
+            return RefundSerializer(row).data
         else:
             return super(RefundsDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Refund.objects.prefetch_related("refund_way")
+        return Refund.objects.prefetch_related("refund_way", "account")
 
 
 class RefundWaysDatatableView(BaseDatatableView):

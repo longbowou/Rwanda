@@ -93,7 +93,7 @@ class Account(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.username
+        return f"{self.user.first_name} {self.user.last_name} ({self.user.email})"
 
     @property
     def created_at_display(self):
