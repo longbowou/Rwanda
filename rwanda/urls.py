@@ -7,6 +7,7 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
 
+from rwanda.administration.views import VerifyAccountEmailPreviewView
 from rwanda.decorators import account_required, admin_required
 from rwanda.graphql.schemas.account import schema
 from rwanda.graphql.schemas.admin import admin_schema
@@ -18,6 +19,8 @@ urlpatterns = [
     path('account/', decorator_include(account_required, include("rwanda.account.urls"))),
     path('administration/', decorator_include(admin_required, include("rwanda.administration.urls"))),
     path('payments/', include("rwanda.payments.urls")),
+
+    path('email/verify-account', VerifyAccountEmailPreviewView.as_view()),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

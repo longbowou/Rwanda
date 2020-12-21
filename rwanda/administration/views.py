@@ -1,8 +1,10 @@
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models import Q
 from django.template.defaultfilters import date as date_filter, time as time_filter
+from django.views.generic import TemplateView
 from django_datatables_view.base_datatable_view import BaseDatatableView
 
+from rwanda.account.mails import send_verification_mail
 from rwanda.account.models import Refund, RefundWay
 from rwanda.account.serializers import RefundSerializer, RefundWaySerializer, ParameterSerializer, UserSerializer
 from rwanda.account.views import ServicesDatatableView as AccountServicesDatatableView, \
@@ -14,6 +16,23 @@ from rwanda.administration.utils import param_currency
 from rwanda.purchase.models import Litigation
 from rwanda.service.models import Service, ServiceCategory
 from rwanda.user.models import User
+
+
+class VerifyAccountEmailPreviewView(TemplateView):
+    template_name = "emails/very_account.html"
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        user = User.objects.get(email='blandedaniel@gmail.com')
+        activate_url = 'https://mdtaf.com/#/activate/' + str(user.id)
+
+        data["activate_url"] = activate_url
+        data["user"] = user
+
+        send_verification_mail(user)
+
+        return data
 
 
 class DisputesDatatableView(BaseDatatableView):

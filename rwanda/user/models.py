@@ -15,6 +15,8 @@ from django.utils.translation import gettext_lazy as _
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     is_online = models.BooleanField(default=False)
+    email_verified = models.BooleanField(default=False)
+    email_verification_expire_at = models.DateTimeField(blank=True, null=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
     image = models.FileField(blank=True, null=True, upload_to="accounts/")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,6 +26,17 @@ class User(AbstractUser):
         self.is_online = False
         self.last_login = timezone.now()
         self.save()
+
+    @property
+    def email_verification_expired(self):
+        if self.email_verification_expire_at is not None and self.email_verification_expire_at > timezone.now():
+            return False
+
+        return True
+
+    @property
+    def email_verification_not_expired(self):
+        return not self.email_verification_expired
 
     @property
     def last_login_display(self):

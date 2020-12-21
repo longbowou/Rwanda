@@ -96,6 +96,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'rwanda.context_processors.base_url',
+                'rwanda.context_processors.today',
             ],
         },
     },
@@ -189,9 +191,9 @@ BASE_URL = 'http://localhost:8000'
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'static'
+# STATIC_ROOT = 'static'
 STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, "static"),
+    os.path.join(BASE_DIR, "static"),
 ]
 
 MEDIA_URL = '/media/'
@@ -262,3 +264,11 @@ CINETPAY_ADD_CONTACT_URL = "https://client.cinetpay.com/v1/transfer/contact"
 CINETPAY_API_KEY = "3281856345e6c13a1a91b61.98428115"
 CINETPAY_SITE_ID = 414425
 CINETPAY_CURRENCY = "CFA"
+
+# EMAIL CONFIGS
+DEFAULT_FROM_EMAIL = "info@mdtaf.com"
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = "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"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
