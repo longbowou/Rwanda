@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-12-21 23:01+0000\n"
+"POT-Creation-Date: 2020-12-22 00:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,9 +18,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: rwanda/account/mails.py:7 templates/emails/very_account.html:385
-msgid "Verify Your Email Account"
-msgstr ""
+#: rwanda/account/mails.py:98 templates/emails/very_account.html:385
+msgid "Activate your account"
+msgstr "Activez votre compte"
 
 #: rwanda/account/models.py:35 rwanda/purchase/models.py:616
 #: rwanda/service/models.py:27 rwanda/service/models.py:137
@@ -87,7 +87,9 @@ msgstr "Nom d'utilisateur ou e-mail incorrect."
 msgid ""
 "Please check your mail to activate your account. You can resend a "
 "verification mail."
-msgstr "Veuillez vérifier votre messagerie pour activer votre compte. Vous pouvez renvoyer un e-mail de vérification."
+msgstr ""
+"Veuillez vérifier votre messagerie pour activer votre compte. Vous pouvez "
+"renvoyer un e-mail de vérification."
 
 #: rwanda/graphql/account/mutations.py:121 rwanda/graphql/admin/mutations.py:49
 msgid "Your account has been disabled."
@@ -105,7 +107,9 @@ msgstr "Votre compte a été activé. Vous pouvez maintenant vous connecter."
 msgid ""
 "Your verification link expired. Please try login and resend a new "
 "verification mail."
-msgstr "Votre lien de vérification a expiré. Veuillez essayer de vous connecter et renvoyer un nouveau courrier de vérification."
+msgstr ""
+"Votre lien de vérification a expiré. Veuillez essayer de vous connecter et "
+"renvoyer un nouveau courrier de vérification."
 
 #: rwanda/graphql/account/mutations.py:197 rwanda/graphql/admin/mutations.py:87
 msgid "Bad current password."
@@ -395,9 +399,11 @@ msgstr "Nous espérons que cet e-mail vous trouve en parfait santé"
 
 #: templates/emails/very_account.html:406
 msgid ""
-"Thank you for your registration to activate your account please click on "
-"the button activate bellow."
-msgstr "Merci de votre inscription pour activer votre compte veuillez cliquer sur le bouton activer ci-dessous."
+"Thank you for your registration to activate your account please click on the "
+"button activate bellow."
+msgstr ""
+"Merci de votre inscription pour activer votre compte veuillez cliquer sur le "
+"bouton activer ci-dessous."
 
 #: templates/emails/very_account.html:431
 msgid "Activate"
