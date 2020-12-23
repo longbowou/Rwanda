@@ -90,11 +90,11 @@ class Refund(models.Model):
 
     @property
     def can_be_processed(self):
-        return self.initiated or self.in_progress
+        return self.initiated or self.payment is not None and self.payment.canceled
 
     @property
     def can_be_refused(self):
-        return self.initiated or self.in_progress
+        return self.initiated or self.payment is not None and self.payment.canceled
 
     @property
     def cannot_be_refused(self):

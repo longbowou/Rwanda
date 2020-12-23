@@ -105,7 +105,7 @@ class ServicesDatatableView(BaseDatatableView):
 
         if column == "created_at":
             return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
-        elif column == "category":
+        elif column == "service_category__label":
             return row.service_category.label
         elif column == "status":
             class_name = 'dark'
