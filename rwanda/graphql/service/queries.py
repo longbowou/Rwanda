@@ -6,7 +6,7 @@ from django.template.defaultfilters import date as date_filter
 
 from rwanda.administration.utils import param_base_price, param_commission, param_home_max_page_size
 from rwanda.graphql.decorators import account_required
-from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceOptionType, ServiceCategoryType
+from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceCategoryType
 from rwanda.service.models import Service, ServiceOption, ServiceCategory
 
 
@@ -15,18 +15,22 @@ class ServiceQueries(graphene.ObjectType):
     service = graphene.Field(ServiceType, id=graphene.UUID(required=True))
     service_categories = graphene.List(ServiceCategoryType)
     service_category = graphene.Field(ServiceCategoryType, id=graphene.UUID(required=True))
+    service_category_services = graphene.List(ServiceType, id=graphene.UUID(required=True))
     service_order_preview = graphene.Field(ServiceOrderType, service=graphene.UUID(required=True),
                                            service_options=graphene.List(graphene.NonNull(graphene.UUID)))
-    service_option = graphene.Field(ServiceOptionType, id=graphene.UUID(required=True))
-
-    def resolve_service_option(self, info, id):
-        return ServiceOption.objects.filter(pk=id).first()
 
     def resolve_service_categories(self, info):
         return ServiceCategory.objects.order_by("index").filter(published=True)
 
     def resolve_service_category(self, info, id):
         return ServiceCategory.objects.get(pk=id)
+
+    def resolve_service_category_services(self, info, id):
+        return Service.objects.filter(
+            service_category__id=id,
+            published=True,
+            published_by_admin=True,
+            status=Service.STATUS_ACCEPTED).order_by("-accepted_at")
 
     def resolve_service(self, info, id):
         return Service.objects.get(pk=id)
