@@ -93,7 +93,7 @@ class RefundsDatatableView(BaseDatatableView):
 class ServicesDatatableView(BaseDatatableView):
     columns = [
         'title',
-        'category',
+        'service_category__label',
         'status',
         'published',
         'created_at',
