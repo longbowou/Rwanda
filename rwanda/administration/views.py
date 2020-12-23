@@ -81,6 +81,7 @@ class ServicesDatatableView(AccountServicesDatatableView):
         'title',
         'category',
         'status',
+        'published_by_admin',
         'account',
         'created_at',
         'data'
@@ -91,6 +92,13 @@ class ServicesDatatableView(AccountServicesDatatableView):
 
         if column == "account":
             return row.account.user.first_name
+        elif column == "published_by_admin":
+            class_name = 'warning'
+            if row.published_by_admin:
+                class_name = 'success'
+
+            return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
+                .format(class_name, row.published_by_admin_display)
         else:
             return super(ServicesDatatableView, self).render_column(row, column)
 

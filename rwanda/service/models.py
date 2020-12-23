@@ -138,6 +138,13 @@ class Service(models.Model):
 
         return _('No')
 
+    @property
+    def published_by_admin_display(self):
+        if self.published_by_admin:
+            return _('Yes')
+
+        return _('No')
+
     def set_as_rejected(self):
         self.status = self.STATUS_REJECTED
 

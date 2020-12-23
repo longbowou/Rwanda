@@ -223,6 +223,11 @@ class RejectService(AdminDjangoModelMutation):
         service.set_as_rejected()
 
 
+class DeleteService(AdminDjangoModelDeleteMutation):
+    class Meta:
+        model_type = ServiceType
+
+
 class AdminInput(UserInput):
     is_superuser = graphene.Boolean()
     is_active = graphene.Boolean()
@@ -504,6 +509,8 @@ class AdminMutations(graphene.ObjectType):
 
     accept_service = AcceptService.Field()
     reject_service = RejectService.Field()
+    delete_service = DeleteService.Field()
+
     handle_litigation = HandleLitigation.Field()
 
     process_refund = ProcessRefund.Field()
