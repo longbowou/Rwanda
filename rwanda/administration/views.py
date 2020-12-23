@@ -66,7 +66,7 @@ class DisputesDatatableView(BaseDatatableView):
                 return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                     .format(class_name, row.decision_display)
         elif column == "account":
-            return row.account.user.username
+            return str(row.account)
         elif column == "data":
             return LitigationSerializer(row).data
         else:
@@ -91,7 +91,7 @@ class ServicesDatatableView(AccountServicesDatatableView):
         row: Service
 
         if column == "account":
-            return row.account.user.first_name
+            return str(row.account)
         elif column == "published_by_admin":
             class_name = 'warning'
             if row.published_by_admin:
