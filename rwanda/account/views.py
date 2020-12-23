@@ -82,7 +82,7 @@ class RefundsDatatableView(BaseDatatableView):
 
             return html
         elif column == "created_at":
-            return date(row.created_at) + ' ' + time_filter(row.created_at)
+            return date(row.created_at) + '<br>' + time_filter(row.created_at)
         else:
             return super(RefundsDatatableView, self).render_column(row, column)
 
@@ -104,7 +104,7 @@ class ServicesDatatableView(BaseDatatableView):
         row: Service
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "service_category__label":
             return row.service_category.label
         elif column == "status":
@@ -180,7 +180,7 @@ class PurchasesDatatableView(BaseDatatableView):
         elif column == "price":
             return row.price_display + " " + self.currency
         elif column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "deadline_at":
             return date_filter(row.deadline_at)
         elif column in ["data", 'number']:
@@ -217,7 +217,7 @@ class OrderDeliverablesDatatableView(BaseDatatableView):
         row: Deliverable
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "annotate_files_count":
             return intcomma(row.annotate_files_count)
         elif column == "version":
@@ -267,7 +267,7 @@ class DeliverableFilesDatatableView(BaseDatatableView):
         row: DeliverableFile
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "size":
             return row.size_display
         elif column == "data":
@@ -417,7 +417,7 @@ class ServiceOptionsDatatableView(BaseDatatableView):
         row: ServiceOption
 
         if column == "created_at":
-            return date_filter(row.created_at) + " " + time_filter(row.created_at)
+            return date_filter(row.created_at) + "<br>" + time_filter(row.created_at)
         elif column == "delay":
             return row.delay_display
         elif column == "price":

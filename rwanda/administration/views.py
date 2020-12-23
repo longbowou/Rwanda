@@ -49,7 +49,7 @@ class DisputesDatatableView(BaseDatatableView):
         row: Litigation
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "status":
             class_name = 'dark'
             if row.handled:
@@ -125,7 +125,7 @@ class ServiceCategoriesDatatableView(BaseDatatableView):
         row: ServiceCategory
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "published":
             class_name = 'warning'
             if row.published:
@@ -221,7 +221,7 @@ class ParametersDatatableView(BaseDatatableView):
         row: Parameter
 
         if column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "data":
             return ParameterSerializer(row).data
         else:
@@ -254,7 +254,7 @@ class AccountDatatableView(BaseDatatableView):
             return '<span style="height: 5px" class="label label-lg font-weight-bold label-inline label-square label-light-{}">{}</span>' \
                 .format(class_name, row.is_active_display)
         elif column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         elif column == "data":
             return UserSerializer(row).data
         else:
@@ -290,7 +290,7 @@ class AccountOperationsDatatableView(BaseDatatableView):
         elif column == "amount":
             return intcomma(row.amount) + " " + self.currency
         elif column == "created_at":
-            return date_filter(row.created_at) + ' ' + time_filter(row.created_at)
+            return date_filter(row.created_at) + '<br>' + time_filter(row.created_at)
         else:
             return super(AccountOperationsDatatableView, self).render_column(row, column)
 
