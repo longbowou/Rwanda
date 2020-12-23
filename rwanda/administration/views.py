@@ -79,7 +79,7 @@ class DisputesDatatableView(BaseDatatableView):
 class ServicesDatatableView(AccountServicesDatatableView):
     columns = [
         'title',
-        'category',
+        'service_category__label',
         'status',
         'published_by_admin',
         'account',
