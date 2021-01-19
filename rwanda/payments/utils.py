@@ -11,7 +11,7 @@ from rwanda.payments.models import Payment
 
 def get_signature(payment: Payment):
     data = {
-        "cpm_amount": payment.amount,
+        "cpm_amount": payment.total_amount,
         "cpm_currency": settings.CINETPAY_CURRENCY,
         "cpm_site_id": settings.CINETPAY_SITE_ID,
         "cpm_trans_id": str(payment.id),
@@ -99,7 +99,6 @@ def transfer_money(token, refund: Refund, payment: Payment):
                     "prefix": refund.refund_way.country_code,
                     "phone": refund.phone_number,
                     "amount": refund.amount,
-                    # "notify_url": "https://backend.mdtaf.com/payments/confirmation",
                     "notify_url": settings.BASE_URL + reverse('payments-confirmation'),
                     "client_transaction_id": str(payment.id),
                 }

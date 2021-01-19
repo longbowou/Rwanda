@@ -2,7 +2,7 @@ import graphene
 import graphql_jwt
 from django.contrib.humanize.templatetags.humanize import intcomma
 
-from rwanda.administration.utils import param_currency, param_base_price
+from rwanda.administration.utils import param_currency, param_base_price, param_deposit_fee
 from rwanda.graphql.account.mutations import AccountMutations
 from rwanda.graphql.account.queries import AccountQueries
 from rwanda.graphql.account.subscriptions import AccountSubscriptions
@@ -23,7 +23,8 @@ class AccountQuery(ServiceQueries, PurchaseQueries, AccountQueries):
     @staticmethod
     def resolve_parameters(self, info):
         return ParametersType(currency=param_currency(),
-                              base_price=intcomma(int(param_base_price())))
+                              base_price=intcomma(param_base_price()),
+                              deposit_fee=param_deposit_fee())
 
     @account_required
     def resolve_payment(self, info, id):

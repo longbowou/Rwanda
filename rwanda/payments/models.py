@@ -9,6 +9,7 @@ from rwanda.user.models import Account
 class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     amount = models.PositiveBigIntegerField()
+    fee = models.PositiveBigIntegerField(default=0)
     TYPE_INCOMING = 'INCOMING'
     TYPE_OUTGOING = 'OUTGOING'
     type = models.CharField(max_length=255, default=TYPE_INCOMING)
@@ -26,6 +27,10 @@ class Payment(models.Model):
     cpm_trans_status = models.TextField(null=True, blank=True)
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def total_amount(self):
+        return self.amount + self.fee
 
     @property
     def status_display(self):

@@ -31,6 +31,7 @@ class AuthType(ObjectType):
 class ParametersType(ObjectType):
     currency = graphene.String(required=True)
     base_price = graphene.String(required=True)
+    deposit_fee = graphene.Float(required=True)
 
 
 class DepositType(DjangoObjectType):

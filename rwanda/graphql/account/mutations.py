@@ -17,6 +17,7 @@ from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
 from rwanda.account.mails import send_verification_mail as send_v_mail
+from rwanda.administration.utils import param_deposit_fee
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account_required, account_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
@@ -234,14 +235,15 @@ class InitiateDeposit(graphene.Mutation):
             return InitiateDeposit(
                 errors=[ErrorType(field='amount', messages=[_("Your amount must be a greater than 200")])])
 
-        payment = Payment(amount=amount, account=info.context.user.account)
+        payment = Payment(amount=amount,
+                          fee=param_deposit_fee() * amount,
+                          account=info.context.user.account)
         payment.save()
-
         payment.signature = get_signature(payment)
         payment.save()
 
         data = {
-            "cpm_amount": payment.amount,
+            "cpm_amount": payment.total_amount,
             "cpm_currency": str(settings.CINETPAY_CURRENCY),
             "cpm_site_id": str(settings.CINETPAY_SITE_ID),
             "cpm_trans_id": str(payment.id),

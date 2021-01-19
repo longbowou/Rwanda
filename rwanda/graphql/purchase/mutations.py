@@ -25,7 +25,7 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
     def pre_save(cls, info, old_obj, form, input):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
 
-        base_price = int(param_base_price())
+        base_price = param_base_price()
         commission = int(param_commission())
 
         service_purchase: ServicePurchase = form.instance

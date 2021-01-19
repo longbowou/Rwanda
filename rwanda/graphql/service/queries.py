@@ -47,7 +47,7 @@ class ServiceQueries(graphene.ObjectType):
         service = Service.objects.get(pk=service)
         service_options = ServiceOption.objects.filter(id__in=service_options, service=service)
 
-        base_price = int(param_base_price())
+        base_price = param_base_price()
         commission = int(param_commission())
 
         total_price = base_price

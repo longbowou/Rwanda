@@ -2,7 +2,11 @@ from rwanda.administration.models import Parameter
 
 
 def param_base_price():
-    return Parameter.objects.filter(label=Parameter.BASE_PRICE).first().value
+    return int(Parameter.objects.filter(label=Parameter.BASE_PRICE).first().value)
+
+
+def param_deposit_fee():
+    return float(Parameter.objects.filter(label=Parameter.DEPOSIT_FEE).first().value)
 
 
 def param_currency():

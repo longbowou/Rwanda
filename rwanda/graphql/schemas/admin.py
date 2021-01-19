@@ -36,7 +36,7 @@ class AdminQuery(AdminQueries):
     @staticmethod
     def resolve_parameters(self, info):
         return ParametersType(currency=param_currency(),
-                              base_price=intcomma(int(param_base_price())))
+                              base_price=intcomma(param_base_price()))
 
 
 class AdminMutation(AdminMutations):
