@@ -58,25 +58,25 @@ def debit_commission(service_purchase, amount, desc):
 
 @transaction.atomic
 def init_service_purchase(service_purchase: ServicePurchase):
-    debit_account(service_purchase.account, service_purchase.total_price, Operation.DESC_DEBIT_FOR_PURCHASE_INIT)
+    debit_account(service_purchase.account, service_purchase.price, Operation.DESC_DEBIT_FOR_PURCHASE_INIT)
 
-    credit_main(service_purchase, service_purchase.price, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
+    credit_main(service_purchase, service_purchase.price_without_commission, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
 
     credit_commission(service_purchase, service_purchase.commission, Operation.DESC_CREDIT_FOR_PURCHASE_INIT)
 
 
 @transaction.atomic
 def approve_service_purchase(service_purchase: ServicePurchase):
-    debit_main(service_purchase, service_purchase.price, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
+    debit_main(service_purchase, service_purchase.price_without_commission, Operation.DESC_DEBIT_FOR_PURCHASE_APPROVED)
 
-    credit_account(service_purchase.service.account, service_purchase.price,
+    credit_account(service_purchase.service.account, service_purchase.price_without_commission,
                    Operation.DESC_CREDIT_FOR_PURCHASE_APPROVED)
 
 
 @transaction.atomic
 def cancel_service_purchase(service_purchase: ServicePurchase):
-    debit_main(service_purchase, service_purchase.price, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
+    debit_main(service_purchase, service_purchase.price_without_commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
 
     debit_commission(service_purchase, service_purchase.commission, Operation.DESC_DEBIT_FOR_PURCHASE_CANCELED)
 
-    credit_account(service_purchase.account, service_purchase.total_price, Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)
+    credit_account(service_purchase.account, service_purchase.price, Operation.DESC_CREDIT_FOR_PURCHASE_CANCELED)

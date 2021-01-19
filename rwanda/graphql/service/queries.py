@@ -48,20 +48,21 @@ class ServiceQueries(graphene.ObjectType):
         service_options = ServiceOption.objects.filter(id__in=service_options, service=service)
 
         base_price = param_base_price()
-        commission = int(param_commission())
 
-        total_price = base_price
+        total_order_price = base_price
         total_delay = service.delay
         for service_option in service_options:
             total_delay += service_option.delay
-            total_price += service_option.price
+            total_order_price += service_option.price
 
-        deadline_at = datetime.today() + timedelta(days=total_delay)
-
-        total_order_price = total_price + commission
         total_order_price_ttc = total_order_price
 
+        commission = total_order_price * param_commission()
+        total_price = total_order_price - commission
+
         cannot_pay_with_wallet = info.context.user.account.balance < total_order_price
+
+        deadline_at = datetime.today() + timedelta(days=total_delay)
 
         total_order_price = intcomma(total_order_price)
         total_order_price_ttc = intcomma(total_order_price_ttc)

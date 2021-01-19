@@ -110,8 +110,8 @@ class ServicePurchase(models.Model):
         return _("Initiated")
 
     @property
-    def total_price(self):
-        return self.price + self.commission
+    def price_without_commission(self):
+        return self.price - self.commission
 
     @property
     def initiated(self):

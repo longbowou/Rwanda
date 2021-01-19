@@ -14,7 +14,7 @@ def param_currency():
 
 
 def param_commission():
-    return Parameter.objects.filter(label=Parameter.COMMISSION).first().value
+    return float(Parameter.objects.filter(label=Parameter.COMMISSION).first().value)
 
 
 def param_home_max_page_size():

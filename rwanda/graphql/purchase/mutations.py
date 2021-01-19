@@ -26,7 +26,6 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
         account = Account.objects.select_for_update().get(pk=info.context.user.account.id)
 
         base_price = param_base_price()
-        commission = int(param_commission())
 
         service_purchase: ServicePurchase = form.instance
         service = service_purchase.service
@@ -37,7 +36,8 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
             price += service_option.price
             delay += service_option.delay
 
-        total_price = price + commission
+        total_price = price
+        commission = price * param_commission()
 
         if account.balance < total_price:
             return cls(
