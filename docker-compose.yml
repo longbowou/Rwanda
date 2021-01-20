@@ -21,6 +21,7 @@ services:
       - postgres
       - pgadmin4
       - redis
+      - worker
 
   pgadmin4:
     container_name: rwanda_pgadmin4
@@ -36,4 +37,15 @@ services:
   redis:
     container_name: rwanda_redis
     image: library/redis:6.0-alpine
+    restart: unless-stopped
+
+  worker:
+    build: .
+    container_name: rwanda_worker
+    command: celery -A rwanda worker --loglevel=info
+    volumes:
+      - ./:/code
+    depends_on:
+      - redis
+      - postgres
     restart: unless-stopped

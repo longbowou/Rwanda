@@ -8,7 +8,18 @@ from django.core.mail import EmailMultiAlternatives, SafeMIMEMultipart
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
+from rwanda.administration.utils import param_currency
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
 from rwanda.settings import BASE_DIR
+from rwanda.user.models import User
+
+base_files = [
+    "static/emails/images/favicon.png",
+    "static/emails/images/facebook2x.png",
+    "static/emails/images/twitter2x.png",
+    "static/emails/images/instagram2x.png",
+    "static/emails/images/youtube2x.png",
+]
 
 
 class EmailMultiRelated(EmailMultiAlternatives):
@@ -94,27 +105,163 @@ class EmailMultiRelated(EmailMultiAlternatives):
         return attachment
 
 
-def send_verification_mail(user):
-    subject = _('Activate your account')
-    activate_url = 'https://mdtaf.com/#/activate/' + str(user.id)
-    body = render_to_string("emails/very_account.html",
-                            {
-                                "activate_url": activate_url,
-                                "user": user
-                            }).strip()
-    msg = EmailMultiRelated(subject, body, to=[user.email])
-    msg.content_subtype = "html"
-
-    for file in [
-        "static/emails/images/favicon.png",
-        "static/emails/images/Thanks.png",
-        "static/emails/images/facebook2x.png",
-        "static/emails/images/twitter2x.png",
-        "static/emails/images/instagram2x.png",
-        "static/emails/images/youtube2x.png",
-    ]:
+def attach_related_file(msg, files):
+    for file in files:
         file = os.path.join(BASE_DIR, file)
         mimetypes.MimeTypes().guess_type(file)
         msg.attach_related_file(file, mimetypes.MimeTypes().guess_type(file)[0])
 
+
+def send_mail(subject, template, data, email, files=None):
+    if files is None:
+        files = base_files
+
+    body = render_to_string(template, data).strip()
+    msg = EmailMultiRelated(subject, body, to=[email])
+    attach_related_file(msg, files)
+    msg.content_subtype = "html"
     msg.send()
+
+
+def send_verification_mail(user: User):
+    send_mail(_('Activate your account'),
+              "mails/very_account.html",
+              {
+                  "activate_url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/activate/' + str(user.id),
+                  "user": user
+              },
+              user.email,
+              base_files + ["static/emails/images/Thanks.png"]
+              )
+
+
+def on_service_purchase_initiated(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(service_purchase.id)}
+
+    send_mail(_("Purchase"),
+              "mails/services/purchases/initiated.html",
+              data,
+              service_purchase.buyer.user.email)
+
+    data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(service_purchase.id)
+    send_mail(_("New order"),
+              "mails/services/orders/initiated.html",
+              data,
+              service_purchase.seller.user.email)
+
+
+def on_service_purchase_accepted_or_refused(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(service_purchase.id)}
+
+    send_mail(_("Purchase accepted") if service_purchase.accepted else _("Purchase refused"),
+              "mails/services/purchases/accepted_or_refused.html",
+              data,
+              service_purchase.buyer.user.email)
+
+
+def on_service_purchase_delivered(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(service_purchase.id)}
+
+    send_mail(_("Purchase delivered"),
+              "mails/services/purchases/delivered.html",
+              data,
+              service_purchase.buyer.user.email)
+
+
+def on_service_purchase_approved(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(service_purchase.id)}
+
+    send_mail(_("Order approved"),
+              "mails/services/purchases/approved.html",
+              data,
+              service_purchase.seller.user.email)
+
+
+def on_service_purchase_canceled(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(service_purchase.id)}
+
+    send_mail(_("Order canceled"),
+              "mails/services/purchases/canceled.html",
+              data,
+              service_purchase.seller.user.email)
+
+
+def on_service_purchase_update_request_initiated(service_purchase_update_request: ServicePurchaseUpdateRequest):
+    data = {"currency": param_currency(),
+            "update_request": service_purchase_update_request,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(
+                service_purchase_update_request.service_purchase.id)}
+
+    send_mail(_("Update requested"),
+              "mails/services/update_requests/initiated.html",
+              data,
+              service_purchase_update_request.service_purchase.seller.user.email)
+
+
+def on_service_purchase_update_request_accepted_or_refused(
+        service_purchase_update_request: ServicePurchaseUpdateRequest):
+    data = {"currency": param_currency(),
+            "update_request": service_purchase_update_request,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(
+                service_purchase_update_request.service_purchase.id)}
+
+    send_mail(_("Update request accepted") if service_purchase_update_request.accepted else _("Update request refused"),
+              "mails/services/update_requests/accepted_or_refused.html",
+              data,
+              service_purchase_update_request.service_purchase.buyer.user.email)
+
+
+def on_service_purchase_update_request_delivered(service_purchase_update_request: ServicePurchaseUpdateRequest):
+    data = {"currency": param_currency(),
+            "update_request": service_purchase_update_request,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(
+                service_purchase_update_request.service_purchase.id)}
+
+    send_mail(_("Update delivered"),
+              "mails/services/update_requests/delivered.html",
+              data,
+              service_purchase_update_request.service_purchase.buyer.user.email)
+
+
+def on_litigation_opened(litigation: Litigation):
+    data = {"currency": param_currency(),
+            "litigation": litigation,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(litigation.service_purchase.id)}
+
+    send_mail(_("Litigation opened"),
+              "mails/services/disputes/opened.html",
+              data,
+              litigation.service_purchase.buyer.user.email)
+
+    data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(litigation.service_purchase.id)
+    send_mail(_("Litigation opened"),
+              "mails/services/disputes/opened.html",
+              data,
+              litigation.service_purchase.seller.user.email)
+
+
+def on_litigation_handled(litigation: Litigation):
+    data = {"currency": param_currency(),
+            "litigation": litigation,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(litigation.service_purchase.id)}
+
+    send_mail(litigation.decision_display,
+              "mails/services/disputes/handled.html",
+              data,
+              litigation.service_purchase.buyer.user.email)
+
+    data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(litigation.service_purchase.id)
+    send_mail(litigation.decision_display,
+              "mails/services/disputes/handled.html",
+              data,
+              litigation.service_purchase.seller.user.email)

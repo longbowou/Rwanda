@@ -53,6 +53,14 @@ class ServicePurchase(models.Model):
         return "#" + str(self.id)[24:].upper()
 
     @property
+    def seller(self):
+        return self.service.account
+
+    @property
+    def buyer(self):
+        return self.account
+
+    @property
     def deadline_at_display(self):
         if self.has_not_been_accepted:
             return None

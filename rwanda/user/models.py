@@ -27,6 +27,9 @@ class User(AbstractUser):
         self.last_login = timezone.now()
         self.save()
 
+    def set_email_verification_expiration(self):
+        self.email_verification_expire_at = timezone.now() + timedelta(hours=24)
+
     @property
     def email_verification_expired(self):
         if self.email_verification_expire_at is not None and self.email_verification_expire_at > timezone.now():

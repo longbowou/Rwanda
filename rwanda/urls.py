@@ -7,7 +7,9 @@ from django.urls import path, include
 from django.views.decorators.csrf import csrf_exempt
 from graphene_django.views import GraphQLView
 
-from rwanda.administration.views import VerifyAccountEmailPreviewView
+from rwanda.administration.views_mails import VerifyAccountMailPreviewView, PurchaseInitiatedMailPreviewView, \
+    PurchaseAcceptedOrRejectedMailPreviewView, OrderInitiatedMailPreviewView, UpdateInitiatedMailPreviewView, \
+    LitigationInitiatedMailPreviewView, LitigationHandledMailPreviewView
 from rwanda.decorators import account_required, admin_required
 from rwanda.graphql.schemas.account import schema
 from rwanda.graphql.schemas.admin import admin_schema
@@ -20,7 +22,13 @@ urlpatterns = [
     path('administration/', decorator_include(admin_required, include("rwanda.administration.urls"))),
     path('payments/', include("rwanda.payments.urls")),
 
-    path('email/verify-account', VerifyAccountEmailPreviewView.as_view()),
+    path('emails/verify-account', VerifyAccountMailPreviewView.as_view()),
+    path('emails/purchases/initiated', PurchaseInitiatedMailPreviewView.as_view()),
+    path('emails/purchases/accepted-or-rejected', PurchaseAcceptedOrRejectedMailPreviewView.as_view()),
+    path('emails/orders/initiated', OrderInitiatedMailPreviewView.as_view()),
+    path('emails/updates/initiated', UpdateInitiatedMailPreviewView.as_view()),
+    path('emails/disputes/initiated', LitigationInitiatedMailPreviewView.as_view()),
+    path('emails/disputes/handeled', LitigationHandledMailPreviewView.as_view()),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

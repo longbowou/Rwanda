@@ -58,10 +58,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'graphene_django',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig',
     'corsheaders',
     'channels',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -186,6 +188,7 @@ LOCALE_PATHS = [
 ]
 
 BASE_URL = 'http://localhost:8000'
+FRONTEND_ACCOUNT_BASE_URL = 'http://localhost:3000'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -272,3 +275,10 @@ EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = "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"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_CACHE_BACKEND = 'django-cache'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"

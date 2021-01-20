@@ -12,6 +12,7 @@ from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
 from rwanda.account.models import Refund
+from rwanda.account.tasks import on_litigation_handled_task
 from rwanda.graphql.auth_base_mutations.admin import AdminDjangoModelDeleteMutation, AdminDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_admin_required, admin_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
@@ -382,6 +383,8 @@ class HandleLitigation(AdminDjangoModelMutation):
         litigation.refresh_from_db()
 
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_litigation_handled_task.delay(str(litigation.id))
 
         return cls(litigation=litigation, errors=[])
 

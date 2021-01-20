@@ -1,5 +1,4 @@
 import json
-from datetime import timedelta
 
 import graphene
 from django.conf import settings
@@ -10,13 +9,13 @@ from django.core.signing import Signer
 from django.core.validators import EmailValidator
 from django.db import transaction
 from django.db.models import Q
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 from graphql_jwt.refresh_token.shortcuts import create_refresh_token
 from graphql_jwt.settings import jwt_settings
 
-from rwanda.account.mails import send_verification_mail as send_v_mail
+from rwanda.account.tasks import on_litigation_opened_task
+from rwanda.account.tasks import send_verification_mail_task
 from rwanda.administration.utils import param_deposit_fee
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_account_required, account_required
@@ -80,6 +79,7 @@ class CreateAccount(graphene.Mutation):
             if field in ('first_name', 'last_name') and value is not None:
                 setattr(user, field, value)
 
+        user.set_email_verification_expiration()
         user.set_password(input.password)
         user.save()
 
@@ -88,7 +88,7 @@ class CreateAccount(graphene.Mutation):
         )
         account.save()
 
-        send_v_mail(user)
+        send_verification_mail_task.delay(str(user.id))
 
         return CreateAccount(account=account, errors=[])
 
@@ -149,10 +149,10 @@ class SendVerificationMail(graphene.Mutation):
 
         sent = False
         if user is not None:
-            user.email_verification_expire_at = timezone.now() + timedelta(hours=24)
+            user.set_email_verification_expiration()
             user.save()
 
-            send_v_mail(user)
+            send_verification_mail_task.delay(str(user.id))
             sent = True
 
         return SendVerificationMail(sent=sent)
@@ -371,6 +371,8 @@ class CreateLitigation(AccountDjangoModelMutation):
         form.save()
 
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_litigation_opened_task.delay(str(form.instance.id))
 
         return cls(litigation=form.instance, errors=[])
 

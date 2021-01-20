@@ -3,6 +3,11 @@ from django.db import transaction
 from django.utils.translation import gettext_lazy as _
 from graphene_django.types import ErrorType
 
+from rwanda.account.tasks import on_service_purchase_initiated_task, on_service_purchase_approved_task, \
+    on_service_purchase_delivered_task, on_service_purchase_accepted_or_refused_task, \
+    on_service_purchase_update_request_delivered_task, \
+    on_service_purchase_update_request_accepted_or_refused_task, \
+    on_service_purchase_update_request_initiated_task, on_service_purchase_canceled_task
 from rwanda.administration.utils import param_base_price, param_commission
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.decorators import account_required
@@ -54,6 +59,8 @@ class InitiateServicePurchase(AccountDjangoModelMutation):
         form.save()
         form.instance.refresh_from_db()
 
+        on_service_purchase_initiated_task.delay(str(form.instance.id))
+
         return cls(servicePurchase=form.instance, errors=[])
 
 
@@ -81,6 +88,8 @@ class AcceptServicePurchase(AccountDjangoModelMutation):
     def post_save(cls, info, old_obj, form, obj, input):
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
 
+        on_service_purchase_accepted_or_refused_task.delay(str(obj.id))
+
 
 class RefuseServicePurchase(AccountDjangoModelMutation):
     class Meta:
@@ -107,6 +116,8 @@ class RefuseServicePurchase(AccountDjangoModelMutation):
     def post_save(cls, info, old_obj, form, obj, input):
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
 
+        on_service_purchase_accepted_or_refused_task.delay(str(obj.id))
+
 
 class DeliverServicePurchase(AccountDjangoModelMutation):
     class Meta:
@@ -131,6 +142,8 @@ class DeliverServicePurchase(AccountDjangoModelMutation):
     @classmethod
     def post_save(cls, info, old_obj, form, obj, input):
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(obj.id)))
+
+        on_service_purchase_delivered_task.delay(str(obj.id))
 
 
 class ApproveServicePurchase(AccountDjangoModelMutation):
@@ -159,6 +172,8 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
         service_purchase.refresh_from_db()
 
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_service_purchase_approved_task.delay(str(service_purchase.id))
 
         return cls(servicePurchase=service_purchase, errors=[])
 
@@ -189,6 +204,8 @@ class CancelServicePurchase(AccountDjangoModelMutation):
         service_purchase.refresh_from_db()
 
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_service_purchase_canceled_task.delay(str(service_purchase.id))
 
         return cls(servicePurchase=service_purchase, errors=[])
 
@@ -346,6 +363,8 @@ class InitiateServicePurchaseUpdateRequest(AccountDjangoModelMutation):
         ServicePurchaseSubscription.broadcast(
             group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
+        on_service_purchase_update_request_initiated_task.delay(str(update_request.id))
+
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
 
@@ -373,6 +392,8 @@ class AcceptServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 
         ServicePurchaseSubscription.broadcast(
             group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_service_purchase_update_request_accepted_or_refused_task.delay(str(update_request.id))
 
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
@@ -407,6 +428,8 @@ class RefuseServicePurchaseUpdateRequest(AccountDjangoModelMutation):
         ServicePurchaseSubscription.broadcast(
             group=ServicePurchaseSubscription.name.format(str(obj.service_purchase_id)))
 
+        on_service_purchase_update_request_accepted_or_refused_task.delay(str(obj.id))
+
 
 class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
     class Meta:
@@ -431,6 +454,8 @@ class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
 
         ServicePurchaseSubscription.broadcast(
             group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
+
+        on_service_purchase_update_request_delivered_task.delay(str(update_request.id))
 
         return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
