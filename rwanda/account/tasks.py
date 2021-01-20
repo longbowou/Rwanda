@@ -1,3 +1,14 @@
+rom
+celery
+import shared_task
+
+from rwanda.account.mails import send_verification_mail, on_service_purchase_initiated, \
+    on_service_purchase_accepted_or_refused, on_service_purchase_delivered, on_service_purchase_approved, \
+    on_service_purchase_canceled, on_service_purchase_update_request_initiated, \
+    on_service_purchase_update_request_accepted_or_refused, on_service_purchase_update_request_delivered, \
+    on_litigation_opened, on_litigation_handled
+from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
+from rwanda.user.models import User
 from celery import shared_task
 
 from rwanda.account.mails import send_verification_mail, on_service_purchase_initiated, \
@@ -74,3 +85,4 @@ def on_litigation_opened_task(self, litigation_uuid):
 def on_litigation_handled_task(self, litigation_uuid):
     on_litigation_handled(Litigation.objects.get(pk=litigation_uuid))
     return True
+

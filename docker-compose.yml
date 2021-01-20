@@ -22,6 +22,7 @@ services:
       - pgadmin4
       - redis
       - worker
+      - scheduler
 
   pgadmin4:
     container_name: rwanda_pgadmin4
@@ -42,7 +43,18 @@ services:
   worker:
     build: .
     container_name: rwanda_worker
-    command: celery -A rwanda worker --loglevel=info
+    command: celery -A rwanda worker -l INFO
+    volumes:
+      - ./:/code
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+
+  scheduler:
+    build: .
+    container_name: rwanda_scheduler
+    command: celery -A rwanda beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ./:/code
     depends_on:

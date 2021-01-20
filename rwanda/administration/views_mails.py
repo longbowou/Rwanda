@@ -30,6 +30,19 @@ class PurchaseInitiatedMailPreviewView(TemplateView):
         data = super().get_context_data(**kwargs)
 
         data["currency"] = param_currency()
+        data["purchase"] = ServicePurchase.objects.first()
+        data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(data["purchase"].id)
+
+        return data
+
+
+class PurchaseReminderMailPreviewView(TemplateView):
+    template_name = "mails/services/purchases/deadline_reminder.html"
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        data["currency"] = param_currency()
         data["purchase"] = ServicePurchase.objects.last()
         data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/purchases/' + str(data["purchase"].id)
 

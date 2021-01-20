@@ -196,6 +196,17 @@ def on_service_purchase_canceled(service_purchase: ServicePurchase):
               service_purchase.seller.user.email)
 
 
+def send_service_purchase_deadline_reminder(service_purchase: ServicePurchase):
+    data = {"currency": param_currency(),
+            "purchase": service_purchase,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(service_purchase.id)}
+
+    send_mail(_("Deadline reminder"),
+              "mails/services/purchases/deadline_reminder.html",
+              data,
+              service_purchase.seller.user.email)
+
+
 def on_service_purchase_update_request_initiated(service_purchase_update_request: ServicePurchaseUpdateRequest):
     data = {"currency": param_currency(),
             "update_request": service_purchase_update_request,
