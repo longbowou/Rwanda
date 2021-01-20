@@ -76,6 +76,10 @@ class ServicePurchase(models.Model):
         return intcomma(self.price)
 
     @property
+    def commission_display(self):
+        return intcomma(self.commission)
+
+    @property
     def base_price_display(self):
         return intcomma(self.base_price)
 
@@ -120,6 +124,10 @@ class ServicePurchase(models.Model):
     @property
     def price_without_commission(self):
         return self.price - self.commission
+
+    @property
+    def price_without_commission_display(self):
+        return intcomma(self.price_without_commission)
 
     @property
     def initiated(self):

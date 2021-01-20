@@ -281,6 +281,8 @@ class ServicePurchaseUpdateRequestType(DjangoObjectType):
 class ServicePurchaseType(DjangoObjectType):
     price = graphene.String(source="price_display", required=True)
     base_price = graphene.String(source="base_price_display", required=True)
+    commission = graphene.String(source="commission_display", required=True)
+    price_without_commission = graphene.String(source="price_without_commission_display", required=True)
     delay = graphene.String(source="delay_display", required=True)
     status = graphene.String(source="status_display", required=True)
     deadline_at = graphene.String(source="deadline_at_display")
