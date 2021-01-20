@@ -32,9 +32,11 @@ def service_purchases_deadline_reminder_task():
     from django.utils import timezone
     from datetime import timedelta
     from rwanda.account.mails import send_service_purchase_deadline_reminder
+    from rwanda.administration.utils import param_reminder_service_purchase_deadline_lte
 
+    days = param_reminder_service_purchase_deadline_lte()
     for purchase in ServicePurchase.objects.filter(status=ServicePurchase.STATUS_ACCEPTED,
-                                                   deadline_at__lte=timezone.now() + timedelta(1)):
+                                                   deadline_at__lte=timezone.now() + timedelta(days)):
         send_service_purchase_deadline_reminder(purchase)
     return True
 

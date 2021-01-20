@@ -1,5 +1,3 @@
-from asgiref.sync import sync_to_async
-
 from rwanda.administration.models import Parameter
 
 
@@ -7,21 +5,16 @@ def param_base_price():
     return int(Parameter.objects.filter(label=Parameter.BASE_PRICE).first().value)
 
 
+def param_reminder_service_purchase_deadline_lte():
+    return int(Parameter.objects.filter(label=Parameter.REMINDER_SERVICE_PURCHASE_DEADLINE_LTE).first().value)
+
+
 def param_deposit_fee():
     return float(Parameter.objects.filter(label=Parameter.DEPOSIT_FEE).first().value)
 
 
-def param_currency(from_async=False):
-    queryset = Parameter.objects.filter(label=Parameter.CURRENCY).first()
-
-    if from_async:
-        @sync_to_async
-        def get_param():
-            return queryset.value
-
-        return get_param()
-
-    return queryset.value
+def param_currency():
+    return Parameter.objects.filter(label=Parameter.CURRENCY).first().value
 
 
 def param_commission():

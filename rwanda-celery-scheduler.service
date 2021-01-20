@@ -5,7 +5,7 @@ After=network.target network.target nss-lookup.target
 [Service]
 Type=simple
 WorkingDirectory=/var/www/html/rwanda/backend
-ExecStart=/var/www/html/rwanda/backend/venv/bin/celery -A rwanda beat --loglevel=INFO --time-limit=300 --concurrency=8 --pidfile=/var/www/html/rwanda/backend/celery.pid --logfile=/var/log/celery/rwanda-backend-scheduler.log
+ExecStart=/var/www/html/rwanda/backend/venv/bin/celery -A rwanda beat --loglevel=INFO --pidfile=/var/www/html/rwanda/backend/celery.pid --logfile=/var/log/celery/rwanda-backend-scheduler.log
 Restart=always
 
 [Install]

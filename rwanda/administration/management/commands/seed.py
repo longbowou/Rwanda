@@ -16,9 +16,10 @@ class Command(BaseCommand):
         for item in [
             {"label": Parameter.BASE_PRICE, "value": 1000},
             {"label": Parameter.DEPOSIT_FEE, "value": 0.04},
-            {"label": Parameter.CURRENCY, "value": "XOF"},
             {"label": Parameter.COMMISSION, "value": 0.04},
             {"label": Parameter.HOME_PAGE_MAX_SIZE, "value": 30},
+            {"label": Parameter.REMINDER_SERVICE_PURCHASE_DEADLINE_LTE, "value": 1},
+            {"label": Parameter.CURRENCY, "value": "XOF"},
             {"label": Parameter.CINETPAY_PASSWORD, "value": 'M@dchanger@2020'},
         ]:
             if not Parameter.objects.filter(label=item['label']).exists():
