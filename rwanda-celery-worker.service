@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=forking
 WorkingDirectory=/var/www/html/rwanda/backend
-ExecStart=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi start w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker-%n.pid --logfile=/var/log/celery/rwanda-backend-scheduler-%n%I.log'
-ExecReload=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi restart w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker-%n.pid --logfile=/var/log/celery/rwanda-backend-scheduler-%n%I.log'
-ExecStop=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi stopwait w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker-%n.pid --logfile=/var/log/celery/rwanda-backend-scheduler-%n%I.log'
+ExecStart=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi start w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker.pid --logfile=/var/log/celery/rwanda-backend-worker.log'
+ExecReload=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi restart w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker.pid --logfile=/var/log/celery/rwanda-backend-worker.log'
+ExecStop=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda multi stopwait w1 w2 --loglevel=INFO --time-limit=300 --concurrency=4 --pidfile=/var/www/html/rwanda/backend/worker.pid --logfile=/var/log/celery/rwanda-backend-worker.log'
 Restart=always
 
 [Install]
