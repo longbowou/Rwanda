@@ -4,9 +4,9 @@ After=network.target network.target nss-lookup.target
 
 [Service]
 Type=simple
-WorkingDirectory=/var/www/html/rwanda/backend
+WorkingDirectory=/opt/celery
 ExecStart=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda beat --loglevel=INFO --pidfile=/var/www/html/rwanda/backend/scheduler-%n.pid --logfile=/var/log/celery/rwanda-backend-scheduler-%n%I.log'
 Restart=always
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
