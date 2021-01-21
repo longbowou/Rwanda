@@ -9,4 +9,4 @@ ExecStart=/bin/sh -c '/var/www/html/rwanda/backend/venv/bin/celery -A rwanda bea
 Restart=always
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
