@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-20 13:00+0000\n"
+"POT-Creation-Date: 2021-01-26 20:01+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,79 +18,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: rwanda/account/mails.py:127 templates/mails/very_account.html:57
+#: rwanda/account/mails.py:128 templates/mails/very_account.html:57
 msgid "Activate your account"
 msgstr "Activez votre compte"
 
-#: rwanda/account/mails.py:143
+#: rwanda/account/mails.py:145 templates/mails/services/accepted.html:18
+msgid "Service accepted"
+msgstr "Achat accepté"
+
+#: rwanda/account/mails.py:145 templates/mails/services/rejected.html:18
+msgid "Service rejected"
+msgstr "Service refusé"
+
+#: rwanda/account/mails.py:156
 msgid "Purchase"
 msgstr "Achat"
 
-#: rwanda/account/mails.py:149
+#: rwanda/account/mails.py:162
 #: templates/mails/services/orders/initiated.html:18
 msgid "New order"
 msgstr "Nouvelle commande"
 
-#: rwanda/account/mails.py:160
+#: rwanda/account/mails.py:173
 #: templates/mails/services/purchases/accepted_or_refused.html:19
 msgid "Purchase accepted"
 msgstr "Achat accepté"
 
-#: rwanda/account/mails.py:160
+#: rwanda/account/mails.py:173
 #: templates/mails/services/purchases/accepted_or_refused.html:23
 msgid "Purchase refused"
 msgstr "Achat approuvé"
 
-#: rwanda/account/mails.py:171
+#: rwanda/account/mails.py:184
 #: templates/mails/services/purchases/delivered.html:18
 msgid "Purchase delivered"
 msgstr "Achat livée"
 
-#: rwanda/account/mails.py:182 templates/mails/services/orders/approved.html:18
+#: rwanda/account/mails.py:195 templates/mails/services/orders/approved.html:18
 msgid "Order approved"
 msgstr "Commande approuvé"
 
-#: rwanda/account/mails.py:193 templates/mails/services/orders/canceled.html:18
+#: rwanda/account/mails.py:206 templates/mails/services/orders/canceled.html:18
 msgid "Order canceled"
 msgstr "Commande annulé"
 
-#: rwanda/account/mails.py:204
+#: rwanda/account/mails.py:217
 #: templates/mails/services/purchases/deadline_reminder.html:18
 msgid "Deadline reminder"
 msgstr "Rappel de la date limite"
 
-#: rwanda/account/mails.py:216
+#: rwanda/account/mails.py:229
 #: templates/mails/services/update_requests/initiated.html:18
 msgid "Update requested"
 msgstr "Demande de modification"
 
-#: rwanda/account/mails.py:229 rwanda/purchase/models.py:110
+#: rwanda/account/mails.py:242 rwanda/purchase/models.py:114
 #: templates/mails/services/update_requests/accepted_or_refused.html:19
 msgid "Update request accepted"
 msgstr "Demande de modification accepté"
 
-#: rwanda/account/mails.py:229 rwanda/purchase/models.py:113
+#: rwanda/account/mails.py:242 rwanda/purchase/models.py:117
 #: templates/mails/services/update_requests/accepted_or_refused.html:23
 msgid "Update request refused"
 msgstr "Demande de modification refusé"
 
-#: rwanda/account/mails.py:241
+#: rwanda/account/mails.py:254
 msgid "Update delivered"
 msgstr "Demande de modification livée"
 
-#: rwanda/account/mails.py:252 rwanda/account/mails.py:258
+#: rwanda/account/mails.py:265 rwanda/account/mails.py:271
 #: templates/mails/services/disputes/opened.html:18
 msgid "Litigation opened"
 msgstr "Ouverture d'un litige."
 
-#: rwanda/account/models.py:35 rwanda/purchase/models.py:624
+#: rwanda/account/models.py:35 rwanda/purchase/models.py:632
 #: rwanda/service/models.py:27 rwanda/service/models.py:137
 #: rwanda/service/models.py:144 rwanda/service/models.py:214
 #: rwanda/user/models.py:91
 msgid "Yes"
 msgstr "Oui"
 
-#: rwanda/account/models.py:37 rwanda/purchase/models.py:626
+#: rwanda/account/models.py:37 rwanda/purchase/models.py:634
 #: rwanda/service/models.py:29 rwanda/service/models.py:139
 #: rwanda/service/models.py:146 rwanda/service/models.py:216
 #: rwanda/user/models.py:93
@@ -105,14 +113,14 @@ msgstr "Traité"
 msgid "In Progress"
 msgstr "En cours"
 
-#: rwanda/account/models.py:83 rwanda/graphql/types.py:492
-#: rwanda/purchase/models.py:92 rwanda/purchase/models.py:365
+#: rwanda/account/models.py:83 rwanda/graphql/types.py:494
+#: rwanda/purchase/models.py:96 rwanda/purchase/models.py:373
 msgid "Refused"
 msgstr "Refusé"
 
-#: rwanda/account/models.py:85 rwanda/graphql/types.py:451
-#: rwanda/payments/models.py:43 rwanda/purchase/models.py:118
-#: rwanda/purchase/models.py:370
+#: rwanda/account/models.py:85 rwanda/graphql/types.py:453
+#: rwanda/payments/models.py:43 rwanda/purchase/models.py:122
+#: rwanda/purchase/models.py:378
 msgid "Initiated"
 msgstr "Initié"
 
@@ -126,23 +134,23 @@ msgstr "Crédit"
 
 #: rwanda/graphql/account/mutations.py:50
 #: rwanda/graphql/account/mutations.py:319
-#: rwanda/graphql/admin/mutations.py:132
+#: rwanda/graphql/admin/mutations.py:133
 msgid "An account with that username already exists."
 msgstr "Un compte avec ce nom d'utilisateur existe déjà."
 
 #: rwanda/graphql/account/mutations.py:60
 #: rwanda/graphql/account/mutations.py:333
-#: rwanda/graphql/admin/mutations.py:146
+#: rwanda/graphql/admin/mutations.py:147
 msgid "An account with that email already exists."
 msgstr "Un compte avec cette adresse e-mail existe déjà."
 
 #: rwanda/graphql/account/mutations.py:70
 #: rwanda/graphql/account/mutations.py:210
-#: rwanda/graphql/admin/mutations.py:100 rwanda/graphql/admin/mutations.py:271
+#: rwanda/graphql/admin/mutations.py:101 rwanda/graphql/admin/mutations.py:280
 msgid "Password does not match password confirmation."
 msgstr "Le mot de passe ne correspond pas à la confirmation du mot de passe."
 
-#: rwanda/graphql/account/mutations.py:111 rwanda/graphql/admin/mutations.py:46
+#: rwanda/graphql/account/mutations.py:111 rwanda/graphql/admin/mutations.py:47
 msgid "Incorrect username or email."
 msgstr "Nom d'utilisateur ou e-mail incorrect."
 
@@ -154,11 +162,11 @@ msgstr ""
 "Veuillez vérifier votre messagerie pour activer votre compte. Vous pouvez "
 "renvoyer un e-mail de vérification."
 
-#: rwanda/graphql/account/mutations.py:122 rwanda/graphql/admin/mutations.py:50
+#: rwanda/graphql/account/mutations.py:122 rwanda/graphql/admin/mutations.py:51
 msgid "Your account has been disabled."
 msgstr "Votre compte a été désactivé."
 
-#: rwanda/graphql/account/mutations.py:126 rwanda/graphql/admin/mutations.py:54
+#: rwanda/graphql/account/mutations.py:126 rwanda/graphql/admin/mutations.py:55
 msgid "Incorrect password."
 msgstr "Mot de passe incorrect."
 
@@ -174,11 +182,11 @@ msgstr ""
 "Votre lien de vérification a expiré. Veuillez essayer de vous connecter et "
 "renvoyer un nouveau courrier de vérification."
 
-#: rwanda/graphql/account/mutations.py:198 rwanda/graphql/admin/mutations.py:88
+#: rwanda/graphql/account/mutations.py:198 rwanda/graphql/admin/mutations.py:89
 msgid "Bad current password."
 msgstr "Mot de passe actuel incorrect."
 
-#: rwanda/graphql/account/mutations.py:204 rwanda/graphql/admin/mutations.py:94
+#: rwanda/graphql/account/mutations.py:204 rwanda/graphql/admin/mutations.py:95
 msgid "The new password must different from the current password."
 msgstr "Le nouveau mot de passe doit être différent du mot de passe actuel."
 
@@ -198,8 +206,8 @@ msgstr "Montant insuffisant pour traiter le remboursement."
 
 #: rwanda/graphql/account/mutations.py:360
 #: rwanda/graphql/account/mutations.py:365
-#: rwanda/graphql/admin/mutations.py:206 rwanda/graphql/admin/mutations.py:222
-#: rwanda/graphql/admin/mutations.py:473
+#: rwanda/graphql/admin/mutations.py:207 rwanda/graphql/admin/mutations.py:227
+#: rwanda/graphql/admin/mutations.py:482
 #: rwanda/graphql/purchase/mutations.py:78
 #: rwanda/graphql/purchase/mutations.py:82
 #: rwanda/graphql/purchase/mutations.py:106
@@ -217,7 +225,7 @@ msgstr "Montant insuffisant pour traiter le remboursement."
 #: rwanda/graphql/purchase/mutations.py:356
 #: rwanda/graphql/purchase/mutations.py:384
 #: rwanda/graphql/purchase/mutations.py:415
-#: rwanda/graphql/purchase/mutations.py:447
+#: rwanda/graphql/purchase/mutations.py:444
 #: rwanda/graphql/service/mutations.py:55
 #: rwanda/graphql/service/mutations.py:68
 #: rwanda/graphql/service/mutations.py:80
@@ -228,37 +236,37 @@ msgstr "Montant insuffisant pour traiter le remboursement."
 msgid "You cannot perform this action."
 msgstr "Vous ne pouvez pas effectuer cette action."
 
-#: rwanda/graphql/admin/mutations.py:252 rwanda/graphql/admin/mutations.py:320
+#: rwanda/graphql/admin/mutations.py:261 rwanda/graphql/admin/mutations.py:329
 msgid "An admin with that username already exists."
 msgstr "Un administrateur avec ce nom d'utilisateur existe déjà."
 
-#: rwanda/graphql/admin/mutations.py:262 rwanda/graphql/admin/mutations.py:334
+#: rwanda/graphql/admin/mutations.py:271 rwanda/graphql/admin/mutations.py:343
 msgid "An admin with that email already exists."
 msgstr "Un administrateur avec cette adresse e-mail existe déjà."
 
-#: rwanda/graphql/admin/mutations.py:310
+#: rwanda/graphql/admin/mutations.py:319
 msgid "Admin instance not found for id {}"
 msgstr "Instance d'administration introuvable pour l'ID {}"
 
-#: rwanda/graphql/admin/mutations.py:366
+#: rwanda/graphql/admin/mutations.py:375
 msgid "Litigation already handled."
 msgstr "Litige déjà traité."
 
-#: rwanda/graphql/admin/mutations.py:422
+#: rwanda/graphql/admin/mutations.py:431
 msgid "Authentication error. Please check CINETPAY password parameter."
 msgstr ""
 "Erreur d'authentification. Veuillez vérifier le paramètre de mot de passe "
 "CINETPAY."
 
-#: rwanda/graphql/admin/mutations.py:426 rwanda/graphql/admin/mutations.py:432
+#: rwanda/graphql/admin/mutations.py:435 rwanda/graphql/admin/mutations.py:441
 msgid "Internal error. Please try again later."
 msgstr "Erreur interne. Veuillez réessayer plus tard."
 
-#: rwanda/graphql/admin/mutations.py:429
+#: rwanda/graphql/admin/mutations.py:438
 msgid "Insufficient balance to process the refund."
 msgstr "Montant insuffisant pour traiter le remboursement."
 
-#: rwanda/graphql/admin/mutations.py:446
+#: rwanda/graphql/admin/mutations.py:455
 msgid ""
 "Refund has been initiated at CINETPAY side. Please wait for the their "
 "confirmation."
@@ -278,60 +286,60 @@ msgstr "Positive"
 msgid "Negative"
 msgstr "Négative"
 
-#: rwanda/graphql/purchase/queries.py:34 rwanda/purchase/models.py:614
+#: rwanda/graphql/purchase/queries.py:34 rwanda/purchase/models.py:622
 msgid "Alpha"
 msgstr ""
 
-#: rwanda/graphql/purchase/queries.py:35 rwanda/purchase/models.py:617
+#: rwanda/graphql/purchase/queries.py:35 rwanda/purchase/models.py:625
 msgid "Beta"
 msgstr ""
 
-#: rwanda/graphql/purchase/queries.py:36 rwanda/purchase/models.py:619
+#: rwanda/graphql/purchase/queries.py:36 rwanda/purchase/models.py:627
 msgid "Final"
 msgstr ""
 
-#: rwanda/graphql/types.py:464 rwanda/graphql/types.py:614
-#: rwanda/graphql/types.py:639 rwanda/payments/models.py:41
-#: rwanda/purchase/models.py:101
+#: rwanda/graphql/types.py:466 rwanda/graphql/types.py:616
+#: rwanda/graphql/types.py:641 rwanda/payments/models.py:41
+#: rwanda/purchase/models.py:105
 msgid "Canceled"
 msgstr "Annulé"
 
-#: rwanda/graphql/types.py:477 rwanda/purchase/models.py:89
-#: rwanda/purchase/models.py:362 rwanda/service/models.py:102
+#: rwanda/graphql/types.py:479 rwanda/purchase/models.py:93
+#: rwanda/purchase/models.py:370 rwanda/service/models.py:102
 msgid "Accepted"
 msgstr "Accepté"
 
-#: rwanda/graphql/types.py:479
+#: rwanda/graphql/types.py:481
 msgid "Deadline set to <strong>{}</strong>"
 msgstr "Date limite fixée le <strong>{}</strong>"
 
-#: rwanda/graphql/types.py:507
+#: rwanda/graphql/types.py:509
 msgid "Deliverable Published"
 msgstr ""
 
-#: rwanda/graphql/types.py:509
+#: rwanda/graphql/types.py:511
 msgid ""
 "Deliverable <strong>{}</strong> published in version <strong>{}</strong>."
 msgstr ""
 
-#: rwanda/graphql/types.py:522 rwanda/purchase/models.py:95
-#: rwanda/purchase/models.py:368
+#: rwanda/graphql/types.py:524 rwanda/purchase/models.py:99
+#: rwanda/purchase/models.py:376
 msgid "Delivered"
 msgstr "Livré"
 
-#: rwanda/graphql/types.py:537
+#: rwanda/graphql/types.py:539
 msgid "Request for update initiated"
 msgstr "Demande de modification initié"
 
-#: rwanda/graphql/types.py:539
+#: rwanda/graphql/types.py:541
 msgid "The buyer make an update request <strong>{}</strong>"
 msgstr "L'acheteur fait une demande de modification <strong>{}</strong>"
 
-#: rwanda/graphql/types.py:552
+#: rwanda/graphql/types.py:554
 msgid "Request for update accepted"
 msgstr "Demande de modification acceptée"
 
-#: rwanda/graphql/types.py:555
+#: rwanda/graphql/types.py:557
 msgid ""
 "The update request <strong>{}</strong> have been accepted. New deadline set "
 "to <strong>{}</strong>"
@@ -339,11 +347,11 @@ msgstr ""
 "La demande de mise à jour <strong> {} </strong> a été acceptée. Nouvelle "
 "date limite fixée le <strong>{}</strong>"
 
-#: rwanda/graphql/types.py:568
+#: rwanda/graphql/types.py:570
 msgid "Request for update refused"
 msgstr "Demande de modification refusée"
 
-#: rwanda/graphql/types.py:571
+#: rwanda/graphql/types.py:573
 msgid ""
 "The update request <strong>{}</strong> have been refused. <strong>Reason:</"
 "strong> {}"
@@ -351,32 +359,32 @@ msgstr ""
 "La demande de modification <strong>{}</strong> a été refusée. <strong>Raison:"
 "</strong> {}"
 
-#: rwanda/graphql/types.py:584
+#: rwanda/graphql/types.py:586
 msgid "Request for update delivered"
 msgstr "Demande de modification livrée"
 
-#: rwanda/graphql/types.py:586
+#: rwanda/graphql/types.py:588
 msgid "The update request <strong>{}</strong> have been delivered."
 msgstr "La demande de modification <strong>{}</strong> a été livrée."
 
-#: rwanda/graphql/types.py:599 rwanda/purchase/models.py:104
+#: rwanda/graphql/types.py:601 rwanda/purchase/models.py:108
 msgid "In dispute"
 msgstr "En conflit"
 
-#: rwanda/graphql/types.py:601
+#: rwanda/graphql/types.py:603
 msgid "The buyer open a litigation <strong>{}</strong>"
 msgstr "L'acheteur ouvre un litige <strong>{}</strong>"
 
-#: rwanda/graphql/types.py:616
+#: rwanda/graphql/types.py:618
 msgid "Has been canceled by <strong>Administrators</strong>"
 msgstr "A été annulé par les <strong>administrateurs</strong>"
 
-#: rwanda/graphql/types.py:626 rwanda/graphql/types.py:650
-#: rwanda/purchase/models.py:98
+#: rwanda/graphql/types.py:628 rwanda/graphql/types.py:652
+#: rwanda/purchase/models.py:102
 msgid "Approved"
 msgstr "Approuvé"
 
-#: rwanda/graphql/types.py:628
+#: rwanda/graphql/types.py:630
 msgid "Has been approved by <strong>Administrators</strong>"
 msgstr "A été approuvé par les <strong>administrateurs</strong>"
 
@@ -384,32 +392,32 @@ msgstr "A été approuvé par les <strong>administrateurs</strong>"
 msgid "Confirmed"
 msgstr "Confirmé"
 
-#: rwanda/purchase/models.py:84
+#: rwanda/purchase/models.py:88
 msgid "total delivery days"
 msgstr "jours de livraison total"
 
-#: rwanda/purchase/models.py:107
+#: rwanda/purchase/models.py:111
 msgid "Update request initiated"
 msgstr "Demande de modification initié"
 
-#: rwanda/purchase/models.py:116
+#: rwanda/purchase/models.py:120
 #: templates/mails/services/update_requests/delivered.html:18
 msgid "Update request delivered"
 msgstr "Demande de modification livée"
 
-#: rwanda/purchase/models.py:532
+#: rwanda/purchase/models.py:540
 msgid "Handled"
 msgstr "Traiter"
 
-#: rwanda/purchase/models.py:534
+#: rwanda/purchase/models.py:542
 msgid "Opened"
 msgstr "Ouvert"
 
-#: rwanda/purchase/models.py:539
+#: rwanda/purchase/models.py:547
 msgid "Purchase approved"
 msgstr "Achat approuvé"
 
-#: rwanda/purchase/models.py:541
+#: rwanda/purchase/models.py:549
 msgid "Purchase canceled"
 msgstr "Achat annulé"
 
@@ -441,10 +449,7 @@ msgstr "Français"
 msgid "English"
 msgstr "Anglais"
 
-#: templates/mails/services/disputes/handled.html:18
-msgid "Litigation handled"
-msgstr "Litige traité"
-
+#: templates/mails/services/accepted.html:46
 #: templates/mails/services/disputes/handled.html:69
 #: templates/mails/services/disputes/opened.html:51
 #: templates/mails/services/orders/approved.html:49
@@ -454,11 +459,16 @@ msgstr "Litige traité"
 #: templates/mails/services/purchases/deadline_reminder.html:49
 #: templates/mails/services/purchases/delivered.html:50
 #: templates/mails/services/purchases/initiated.html:52
+#: templates/mails/services/rejected.html:78
 #: templates/mails/services/update_requests/accepted_or_refused.html:58
 #: templates/mails/services/update_requests/delivered.html:51
 #: templates/mails/services/update_requests/initiated.html:51
 msgid "View"
 msgstr "Voir"
+
+#: templates/mails/services/disputes/handled.html:18
+msgid "Litigation handled"
+msgstr "Litige traité"
 
 #: templates/mails/services/purchases/initiated.html:18
 msgid "Congratulation"
@@ -467,6 +477,14 @@ msgstr "Félicitation"
 #: templates/mails/services/purchases/initiated.html:21
 msgid "You made a purchase"
 msgstr "Vous avez effectué un achat"
+
+#: templates/mails/services/rejected.html:33
+msgid "Reason"
+msgstr "Raison"
+
+#: templates/mails/services/rejected.html:50
+msgid "You can update your service and submit it for approval."
+msgstr "Vous pouvez mettre à jour votre service et le soumettre pour approbation."
 
 #: templates/mails/very_account.html:54
 msgid "Welcome to MDTAF !"

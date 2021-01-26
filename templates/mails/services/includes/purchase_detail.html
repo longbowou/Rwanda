@@ -35,7 +35,7 @@
                     {{ purchase.delay_display }}
                     {% if purchase.has_been_accepted %}
                         <br>
-                        {{ purchase.deadline_at }}
+                        {{ purchase.deadline_at|date }}
                     {% endif %}
                 </td>
             </tr>

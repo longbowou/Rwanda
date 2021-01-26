@@ -193,7 +193,7 @@ def on_service_purchase_approved(service_purchase: ServicePurchase):
             "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/orders/' + str(service_purchase.id)}
 
     send_mail(_("Order approved"),
-              "mails/services/purchases/approved.html",
+              "mails/services/orders/approved.html",
               data,
               service_purchase.seller.user.email)
 

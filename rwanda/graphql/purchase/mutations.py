@@ -168,7 +168,7 @@ class ApproveServicePurchase(AccountDjangoModelMutation):
         approve_service_purchase(service_purchase)
 
         service_purchase.set_as_approved()
-        form.save()
+        service_purchase.save()
         service_purchase.refresh_from_db()
 
         ServicePurchaseSubscription.broadcast(group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
@@ -420,15 +420,12 @@ class RefuseServicePurchaseUpdateRequest(AccountDjangoModelMutation):
         update_request.set_as_refused()
         update_request.save()
 
-        return cls(servicePurchaseUpdateRequest=update_request, errors=[])
-
-    @classmethod
-    def post_save(cls, info, old_obj, form, obj, input):
-        obj: ServicePurchaseUpdateRequest
         ServicePurchaseSubscription.broadcast(
-            group=ServicePurchaseSubscription.name.format(str(obj.service_purchase_id)))
+            group=ServicePurchaseSubscription.name.format(str(service_purchase.id)))
 
-        on_service_purchase_update_request_accepted_or_refused_task.delay(str(obj.id))
+        on_service_purchase_update_request_accepted_or_refused_task.delay(str(update_request.id))
+
+        return cls(servicePurchaseUpdateRequest=update_request, errors=[])
 
 
 class DeliverServicePurchaseUpdateRequest(AccountDjangoModelMutation):
