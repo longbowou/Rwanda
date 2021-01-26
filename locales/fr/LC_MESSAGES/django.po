@@ -81,7 +81,7 @@ msgstr "Demande de modification livée"
 #: rwanda/account/mails.py:252 rwanda/account/mails.py:258
 #: templates/mails/services/disputes/opened.html:18
 msgid "Litigation opened"
-msgstr "Litige déjà traité."
+msgstr "Ouverture d'un litige."
 
 #: rwanda/account/models.py:35 rwanda/purchase/models.py:624
 #: rwanda/service/models.py:27 rwanda/service/models.py:137

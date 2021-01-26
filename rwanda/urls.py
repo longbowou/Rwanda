@@ -9,7 +9,8 @@ from graphene_django.views import GraphQLView
 
 from rwanda.administration.views_mails import VerifyAccountMailPreviewView, PurchaseInitiatedMailPreviewView, \
     PurchaseAcceptedOrRejectedMailPreviewView, OrderInitiatedMailPreviewView, UpdateInitiatedMailPreviewView, \
-    LitigationInitiatedMailPreviewView, LitigationHandledMailPreviewView, PurchaseReminderMailPreviewView
+    LitigationInitiatedMailPreviewView, LitigationHandledMailPreviewView, PurchaseReminderMailPreviewView, \
+    ServiceAcceptedMailPreviewView, ServiceRejectedMailPreviewView
 from rwanda.decorators import account_required, admin_required
 from rwanda.graphql.schemas.account import schema
 from rwanda.graphql.schemas.admin import admin_schema
@@ -30,6 +31,8 @@ urlpatterns = [
     path('mails/updates/initiated', UpdateInitiatedMailPreviewView.as_view()),
     path('mails/disputes/initiated', LitigationInitiatedMailPreviewView.as_view()),
     path('mails/disputes/handeled', LitigationHandledMailPreviewView.as_view()),
+    path('mails/services/accepted', ServiceAcceptedMailPreviewView.as_view()),
+    path('mails/services/rejected', ServiceRejectedMailPreviewView.as_view()),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

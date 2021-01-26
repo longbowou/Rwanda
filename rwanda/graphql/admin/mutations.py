@@ -13,6 +13,7 @@ from graphql_jwt.settings import jwt_settings
 
 from rwanda.account.models import Refund
 from rwanda.account.tasks import on_litigation_handled_task
+from rwanda.account.tasks import on_service_accepted_or_rejected_task
 from rwanda.graphql.auth_base_mutations.admin import AdminDjangoModelDeleteMutation, AdminDjangoModelMutation
 from rwanda.graphql.decorators import anonymous_admin_required, admin_required
 from rwanda.graphql.inputs import UserInput, UserUpdateInput, LoginInput, ChangePasswordInput
@@ -207,6 +208,10 @@ class AcceptService(AdminDjangoModelMutation):
 
         service.set_as_accepted()
 
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        on_service_accepted_or_rejected_task.delay(str(obj.id))
+
 
 class RejectService(AdminDjangoModelMutation):
     class Meta:
@@ -222,6 +227,10 @@ class RejectService(AdminDjangoModelMutation):
             return cls(errors=[ErrorType(field="id", messages=[_("You cannot perform this action.")])])
 
         service.set_as_rejected()
+
+    @classmethod
+    def post_save(cls, info, old_obj, form, obj, input):
+        on_service_accepted_or_rejected_task.delay(str(obj.id))
 
 
 class DeleteService(AdminDjangoModelDeleteMutation):

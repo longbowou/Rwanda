@@ -8,8 +8,9 @@ from django.core.mail import EmailMultiAlternatives, SafeMIMEMultipart
 from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
-from rwanda.administration.utils import param_currency
+from rwanda.administration.utils import param_currency, param_base_price
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
+from rwanda.service.models import Service
 from rwanda.settings import BASE_DIR
 from rwanda.user.models import User
 
@@ -133,6 +134,18 @@ def send_verification_mail(user: User):
               user.email,
               base_files + ["static/emails/images/Thanks.png"]
               )
+
+
+def on_service_accepted_or_rejected(service: Service):
+    data = {"currency": param_currency(),
+            "base_price": param_base_price(),
+            "service": service,
+            "url": settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/services/' + str(service.id)}
+
+    send_mail(_("Service accepted") if service.accepted else _("Service rejected"),
+              "mails/services/accepted.html" if service.accepted else "mails/services/rejected.html",
+              data,
+              service.account.user.email)
 
 
 def on_service_purchase_initiated(service_purchase: ServicePurchase):

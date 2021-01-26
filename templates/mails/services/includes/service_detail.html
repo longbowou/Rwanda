@@ -1,0 +1,36 @@
+{% load humanize %}
+<!--[if mso]>
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+        <td style="padding-right: 40px; padding-left: 40px; padding-top: 15px; padding-bottom: 10px; font-family: Tahoma, sans-serif">
+<![endif]-->
+<div style="color:#555555;font-family:Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;line-height:1.5;padding-top:15px;padding-right:40px;padding-bottom:10px;padding-left:40px;">
+    <div style="line-height: 1.5; font-size: 12px; font-family: Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif; color: #555555; mso-line-height-alt: 18px;">
+        <table style="text-align: center" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tbody>
+            <tr>
+                <td style="width: 50%; font-size: 20px; color: #6d89bc;">
+                    {{ service.title }}
+                </td>
+
+                <td style="width: 50%; font-size: 20px; color: #6d89bc;">
+                    {{ base_price|intcomma }} {{ currency }}
+                </td>
+            </tr>
+
+            {% for option in service.serviceoption_set.all %}
+                <tr>
+                    <td style="width: 50%; font-size: 16px; color: #6d89bc;">
+                        {{ option.label }}
+                    </td>
+
+                    <td style="width: 50%; font-size: 16px; color: #6d89bc;">
+                        {{ option.price|intcomma }} {{ currency }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--[if mso]></td></tr></table><![endif]-->

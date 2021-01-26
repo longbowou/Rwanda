@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.views.generic import TemplateView
 
-from rwanda.administration.utils import param_currency
+from rwanda.administration.utils import param_currency, param_base_price
 from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
+from rwanda.service.models import Service
 from rwanda.user.models import User
 
 
@@ -19,6 +20,34 @@ class VerifyAccountMailPreviewView(TemplateView):
         data["user"] = user
 
         # send_verification_mail(user)
+
+        return data
+
+
+class ServiceAcceptedMailPreviewView(TemplateView):
+    template_name = "mails/services/accepted.html"
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        data["currency"] = param_currency()
+        data["base_price"] = param_base_price()
+        data["service"] = Service.objects.first()
+        data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/services/' + str(data["service"].id)
+
+        return data
+
+
+class ServiceRejectedMailPreviewView(TemplateView):
+    template_name = "mails/services/rejected.html"
+
+    def get_context_data(self, **kwargs):
+        data = super().get_context_data(**kwargs)
+
+        data["currency"] = param_currency()
+        data["base_price"] = param_base_price()
+        data["service"] = Service.objects.first()
+        data["url"] = settings.FRONTEND_ACCOUNT_BASE_URL + '/#/account/services/' + str(data["service"].id)
 
         return data
 
