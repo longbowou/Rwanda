@@ -24,7 +24,7 @@ msgstr "Activez votre compte"
 
 #: rwanda/account/mails.py:145 templates/mails/services/accepted.html:18
 msgid "Service accepted"
-msgstr "Achat accepté"
+msgstr "Service accepté"
 
 #: rwanda/account/mails.py:145 templates/mails/services/rejected.html:18
 msgid "Service rejected"
