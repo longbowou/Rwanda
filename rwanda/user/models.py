@@ -19,6 +19,7 @@ class User(AbstractUser):
     email_verification_expire_at = models.DateTimeField(blank=True, null=True)
     phone_number = models.CharField(max_length=255, null=True, blank=True)
     image = models.FileField(blank=True, null=True, upload_to="accounts/")
+    longbowou = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def disconnect(self):

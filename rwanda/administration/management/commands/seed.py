@@ -14,7 +14,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         for item in [
-            {"label": Parameter.BASE_PRICE, "value": 1000},
+            {"label": Parameter.BASE_PRICE, "value": 2000},
             {"label": Parameter.DEPOSIT_FEE, "value": 0.04},
             {"label": Parameter.COMMISSION, "value": 0.04},
             {"label": Parameter.HOME_PAGE_MAX_SIZE, "value": 30},
