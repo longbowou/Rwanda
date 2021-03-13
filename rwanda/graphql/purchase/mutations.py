@@ -15,9 +15,9 @@ from rwanda.graphql.purchase.operations import approve_service_purchase, cancel_
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription, ServicePurchaseSubscription
 from rwanda.graphql.types import ServicePurchaseType, DeliverableType, DeliverableFileType, ChatMessageType, \
     ServicePurchaseUpdateRequestType
-from rwanda.purchase.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked, \
+from rwanda.purchases.models import ServicePurchase, Deliverable, ChatMessage, ChatMessageMarked, \
     ServicePurchaseUpdateRequest
-from rwanda.user.models import Account
+from rwanda.users.models import Account
 
 
 class InitiateServicePurchase(AccountDjangoModelMutation):

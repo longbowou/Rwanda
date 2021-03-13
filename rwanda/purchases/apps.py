@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class PurchaseConfig(AppConfig):
-    name = 'rwanda.purchase'
+    name = 'rwanda.purchases'

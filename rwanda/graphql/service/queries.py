@@ -7,7 +7,7 @@ from django.template.defaultfilters import date as date_filter
 from rwanda.administration.utils import param_base_price, param_commission, param_home_max_page_size
 from rwanda.graphql.decorators import account_required
 from rwanda.graphql.types import ServiceOrderType, ServiceType, ServiceCategoryType
-from rwanda.service.models import Service, ServiceOption, ServiceCategory
+from rwanda.services.models import Service, ServiceOption, ServiceCategory
 
 
 class ServiceQueries(graphene.ObjectType):

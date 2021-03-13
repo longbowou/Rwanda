@@ -2,7 +2,7 @@ import channels_graphql_ws
 import graphene
 
 from rwanda.graphql.types import AccountType
-from rwanda.user.models import User, Account
+from rwanda.users.models import User, Account
 
 
 class OnlineSubscription(channels_graphql_ws.Subscription):

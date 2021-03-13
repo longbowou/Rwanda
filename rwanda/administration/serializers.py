@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from rwanda.purchase.models import Litigation
-from rwanda.service.models import ServiceCategory
+from rwanda.purchases.models import Litigation
+from rwanda.services.models import ServiceCategory
 
 
 class LitigationSerializer(serializers.ModelSerializer):

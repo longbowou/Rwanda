@@ -3,8 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 from rwanda.graphql.types import ServicePurchaseType, LitigationType, DeliverableType, DeliverableVersionType, \
     ServiceCommentTypeType
-from rwanda.purchase.models import ServicePurchase, Litigation, Deliverable
-from rwanda.service.models import ServiceComment
+from rwanda.purchases.models import ServicePurchase, Litigation, Deliverable
+from rwanda.services.models import ServiceComment
 
 
 class PurchaseQueries(graphene.ObjectType):

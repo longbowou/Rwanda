@@ -8,8 +8,8 @@ from rwanda.graphql.admin.queries import AdminQueries
 from rwanda.graphql.decorators import admin_required
 from rwanda.graphql.types import ServiceCategoryType, ServiceType, FundType, LitigationType, \
     ParametersType
-from rwanda.purchase.models import Litigation
-from rwanda.service.models import Service, ServiceCategory
+from rwanda.purchases.models import Litigation
+from rwanda.services.models import Service, ServiceCategory
 
 
 class AdminQuery(AdminQueries):

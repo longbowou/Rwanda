@@ -5,7 +5,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from rwanda.payments.models import Payment
-from rwanda.user.models import Account
+from rwanda.users.models import Account
 
 
 class Deposit(models.Model):

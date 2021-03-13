@@ -17,9 +17,9 @@ from rwanda.account.serializers import ServiceSerializer, PurchaseSerializer, Or
 from rwanda.account.utils import create_folder_if_not_exits
 from rwanda.administration.utils import param_currency
 from rwanda.graphql.purchase.subscriptions import ChatMessageSubscription
-from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile, ChatMessage
-from rwanda.service.models import Service, ServiceOption
-from rwanda.user.models import User
+from rwanda.purchases.models import ServicePurchase, Deliverable, DeliverableFile, ChatMessage
+from rwanda.services.models import Service, ServiceOption
+from rwanda.users.models import User
 
 
 class DepositsDatatableView(BaseDatatableView):

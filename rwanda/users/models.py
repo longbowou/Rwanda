@@ -122,7 +122,7 @@ class Account(models.Model):
 
     @property
     def services_count(self):
-        from rwanda.service.models import Service
+        from rwanda.services.models import Service
         return Service.objects.filter(account=self).count()
 
     @property
@@ -131,7 +131,7 @@ class Account(models.Model):
 
     @property
     def purchases_count(self):
-        from rwanda.purchase.models import ServicePurchase
+        from rwanda.purchases.models import ServicePurchase
         return ServicePurchase.objects.filter(account=self).count()
 
     @property
@@ -140,7 +140,7 @@ class Account(models.Model):
 
     @property
     def orders_count(self):
-        from rwanda.purchase.models import ServicePurchase
+        from rwanda.purchases.models import ServicePurchase
         return ServicePurchase.objects.filter(service__account=self).count()
 
     @property

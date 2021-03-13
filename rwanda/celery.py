@@ -28,7 +28,7 @@ def setup_periodic_tasks(sender, **kwargs):
 
 @app.task
 def service_purchases_deadline_reminder_task():
-    from rwanda.purchase.models import ServicePurchase
+    from rwanda.purchases.models import ServicePurchase
     from django.utils import timezone
     from datetime import timedelta
     from rwanda.account.mails import send_service_purchase_deadline_reminder

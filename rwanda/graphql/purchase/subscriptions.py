@@ -2,7 +2,7 @@ import channels_graphql_ws
 import graphene
 
 from rwanda.graphql.types import ServicePurchaseChatMessageType, ServicePurchaseType
-from rwanda.purchase.models import ChatMessage, ServicePurchase
+from rwanda.purchases.models import ChatMessage, ServicePurchase
 
 
 class ChatMessageSubscription(channels_graphql_ws.Subscription):

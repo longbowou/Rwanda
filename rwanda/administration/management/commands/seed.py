@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from rwanda.account.models import RefundWay
 from rwanda.accounting.models import Fund
 from rwanda.administration.models import Parameter
-from rwanda.service.models import ServiceCategory
+from rwanda.services.models import ServiceCategory
 
 
 class Command(BaseCommand):

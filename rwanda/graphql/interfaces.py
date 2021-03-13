@@ -1,6 +1,6 @@
 import graphene
 
-from rwanda.user.models import Account
+from rwanda.users.models import Account
 
 
 class UserInterface(graphene.Interface):

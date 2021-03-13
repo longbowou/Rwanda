@@ -8,9 +8,9 @@ from rwanda.administration.models import Parameter
 from rwanda.administration.utils import param_currency
 from rwanda.graphql.decorators import admin_required
 from rwanda.graphql.types import AdminType, RefundWayType, ParameterType, StatsType, AccountType
-from rwanda.purchase.models import Litigation, ServicePurchase
-from rwanda.service.models import Service
-from rwanda.user.models import Account, User
+from rwanda.purchases.models import Litigation, ServicePurchase
+from rwanda.services.models import Service
+from rwanda.users.models import Account, User
 
 
 class AdminQueries(graphene.ObjectType):

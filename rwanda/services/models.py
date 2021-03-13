@@ -7,7 +7,7 @@ from django.db import models
 from django.template.defaultfilters import date as date_filter, time as time_filter
 from django.utils.translation import gettext_lazy as _
 
-from rwanda.user.models import Account
+from rwanda.users.models import Account
 
 
 class ServiceCategory(models.Model):
@@ -176,7 +176,8 @@ class ServiceComment(models.Model):
     TYPE_POSITIVE = 'POSITIVE'
     TYPE_NEGATIVE = 'NEGATIVE'
     type = models.CharField(max_length=255, blank=True, null=True)
-    service_purchase = models.ForeignKey("purchase.ServicePurchase", on_delete=models.CASCADE, blank=True, null=True)
+    service_purchase = models.ForeignKey("purchases.ServicePurchase", on_delete=models.CASCADE, blank=True,
+                                         null=True)
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
     reply_at = models.DateTimeField(blank=True, null=True)
     published = models.BooleanField(default=True)

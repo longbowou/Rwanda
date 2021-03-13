@@ -2,8 +2,8 @@ from django.db import transaction
 from django.db.models import F
 
 from rwanda.accounting.models import Operation, Fund
-from rwanda.purchase.models import ServicePurchase
-from rwanda.user.models import Account
+from rwanda.purchases.models import ServicePurchase
+from rwanda.users.models import Account
 
 
 @transaction.atomic

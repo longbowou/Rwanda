@@ -24,8 +24,8 @@ from rwanda.graphql.purchase.subscriptions import ServicePurchaseSubscription
 from rwanda.graphql.types import AccountType, RefundType, LitigationType, AuthType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_signature
-from rwanda.purchase.models import ServicePurchase
-from rwanda.user.models import User, Account
+from rwanda.purchases.models import ServicePurchase
+from rwanda.users.models import User, Account
 
 
 class AccountInput(UserInput):

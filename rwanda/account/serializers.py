@@ -2,9 +2,9 @@ from rest_framework import serializers
 
 from rwanda.account.models import Refund, RefundWay
 from rwanda.administration.models import Parameter
-from rwanda.purchase.models import ServicePurchase, Deliverable, DeliverableFile
-from rwanda.service.models import Service, ServiceOption
-from rwanda.user.models import User
+from rwanda.purchases.models import ServicePurchase, Deliverable, DeliverableFile
+from rwanda.services.models import Service, ServiceOption
+from rwanda.users.models import User
 
 
 class ServiceSerializer(serializers.ModelSerializer):

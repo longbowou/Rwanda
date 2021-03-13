@@ -24,9 +24,9 @@ from rwanda.graphql.types import ServiceCategoryType, ServiceType, AdminType, Li
     ParameterType, UserType, RefundType
 from rwanda.payments.models import Payment
 from rwanda.payments.utils import get_auth_token, get_available_balance, transfer_money, add_contact
-from rwanda.purchase.models import ServicePurchase, Litigation
-from rwanda.service.models import Service, ServiceCategory
-from rwanda.user.models import User, Admin
+from rwanda.purchases.models import ServicePurchase, Litigation
+from rwanda.services.models import Service, ServiceCategory
+from rwanda.users.models import User, Admin
 
 
 class LoginAdmin(graphene.Mutation):

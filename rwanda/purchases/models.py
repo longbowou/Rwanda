@@ -11,8 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 from rwanda.account.utils import natural_size
 from rwanda.administration.models import Parameter
-from rwanda.service.models import ServiceOption, Service
-from rwanda.user.models import Account, Admin
+from rwanda.services.models import ServiceOption, Service
+from rwanda.users.models import Account, Admin
 
 
 class ServicePurchase(models.Model):

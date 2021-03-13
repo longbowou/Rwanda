@@ -9,10 +9,10 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
 from rwanda.administration.utils import param_currency, param_base_price
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
-from rwanda.service.models import Service
+from rwanda.purchases.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
+from rwanda.services.models import Service
 from rwanda.settings import BASE_DIR
-from rwanda.user.models import User
+from rwanda.users.models import User
 
 base_files = [
     "static/emails/images/favicon.png",

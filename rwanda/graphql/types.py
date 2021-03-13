@@ -16,10 +16,10 @@ from rwanda.administration.utils import param_base_price
 from rwanda.graphql.decorators import account_required, admin_required
 from rwanda.graphql.interfaces import UserInterface
 from rwanda.payments.models import Payment
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
+from rwanda.purchases.models import ServicePurchase, ServicePurchaseServiceOption, ChatMessage, Litigation, Deliverable, \
     DeliverableFile, ServicePurchaseUpdateRequest
-from rwanda.service.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
-from rwanda.user.models import Admin, Account, User
+from rwanda.services.models import ServiceCategory, Service, ServiceMedia, ServiceComment, ServiceOption
+from rwanda.users.models import Admin, Account, User
 
 
 class AuthType(ObjectType):

@@ -45,12 +45,12 @@ CORS_ALLOW_CREDENTIALS = True
 # Application definition
 
 INSTALLED_APPS = [
-    'rwanda.user',
-    'rwanda.service',
+    'rwanda.users',
+    'rwanda.services',
     'rwanda.administration',
     'rwanda.account',
     'rwanda.accounting',
-    'rwanda.purchase',
+    'rwanda.purchases',
     'rwanda.payments',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -133,7 +133,7 @@ DATABASES = {
     }
 }
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'users.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators

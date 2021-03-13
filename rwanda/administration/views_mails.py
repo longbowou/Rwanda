@@ -2,9 +2,9 @@ from django.conf import settings
 from django.views.generic import TemplateView
 
 from rwanda.administration.utils import param_currency, param_base_price
-from rwanda.purchase.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
-from rwanda.service.models import Service
-from rwanda.user.models import User
+from rwanda.purchases.models import ServicePurchase, ServicePurchaseUpdateRequest, Litigation
+from rwanda.services.models import Service
+from rwanda.users.models import User
 
 
 class VerifyAccountMailPreviewView(TemplateView):

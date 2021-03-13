@@ -11,9 +11,9 @@ from rwanda.accounting.models import Operation
 from rwanda.administration.models import Parameter
 from rwanda.administration.serializers import LitigationSerializer, ServiceCategorySerializer
 from rwanda.administration.utils import param_currency
-from rwanda.purchase.models import Litigation
-from rwanda.service.models import Service, ServiceCategory
-from rwanda.user.models import User
+from rwanda.purchases.models import Litigation
+from rwanda.services.models import Service, ServiceCategory
+from rwanda.users.models import User
 
 
 class DisputesDatatableView(BaseDatatableView):

@@ -3,8 +3,8 @@ import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from rwanda.purchase.models import ServicePurchase
-from rwanda.user.models import Account
+from rwanda.purchases.models import ServicePurchase
+from rwanda.users.models import Account
 
 
 class Fund(models.Model):

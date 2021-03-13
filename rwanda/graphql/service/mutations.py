@@ -6,7 +6,7 @@ from graphene_django.types import ErrorType
 
 from rwanda.graphql.auth_base_mutations.account import AccountDjangoModelMutation, AccountDjangoModelDeleteMutation
 from rwanda.graphql.types import ServiceType, ServiceCommentType, ServiceOptionType
-from rwanda.service.models import ServiceComment, Service
+from rwanda.services.models import ServiceComment, Service
 
 
 # INPUTS
