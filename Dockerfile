@@ -10,6 +10,7 @@ RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
 RUN apt-get update && apt-get install -y gettext libgettextpo-dev
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Git config
 RUN git config --global user.email "rwanda@rwanda.com"

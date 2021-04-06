@@ -1,63 +1,74 @@
 version: '3'
 
 services:
-  postgres:
+  rwanda_postgres:
     container_name: rwanda_postgres
-    image: postgres
+    image: postgres:alpine
     environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
-  app:
-    container_name: rwanda_app
+  rwanda:
+    container_name: rwanda
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn rwanda.asgi -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --preload --timeout 60 --graceful-timeout 60
     volumes:
       - .:/code
     ports:
       - 8000:8000
     depends_on:
-      - postgres
-      - pgadmin4
-      - redis
-      - worker
-      - scheduler
-
-  pgadmin4:
-    container_name: rwanda_pgadmin4
-    image: dpage/pgadmin4
-    depends_on:
-      - postgres
+      - rwanda_postgres
+      - rwanda_pgadmin4
+      - rwanda_redis
+      - rwanda_worker
+      - rwanda_scheduler
     environment:
-      - PGADMIN_DEFAULT_EMAIL=postgre@rwanda.com
-      - PGADMIN_DEFAULT_PASSWORD=togorwanda
+      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
+      VIRTUAL_PORT: 8000
+      LETSENCRYPT_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
+
+  rwanda_pgadmin4:
+    container_name: rwanda_pgadmin4
+    image: dpage/pgadmin4:latest
+    depends_on:
+      - rwanda_postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: postgre@rwanda.com
+      PGADMIN_DEFAULT_PASSWORD: togorwanda
+      VIRTUAL_HOST: pgadmin.mdtaf.com
+      LETSENCRYPT_HOST: pgadmin.mdtaf.com
     ports:
       - 5050:80
 
-  redis:
+  rwanda_redis:
     container_name: rwanda_redis
-    image: library/redis:6.0-alpine
+    image: redis:alpine
     restart: unless-stopped
 
-  worker:
+  rwanda_worker:
     build: .
     container_name: rwanda_worker
     command: celery -A rwanda worker -l INFO
     volumes:
       - ./:/code
     depends_on:
-      - redis
-      - postgres
+      - rwanda_redis
+      - rwanda_postgres
     restart: unless-stopped
 
-  scheduler:
+  rwanda_scheduler:
     build: .
     container_name: rwanda_scheduler
     command: celery -A rwanda beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ./:/code
     depends_on:
-      - redis
-      - postgres
+      - rwanda_redis
+      - rwanda_postgres
     restart: unless-stopped
+
+networks:
+  default:
+    external:
+      name: nginx-proxy
