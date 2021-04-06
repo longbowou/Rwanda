@@ -34,8 +34,8 @@ services:
     depends_on:
       - rwanda_postgres
     environment:
-      PGADMIN_DEFAULT_EMAIL: postgre@rwanda.com
-      PGADMIN_DEFAULT_PASSWORD: togorwanda
+      PGADMIN_DEFAULT_EMAIL: postgre@postgres.com
+      PGADMIN_DEFAULT_PASSWORD: postgres
       VIRTUAL_HOST: pgadmin.mdtaf.com
       LETSENCRYPT_HOST: pgadmin.mdtaf.com
     ports:
