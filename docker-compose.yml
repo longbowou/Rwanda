@@ -28,6 +28,7 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    restart: always
 
   rwanda_pgadmin4:
     container_name: rwanda_pgadmin4
@@ -41,10 +42,12 @@ services:
       LETSENCRYPT_HOST: pgadmin.mdtaf.com
     depends_on:
       - rwanda_postgres
+    restart: always
 
   rwanda_redis:
     container_name: rwanda_redis
     image: redis:alpine
+    restart: always
 
   rwanda_worker:
     build: .
@@ -55,6 +58,7 @@ services:
     depends_on:
       - rwanda_redis
       - rwanda_postgres
+    restart: always
 
   rwanda_scheduler:
     build: .
@@ -65,6 +69,7 @@ services:
     depends_on:
       - rwanda_redis
       - rwanda_postgres
+    restart: always
 
 networks:
   default:
