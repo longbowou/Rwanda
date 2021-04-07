@@ -8,7 +8,7 @@ from rwanda.graphql.consumers import AccountGraphqlWsConsumer
 application = ProtocolTypeRouter({
     'websocket': AuthMiddlewareStack(
         channels.routing.URLRouter([
-            path('graphql-ws/', AccountGraphqlWsConsumer),
+            path('graphql-ws/', AccountGraphqlWsConsumer.as_asgi()),
         ])
     )
 })
