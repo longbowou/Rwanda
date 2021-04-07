@@ -9,16 +9,16 @@ services:
       - .:/code
     ports:
       - 8000:8000
+    environment:
+      VIRTUAL_PORT: 8000
+      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
+      LETSENCRYPT_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
     depends_on:
       - rwanda_postgres
       - rwanda_pgadmin4
       - rwanda_redis
       - rwanda_worker
       - rwanda_scheduler
-    environment:
-      VIRTUAL_PORT: 8000
-      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
-      LETSENCRYPT_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
     restart: always
 
   rwanda_postgres:
@@ -32,15 +32,15 @@ services:
   rwanda_pgadmin4:
     container_name: rwanda_pgadmin4
     image: dpage/pgadmin4:latest
-    depends_on:
-      - rwanda_postgres
+    ports:
+      - 5050:80
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@postgres.com
       PGADMIN_DEFAULT_PASSWORD: postgres
       VIRTUAL_HOST: pgadmin.mdtaf.com
       LETSENCRYPT_HOST: pgadmin.mdtaf.com
-    ports:
-      - 5050:80
+    depends_on:
+      - rwanda_postgres
 
   rwanda_redis:
     container_name: rwanda_redis
