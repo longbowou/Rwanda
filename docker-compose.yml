@@ -1,14 +1,6 @@
 version: '3'
 
 services:
-  rwanda_postgres:
-    container_name: rwanda_postgres
-    image: postgres:alpine
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-
   rwanda:
     container_name: rwanda
     build: .
@@ -24,9 +16,18 @@ services:
       - rwanda_worker
       - rwanda_scheduler
     environment:
-      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
       VIRTUAL_PORT: 8000
+      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
       LETSENCRYPT_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
+    restart: always
+
+  rwanda_postgres:
+    container_name: rwanda_postgres
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
 
   rwanda_pgadmin4:
     container_name: rwanda_pgadmin4
@@ -44,7 +45,6 @@ services:
   rwanda_redis:
     container_name: rwanda_redis
     image: redis:alpine
-    restart: unless-stopped
 
   rwanda_worker:
     build: .
@@ -55,7 +55,6 @@ services:
     depends_on:
       - rwanda_redis
       - rwanda_postgres
-    restart: unless-stopped
 
   rwanda_scheduler:
     build: .
@@ -66,7 +65,6 @@ services:
     depends_on:
       - rwanda_redis
       - rwanda_postgres
-    restart: unless-stopped
 
 networks:
   default:
