@@ -11,7 +11,4 @@ static/admin/
 static/graphene_django/
 .reload
 
-# services
-celerybeat-schedule
-scheduler.pid
-worker.pid
+dump.json
