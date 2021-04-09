@@ -4,7 +4,7 @@ services:
   rwanda:
     container_name: rwanda
     build: .
-    command: gunicorn rwanda.asgi -w 4 --threads 4 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --preload --timeout 60 --graceful-timeout 60
+    command: gunicorn rwanda.asgi -w 4 --threads 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --preload --timeout 60 --graceful-timeout 60
     volumes:
       - .:/code
     ports:
@@ -28,6 +28,8 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+    volumes:
+      - rwanda_postgres:/var/lib/postgresql/data
     restart: always
 
   rwanda_pgadmin4:
@@ -47,12 +49,14 @@ services:
   rwanda_redis:
     container_name: rwanda_redis
     image: redis:alpine
+    volumes:
+      - rwanda_redis:/data
     restart: always
 
   rwanda_worker:
     build: .
     container_name: rwanda_worker
-    command: celery -A rwanda worker -l INFO
+    command: celery -A rwanda multi start w1 w2 --loglevel=INFO --time-limit=300 --concurrency=2
     volumes:
       - ./:/code
     depends_on:
@@ -70,6 +74,10 @@ services:
       - rwanda_redis
       - rwanda_postgres
     restart: always
+
+volumes:
+  rwanda_postgres:
+  rwanda_redis:
 
 networks:
   default:
