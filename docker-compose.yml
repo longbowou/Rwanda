@@ -19,7 +19,7 @@ services:
       - rwanda_redis
       - rwanda_worker
       - rwanda_scheduler
-    restart: always
+    restart: unless-stopped
 
   rwanda_postgres:
     container_name: rwanda_postgres
@@ -30,7 +30,7 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - rwanda_postgres:/var/lib/postgresql/data
-    restart: always
+    restart: unless-stopped
 
   rwanda_pgadmin4:
     container_name: rwanda_pgadmin4
@@ -44,25 +44,25 @@ services:
       LETSENCRYPT_HOST: pgadmin.mdtaf.com
     depends_on:
       - rwanda_postgres
-    restart: always
+    restart: unless-stopped
 
   rwanda_redis:
     container_name: rwanda_redis
     image: redis:alpine
     volumes:
       - rwanda_redis:/data
-    restart: always
+    restart: unless-stopped
 
   rwanda_worker:
     build: .
     container_name: rwanda_worker
-    command: celery -A rwanda multi start w1 w2 --loglevel=INFO --time-limit=300 --concurrency=2
+    command: celery -A rwanda worker -l INFO --concurrency=2 --autoscale=2,1 --time-limit=3600
     volumes:
       - ./:/code
     depends_on:
       - rwanda_redis
       - rwanda_postgres
-    restart: always
+    restart: unless-stopped
 
   rwanda_scheduler:
     build: .
@@ -73,7 +73,7 @@ services:
     depends_on:
       - rwanda_redis
       - rwanda_postgres
-    restart: always
+    restart: unless-stopped
 
 volumes:
   rwanda_postgres:
