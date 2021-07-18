@@ -11,7 +11,7 @@ services:
       - 8000
     labels:
       - traefik.enable=true
-      - traefik.http.routers.rwanda.rule=Host(`rwanda.mdtaf.com`,`vhl.kovech.org`,`www.rwanda.mdtaf.com`)
+      - traefik.http.routers.rwanda.rule=Host(`rwanda.mdtaf.com`,`www.rwanda.mdtaf.com`)
       - traefik.http.routers.rwanda.tls=true
       - traefik.http.routers.rwanda.tls.certresolver=le
       - traefik.port=8000
