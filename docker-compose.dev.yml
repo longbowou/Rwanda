@@ -2,7 +2,13 @@ version: '3'
 
 services:
   rwanda:
-    command: gunicorn rwanda.asgi -w 4 --threads 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --preload --timeout 60 --graceful-timeout 60
+    command: python manage.py runserver 0.0.0.0:8000
+    ports:
+      - 8000:8000
+
+  rwanda_pgadmin4:
+    ports:
+      - 5050:80
 
   rwanda_worker:
     command: celery -A rwanda worker -l INFO

@@ -7,12 +7,18 @@ services:
     command: gunicorn rwanda.asgi -w 4 --threads 2 -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 --preload --timeout 60 --graceful-timeout 60
     volumes:
       - .:/code
-    ports:
-      - 8000:8000
-    environment:
-      VIRTUAL_PORT: 8000
-      VIRTUAL_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
-      LETSENCRYPT_HOST: rwanda.mdtaf.com,www.rwanda.mdtaf.com
+    expose:
+      - 8000
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rwanda.rule=Host(`rwanda.mdtaf.com`,`vhl.kovech.org`,`www.rwanda.mdtaf.com`)
+      - traefik.http.routers.rwanda.tls=true
+      - traefik.http.routers.rwanda.tls.certresolver=le
+      - traefik.port=8000
+      - traefik.docker.network=traefik-proxy
+      networks:
+        - default
+        - traefik-proxy
     depends_on:
       - rwanda_postgres
       - rwanda_pgadmin4
@@ -35,13 +41,19 @@ services:
   rwanda_pgadmin4:
     container_name: rwanda_pgadmin4
     image: dpage/pgadmin4:latest
-    ports:
-      - 5050:80
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.rwanda_pgadmin4.rule=Host(`pgadmin.mdtaf.com`)
+      - traefik.http.routers.rwanda_pgadmin4.tls=true
+      - traefik.http.routers.rwanda_pgadmin4.tls.certresolver=le
+      - traefik.port=80
+      - traefik.docker.network=traefik-proxy
+      networks:
+        - default
+        - traefik-proxy
     environment:
       PGADMIN_DEFAULT_EMAIL: postgres@postgres.com
       PGADMIN_DEFAULT_PASSWORD: postgres
-      VIRTUAL_HOST: pgadmin.mdtaf.com
-      LETSENCRYPT_HOST: pgadmin.mdtaf.com
     depends_on:
       - rwanda_postgres
     restart: unless-stopped
@@ -81,5 +93,7 @@ volumes:
 
 networks:
   default:
-    external:
-      name: nginx-proxy
+    name: rwanda_network
+
+  traefik-proxy:
+    external: true
