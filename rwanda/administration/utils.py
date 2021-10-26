@@ -1,3 +1,6 @@
+from django.conf import settings
+from mailjet_rest import Client
+
 from rwanda.administration.models import Parameter
 
 
@@ -27,3 +30,26 @@ def param_home_max_page_size():
 
 def param_cinetpay_password():
     return Parameter.objects.filter(label=Parameter.CINETPAY_PASSWORD).first().value
+
+
+def send_mail(to_email, subject, html):
+    mailjet = Client(auth=(settings.MAILJET_KEY, settings.MAILJET_SECRET), version='v3.1')
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": settings.DEFAULT_FROM_EMAIL,
+                    "Name": settings.BRAND
+                },
+                "To": [
+                    {
+                        "Email": to_email,
+                    }
+                ],
+                "Subject": subject,
+                "HTMLPart": html,
+            }
+        ]
+    }
+    result = mailjet.send.create(data=data)
+    return result.status_code == 200

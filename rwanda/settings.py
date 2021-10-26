@@ -222,16 +222,12 @@ LOGGING = {
         'rwanda': {
             'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, "logs", "rwanda.log"),
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'midnight',
-            'interval': 1,
+            'class': 'logging.FileHandler',
         },
         'rwanda.payments': {
             'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, "logs", "payments.log"),
-            'class': 'logging.handlers.TimedRotatingFileHandler',
-            'when': 'midnight',
-            'interval': 1,
+            'class': 'logging.FileHandler',
         }
     },
     'loggers': {
@@ -270,12 +266,9 @@ CINETPAY_SITE_ID = 414425
 CINETPAY_CURRENCY = "CFA"
 
 # EMAIL CONFIGS
-DEFAULT_FROM_EMAIL = "mdtaf@mdtaf.com"
-EMAIL_HOST = "smtp.sendgrid.net"
-EMAIL_HOST_USER = "apikey"
-EMAIL_HOST_PASSWORD = "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"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+MAILJET_KEY = 'cc640a87932deff2d19f761c017d9870'
+MAILJET_SECRET = '0a767230096a3eaf30c7017e69f3bd4a'
+DEFAULT_FROM_EMAIL = 'blandedaniel@gmail.com'
 
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
@@ -283,3 +276,9 @@ CELERY_BROKER_URL = 'redis://rwanda_redis:6379/0'
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
+
+BRAND = "MDTAF"
+BRAND_ALT = "MDTAF"
+
+AUTHOR = "Longbowou"
+AUTHOR_LINK = "https://gitlab.com/longbowou"
