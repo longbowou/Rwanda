@@ -12,10 +12,6 @@ RUN pip install -r requirements.txt
 RUN apt-get update && apt-get install -y gettext libgettextpo-dev
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Git config
-RUN git config --global user.email "rwanda@rwanda.com"
-RUN git config --global user.name "rwanda"
-
 RUN groupadd -g 1000 rwanda
 RUN useradd -u 1000 -ms /bin/bash  -g rwanda rwanda
 
