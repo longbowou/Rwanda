@@ -22,22 +22,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'h=i^c29+u$^669mk^ba*6rmq*yw+qe$y#()fg5k9@4&(6v1td9'
+SECRET_KEY = os.environ.get("SECRET_KEY", 'h=i^c29+u$^669mk^ba*6rmq*yw+qe$y#()fg5k9@4&(6v1td9')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", '*' if DEBUG else "").split(',')
 
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:4000',
     'http://127.0.0.1:4000',
-    'https://mdtaf.com',
-    'https://www.mdtaf.com',
-    'https://admin.mdtaf.com',
-    'https://www.admin.mdtaf.com',
+    'https://rwanda.run-on.app',
+    'https://app.rwanda.run-on.app',
+    'https://admin.rwanda.run-on.app',
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -64,8 +63,16 @@ INSTALLED_APPS = [
     'corsheaders',
     'channels',
     'django_celery_results',
-    'django_celery_beat'
+    'django_celery_beat',
+    # "django_browser_reload",
+    # "debug_toolbar",
 ]
+
+if DEBUG:
+    import socket  # only if you haven't already imported this
+
+    hostname, alias, ips = socket.gethostbyname_ex(socket.gethostname())
+    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,6 +85,8 @@ MIDDLEWARE = [
     'rwanda.middlewares.JSONWebTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
 
 AUTHENTICATION_BACKENDS = [
@@ -90,8 +99,7 @@ ROOT_URLCONF = 'rwanda.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,27 +117,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'rwanda.wsgi.application'
 ASGI_APPLICATION = 'rwanda.routing.application'
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('rwanda_redis', 6379)],
-        },
-    },
-}
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'rwanda_postgres',
+        'ENGINE': "django.db.backends.postgresql",
+        'NAME': "postgres",
+        'USER': "postgres",
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', "postgres"),
+        'HOST': "db",
         'PORT': 5432,
-
     }
 }
 
@@ -169,7 +167,7 @@ GRAPHQL_JWT = {
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -188,17 +186,19 @@ LOCALE_PATHS = [
     os.path.join(BASE_DIR, "locales"),
 ]
 
-BASE_URL = 'http://localhost:8000'
-FRONTEND_ACCOUNT_BASE_URL = 'http://localhost:3000'
+BASE_URL = 'http://localhost:8000' if DEBUG else f"https://{ALLOWED_HOSTS[0]}"
+FRONTEND_ACCOUNT_BASE_URL = os.environ.get("FRONTEND_ACCOUNT_BASE_URL", 'http://localhost:3000')
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-# STATIC_ROOT = 'static'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+if not DEBUG:
+    STATIC_ROOT = 'static'
+else:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static"),
+    ]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'media'
@@ -219,12 +219,12 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
-        'rwanda': {
+        'app': {
             'formatter': 'verbose',
-            'filename': os.path.join(BASE_DIR, "logs", "rwanda.log"),
+            'filename': os.path.join(BASE_DIR, "logs", "app.log"),
             'class': 'logging.FileHandler',
         },
-        'rwanda.payments': {
+        'app.payments': {
             'formatter': 'verbose',
             'filename': os.path.join(BASE_DIR, "logs", "payments.log"),
             'class': 'logging.FileHandler',
@@ -242,12 +242,12 @@ LOGGING = {
             'propagate': True,
         },
         'django.request': {
-            'handlers': ['rwanda'],
+            'handlers': ['app'],
             'level': 'WARNING',
             'propagate': True,
         },
-        'rwanda.payments': {
-            'handlers': ['rwanda.payments'],
+        'app.payments': {
+            'handlers': ['app.payments'],
             'level': 'INFO',
             'propagate': True,
         },
@@ -277,8 +277,28 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
-BRAND = "MDTAF"
-BRAND_ALT = "MDTAF"
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
+
+BRAND = "RWANDA"
+BRAND_ALT = "RWANDA"
 
 AUTHOR = "Longbowou"
 AUTHOR_LINK = "https://gitlab.com/longbowou"
+
+EMAIL_HOST = "mail.run-at.app"
+EMAIL_HOST_USER = "app@run-at.app"
+EMAIL_HOST_PASSWORD = "I@a7tD*db3@*mBKG"
+EMAIL_USE_TLS = True
+
+if not DEBUG:
+    SERVER_EMAIL = f'rwanda@app'
+    ADMINS = [
+        ('Longbowou', 'blandedaniel@gmail.com'),
+    ]

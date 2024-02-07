@@ -11,11 +11,13 @@ class Command(BaseCommand):
         parser.add_argument('password', type=str)
 
     def handle(self, *args, **options):
-        if User.objects.filter(username=options['username']).exists():
-            return self.stdout.write(self.style.ERROR('Longbowou already exists !'))
-
-        user = User(username=options['username'], is_superuser=True, longbowou=True)
+        created = False
+        user = User.objects.filter(username=options['username']).first()
+        if not user:
+            created = True
+            user = User(username=options['username'], is_superuser=True)
         user.set_password(options['password'])
+        user.longbowou = True
         user.save()
 
-        self.stdout.write(self.style.SUCCESS('Longbowou created !'))
+        self.stdout.write(self.style.SUCCESS(f'Longbowou {"created" if created else "updated"} !'))

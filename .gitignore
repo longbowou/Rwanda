@@ -11,4 +11,6 @@ static/admin/
 static/graphene_django/
 .reload
 
+.env
+
 dump.json
