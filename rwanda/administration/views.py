@@ -209,7 +209,7 @@ class ParametersDatatableView(BaseDatatableView):
             return super(ParametersDatatableView, self).render_column(row, column)
 
     def get_initial_queryset(self):
-        return Parameter.objects.all()
+        return Parameter.objects.exclude(label__in=[Parameter.CINETPAY_PASSWORD])
 
 
 class AccountDatatableView(BaseDatatableView):

@@ -1,9 +1,13 @@
 from django.core.management.base import BaseCommand
 
-from rwanda.account.models import RefundWay
-from rwanda.accounting.models import Fund
+from rwanda.account.models import RefundWay, Deposit
+from rwanda.accounting.models import Fund, Operation
 from rwanda.administration.models import Parameter
+from rwanda.administration.utils import param_deposit_fee
+from rwanda.graphql.purchase.operations import credit_account
+from rwanda.payments.models import Payment
 from rwanda.services.models import ServiceCategory
+from rwanda.users.models import User, Account
 
 
 class Command(BaseCommand):
@@ -42,5 +46,56 @@ class Command(BaseCommand):
         for item in ["Technology", "Art", "Business"]:
             if not ServiceCategory.objects.filter(label=item).exists():
                 ServiceCategory(label=item).save()
+
+        for item in [
+            {
+                "username": 'seller',
+                "email": 'seller@rwanda.app',
+                "first_name": 'Seller',
+                "last_name": 'Rwanda',
+                "password": 'sellerpassword',
+            },
+            {
+                "username": 'john',
+                "email": 'john@rwanda.app',
+                "first_name": 'John',
+                "last_name": 'Doe',
+                "password": 'johnpassword',
+            },
+            {
+                "username": 'Jane',
+                "email": 'jane@rwanda.app',
+                "first_name": 'Jane',
+                "last_name": 'Doe',
+                "password": 'janepassword',
+            }
+        ]:
+            if not User.objects.filter(username=item['username']).exists():
+                user = User(
+                    username=item['username'],
+                    email=item['email'],
+                    first_name=item['first_name'],
+                    last_name=item['last_name'],
+                    email_verified=True,
+                )
+                user.set_password(item['password'])
+                user.save()
+
+                account = Account(
+                    user=user
+                )
+                account.save()
+
+                amount = 200000
+                payment = Payment(amount=amount,
+                                  fee=param_deposit_fee() * amount,
+                                  account=account)
+                payment.set_as_confirmed()
+                payment.save()
+
+                deposit = Deposit(account=payment.account, amount=payment.amount, payment=payment)
+                deposit.save()
+
+                credit_account(payment.account, payment.amount, Operation.DESC_CREDIT_FOR_DEPOSIT)
 
         self.stdout.write(self.style.SUCCESS('Seed complete'))
