@@ -1,8 +1,9 @@
 # Rwanda App
 
 Rwanda is an innovative digital platform serving as a marketplace for both sellers and buyers, offering a
-seamless experience for trading digital products. The name **Rwanda** is a code name inspired by the vibrant spirit of
-Rwanda in Africa, this project aims to foster economic growth and empowerment by facilitating transactions in the
+seamless experience for trading digital products. The name **Rwanda** is a code name inspired by the country
+**[Rwanda](https://en.wikipedia.org/wiki/Rwanda)** in Africa, this project aims to foster economic growth and
+empowerment by facilitating transactions in the
 digital realm. Sellers can showcase their digital creations, while buyers can explore a diverse range of products,
 creating a dynamic marketplace that celebrates creativity and entrepreneurship. With Rwanda, the digital landscape
 becomes more accessible, connecting individuals and businesses worldwide in a thriving ecosystem of trade and
