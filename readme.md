@@ -37,7 +37,7 @@ Feel free to try it out. Check the credentials below.
   - superuser@rwanda.app
   - superuserpassword
 
-### App
+### App (Backend)
 
 - GraphQl Account - [https://app.rwanda.run-on.app/graphql/](http://localhost:8000/graphql/)
 - GraphQl Admin - [https://app.rwanda.run-on.app/graphql-admin/](http://localhost:8000/graphql-admin/)
@@ -76,12 +76,15 @@ Feel free to try it out. Check the credentials below.
 * **Multi-platform Accessibility**: Ensure the app is accessible across various devices and platforms, including
   smartphones, tablets, and desktops, to maximize user convenience.
 
+* **Development & Deployment**: Rwanda utilizes Docker containers to streamline its development and deployment
+  processes, bolstering the efficiency and consistency of its backend and frontend applications.
+
 ## Architecture
 
 The application architecture is split in three different parts: app(backend), frontend for seller and buyer accounts,
 and frontend for admins
 
-### App (Backend)
+### App (Backend With Django Framework)
 
 The backend of the application serves as the central component responsible for managing data, handling business logic,
 and facilitating communication between the frontend interfaces and the database. Here's a breakdown of its key
@@ -113,7 +116,7 @@ components
   and [Redis](https://redis.com) to handle tasks such as sending notifications, updating order status, and processing
   payments asynchronously.
 
-### Account
+### Account (Vue Framework)
 
 The frontend interfaces for sellers and buyers provide user-friendly interfaces for browsing services, placing orders,
 and managing their accounts. Here are the technical details:
@@ -138,7 +141,7 @@ and managing their accounts. Here are the technical details:
   responsive design principles and CSS
   frameworks [Bootstrap 4](https://getbootstrap.com/docs/4.6/getting-started/introduction).
 
-### Admin
+### Admin (Vue Framework)
 
 The frontend interface for admins provides the necessary tools for managing users, services, orders, and resolving
 disputes. Here are the technical aspects:
