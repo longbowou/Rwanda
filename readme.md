@@ -39,8 +39,8 @@ Feel free to try it out. Check the credentials below.
 
 ### App (Backend)
 
-- GraphQl Account - [https://app.rwanda.run-on.app/graphql/](http://localhost:8000/graphql/)
-- GraphQl Admin - [https://app.rwanda.run-on.app/graphql-admin/](http://localhost:8000/graphql-admin/)
+- GraphQl Account - [https://app.rwanda.run-on.app/graphql/](https://app.rwanda.run-on.app/graphql/)
+- GraphQl Admin - [https://app.rwanda.run-on.app/graphql-admin/](https://app.rwanda.run-on.app/graphql-admin/)
 
 ## Key Features
 
