@@ -163,7 +163,7 @@ disputes. Here are the technical aspects:
 
 - **Responsive Design**: Ensure the frontend interfaces are optimized for various screen sizes and devices using
   responsive
-  design principles and CSS frameworks Bootstrap 4.
+  design principles and CSS frameworks [Bootstrap 4](https://getbootstrap.com/docs/4.6/getting-started/introduction).
 
 ## Requirements
 
