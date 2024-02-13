@@ -217,6 +217,12 @@ docker compose run --rm app python manage.py seed
 docker compose run --rm app python manage.py longbowou root root
 ```
 
+### Run
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d app
+```
+
 ## Where is the application running?
 
 - GraphQl Account - [http://localhost:8000/graphql/](http://localhost:8000/graphql/)
