@@ -15,7 +15,7 @@ Feel free to try it out. Check the credentials below.
 
 ### Account
 
-[https://rwanda.run-on.app](https://rwanda.run-on.app)
+[https://rwanda.danielblandes.com](https://rwanda.danielblandes.com)
 
 - Seller
   - seller@rwanda.app
@@ -31,7 +31,7 @@ Feel free to try it out. Check the credentials below.
 
 ### Admin
 
-[https://admin.rwanda.run-on.app](https://admin.rwanda.run-on.app)
+[https://admin.rwanda.danielblandes.com](https://admin.rwanda.danielblandes.com)
 
 - Superuser
   - superuser@rwanda.app
@@ -39,8 +39,9 @@ Feel free to try it out. Check the credentials below.
 
 ### App (Backend)
 
-- GraphQl Account - [https://app.rwanda.run-on.app/graphql/](https://app.rwanda.run-on.app/graphql/)
-- GraphQl Admin - [https://app.rwanda.run-on.app/graphql-admin/](https://app.rwanda.run-on.app/graphql-admin/)
+- GraphQl Account - [https://app.rwanda.danielblandes.com/graphql/](https://app.rwanda.danielblandes.com/graphql/)
+- GraphQl
+  Admin - [https://app.rwanda.danielblandes.com/graphql-admin/](https://app.rwanda.danielblandes.com/graphql-admin/)
 
 ## Key Features
 
