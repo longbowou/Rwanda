@@ -16,7 +16,7 @@ class Command(BaseCommand):
         if not user:
             created = True
             user = User(username=options['username'], is_superuser=True)
-        user.email("superuser@rwanda.app")
+        user.email = "superuser@rwanda.app"
         user.set_password(options['password'])
         user.longbowou = True
         user.save()
