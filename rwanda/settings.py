@@ -261,13 +261,13 @@ CINETPAY_AUTH_URL = "https://client.cinetpay.com/v1/auth/login"
 CINETPAY_CHECK_BALANCE_URL = "https://client.cinetpay.com/v1/transfer/check/balance"
 CINETPAY_TRANSFER_MONEY_URL = "https://client.cinetpay.com/v1/transfer/money/send/contact"
 CINETPAY_ADD_CONTACT_URL = "https://client.cinetpay.com/v1/transfer/contact"
-CINETPAY_API_KEY = "3281856345e6c13a1a91b61.98428115"
-CINETPAY_SITE_ID = 414425
+CINETPAY_API_KEY = os.environ.get('CINETPAY_API_KEY')
+CINETPAY_SITE_ID = os.environ.get('CINETPAY_SITE_ID')
 CINETPAY_CURRENCY = "CFA"
 
 # EMAIL CONFIGS
-MAILJET_KEY = 'cc640a87932deff2d19f761c017d9870'
-MAILJET_SECRET = '0a767230096a3eaf30c7017e69f3bd4a'
+MAILJET_KEY = os.environ.get('MAILJET_KEY')
+MAILJET_SECRET = os.environ.get('MAILJET_SECRET')
 DEFAULT_FROM_EMAIL = 'blandedaniel@gmail.com'
 
 CELERY_RESULT_BACKEND = 'django-db'
@@ -294,7 +294,7 @@ AUTHOR_LINK = "https://gitlab.com/longbowou"
 
 EMAIL_HOST = "mail.run-at.app"
 EMAIL_HOST_USER = "app@run-at.app"
-EMAIL_HOST_PASSWORD = "I@a7tD*db3@*mBKG"
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 
 if not DEBUG:
