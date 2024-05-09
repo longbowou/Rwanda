@@ -235,3 +235,7 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d app
 ### What's next ?
 
 Check other parts on [Rwanda Platform](https://gitlab.com/rwanda/rwanda-platform) repository
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
